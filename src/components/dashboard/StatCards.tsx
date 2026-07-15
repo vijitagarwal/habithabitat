@@ -1,0 +1,115 @@
+import { Flame, Trophy, Target, CheckCircle2 } from "lucide-react";
+import { useHabits, overallProgress, currentStreak, longestStreak, completionsForDate, todayISO } from "@/lib/habits-store";
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="card-glass flex items-center gap-4 rounded-2xl p-5 transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+      {children}
+    </div>
+  );
+}
+
+function CircularProgress({ value, size = 60, stroke = 6, gradient = true }: { value: number; size?: number; stroke?: number; gradient?: boolean }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  return (
+    <svg width={size} height={size} className="-rotate-90">
+      <defs>
+        <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="oklch(0.72 0.18 235)" />
+          <stop offset="100%" stopColor="oklch(0.68 0.22 320)" />
+        </linearGradient>
+      </defs>
+      <circle cx={size / 2} cy={size / 2} r={r} stroke="oklch(0.3 0.03 265)" strokeWidth={stroke} fill="none" />
+      <circle
+        cx={size / 2} cy={size / 2} r={r}
+        stroke={gradient ? "url(#ring-grad)" : "oklch(0.72 0.18 155)"}
+        strokeWidth={stroke} fill="none"
+        strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function StatCards() {
+  const s = useHabits();
+  const overall = overallProgress(s);
+  const streak = currentStreak(s);
+  const longest = longestStreak(s);
+  const today = completionsForDate(s, todayISO());
+  const monthlyGoal = 90;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <Card>
+        <div className="relative grid place-items-center">
+          <CircularProgress value={overall} />
+          <div className="absolute text-sm font-bold">{overall}%</div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Overall Progress</div>
+          <div className="mt-1 text-base font-semibold">Last 30 days</div>
+          <div className="mt-1 text-xs font-medium text-success">+12% vs last month</div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20">
+          <Flame className="h-8 w-8 text-orange-400" />
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Current Streak</div>
+          <div className="mt-0.5 text-2xl font-bold">
+            {streak} <span className="text-sm font-normal text-muted-foreground">days</span>
+          </div>
+          <div className="mt-0.5 text-xs font-medium text-orange-400">Keep it up! 🔥</div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
+          <Trophy className="h-8 w-8 text-yellow-400" />
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Longest Streak</div>
+          <div className="mt-0.5 text-2xl font-bold">
+            {longest.days} <span className="text-sm font-normal text-muted-foreground">days</span>
+          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">{longest.from} – {longest.to}</div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="relative grid place-items-center">
+          <svg width={60} height={60} className="-rotate-90">
+            <circle cx={30} cy={30} r={25} stroke="oklch(0.3 0.03 265)" strokeWidth={6} fill="none" />
+            <circle cx={30} cy={30} r={25} stroke="oklch(0.72 0.18 155)" strokeWidth={6} fill="none"
+              strokeDasharray={2 * Math.PI * 25}
+              strokeDashoffset={2 * Math.PI * 25 - (today.pct / 100) * 2 * Math.PI * 25}
+              strokeLinecap="round" />
+          </svg>
+          <CheckCircle2 className="absolute h-6 w-6 text-success" />
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Completion Today</div>
+          <div className="mt-0.5 text-2xl font-bold">{today.done} <span className="text-sm text-muted-foreground">/ {today.total}</span></div>
+          <div className="mt-0.5 text-xs font-medium text-success">{today.pct}% completed</div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-red-500/20">
+          <Target className="h-8 w-8 text-pink-400" />
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Monthly Goal</div>
+          <div className="mt-0.5 text-2xl font-bold">{monthlyGoal}%</div>
+          <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-success">
+            On Track <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

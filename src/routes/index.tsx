@@ -1,24 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+import { Header } from "@/components/dashboard/Header";
+import { StatCards } from "@/components/dashboard/StatCards";
+import { WeeklyProgress } from "@/components/dashboard/WeeklyProgress";
+import { CategoryBreakdown } from "@/components/dashboard/CategoryBreakdown";
+import { TodaysHabits } from "@/components/dashboard/TodaysHabits";
+import { Heatmap } from "@/components/dashboard/Heatmap";
+import { TopHabits } from "@/components/dashboard/TopHabits";
+import { QuickStats } from "@/components/dashboard/QuickStats";
+import { Insights } from "@/components/dashboard/Insights";
+import { Achievements } from "@/components/dashboard/Achievements";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Habit Tracker Dashboard" },
+      { name: "description", content: "Track daily habits, streaks, and progress with a premium personal habit tracker dashboard." },
+      { property: "og:title", content: "Habit Tracker Dashboard" },
+      { property: "og:description", content: "Track daily habits, streaks, and progress with a premium personal habit tracker." },
+      { property: "og:type", content: "website" },
+    ],
+  }),
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Dashboard() {
+  const [active, setActive] = useState("dashboard");
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="dark min-h-screen bg-background text-foreground">
+      <div className="flex min-h-screen">
+        <Sidebar active={active} onSelect={setActive} />
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          <Header />
+          <StatCards />
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+            <WeeklyProgress />
+            <CategoryBreakdown />
+            <TodaysHabits />
+          </div>
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+            <Heatmap />
+            <TopHabits />
+            <QuickStats />
+          </div>
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+            <Insights />
+            <Achievements />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
