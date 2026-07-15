@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, Moon, Sun, User } from "lucide-react";
+import { CalendarDays, ChevronDown, Menu, Moon, Sun, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function useTheme() {
