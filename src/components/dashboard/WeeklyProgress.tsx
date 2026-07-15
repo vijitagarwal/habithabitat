@@ -25,7 +25,7 @@ export function WeeklyProgress() {
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 24, right: 8, left: -20, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 32, right: 12, left: -18, bottom: 0 }}>
             <defs>
               <linearGradient id="bar-grad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="oklch(0.72 0.18 235)" />
@@ -34,13 +34,13 @@ export function WeeklyProgress() {
             </defs>
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "oklch(0.7 0.02 260)", fontSize: 12 }} />
             <YAxis
-              domain={[0, 100]} ticks={[0, 25, 50, 75, 100]}
+              domain={[0, 120]} ticks={[0, 25, 50, 75, 100]}
               tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false}
               tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 11 }}
             />
-            <Bar dataKey="pct" radius={[8, 8, 0, 0]}>
+            <Bar dataKey="pct" radius={[8, 8, 0, 0]} maxBarSize={44}>
               {data.map((_, i) => (<Cell key={i} fill="url(#bar-grad)" />))}
-              <LabelList dataKey="pct" position="top" formatter={(v: number) => `${v}%`} style={{ fill: "oklch(0.9 0.01 260)", fontSize: 11, fontWeight: 600 }} />
+              <LabelList dataKey="pct" position="top" offset={10} formatter={(v: number) => `${v}%`} style={{ fill: "oklch(0.9 0.01 260)", fontSize: 11, fontWeight: 600 }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

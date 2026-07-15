@@ -2,24 +2,41 @@ import { useEffect, useSyncExternalStore } from "react";
 
 export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle";
 
+export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle"];
+export const ICON_CHOICES = [
+  "Sparkles", "Dumbbell", "BookOpen", "NotebookPen", "Code2", "Droplets", "Ban",
+  "Moon", "GraduationCap", "Footprints", "Heart", "Apple", "Bike", "Music",
+  "Palette", "Sun", "Coffee", "Leaf", "Brain", "Star", "Target", "CheckCircle2",
+];
+export const COLOR_CHOICES = ["brand", "brand-2", "success", "warning", "danger", "info"];
+
 export interface Habit {
   id: string;
   name: string;
-  icon: string; // lucide icon name key
+  icon: string;
   category: HabitCategory;
-  color: string; // css var name
-  createdAt: string; // ISO date
+  color: string;
+  createdAt: string;
+}
+
+export interface DailyMetrics {
+  mood?: number;    // 1-5
+  sleep?: number;   // hours
+  water?: number;   // glasses
+  weight?: number;  // kg
 }
 
 export interface HabitState {
   habits: Habit[];
-  // completions[dateISO][habitId] = true
   completions: Record<string, Record<string, boolean>>;
+  notes: Record<string, string>;
+  metrics: Record<string, DailyMetrics>;
+  monthlyGoal: number;
   level: number;
   xp: number;
 }
 
-const KEY = "habit-tracker-v1";
+const KEY = "habit-tracker-v2";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const daysAgoISO = (n: number) => {
@@ -43,7 +60,6 @@ const seedHabits: Habit[] = [
 
 function seedCompletions(habits: Habit[]): Record<string, Record<string, boolean>> {
   const out: Record<string, Record<string, boolean>> = {};
-  // seed 60 days with realistic completion rates per habit
   const rates: Record<string, number> = {
     meditation: 0.9, exercise: 0.95, read: 0.9, journal: 0.88,
     code: 0.85, water: 0.6, nosugar: 0.55, sleep: 0.8,
@@ -54,13 +70,11 @@ function seedCompletions(habits: Habit[]): Record<string, Record<string, boolean
     out[day] = {};
     for (const h of habits) {
       const rate = rates[h.id] ?? 0.7;
-      // stronger pseudo random using multiple prime mixes
       const hcode = h.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
       const mix = Math.abs(Math.sin((i + 1) * 9301 + hcode * 49297) * 233280) % 1;
       out[day][h.id] = mix < rate;
     }
   }
-  // Today: partial – first 7 done to match reference
   const today = todayISO();
   out[today] = {};
   const doneToday = ["meditation", "exercise", "read", "journal", "code", "sleep", "learn"];
@@ -68,43 +82,61 @@ function seedCompletions(habits: Habit[]): Record<string, Record<string, boolean
   return out;
 }
 
+function defaultState(): HabitState {
+  const habits = seedHabits;
+  return {
+    habits,
+    completions: seedCompletions(habits),
+    notes: {},
+    metrics: {},
+    monthlyGoal: 90,
+    level: 18,
+    xp: 2450,
+  };
+}
+
+function emptyState(): HabitState {
+  return { habits: [], completions: {}, notes: {}, metrics: {}, monthlyGoal: 80, level: 1, xp: 0 };
+}
+
 function load(): HabitState {
-  if (typeof window === "undefined") {
-    return { habits: seedHabits, completions: {}, level: 18, xp: 2450 };
-  }
+  if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...defaultState(),
+        ...parsed,
+        notes: parsed.notes ?? {},
+        metrics: parsed.metrics ?? {},
+        monthlyGoal: parsed.monthlyGoal ?? 90,
+      };
+    }
   } catch {}
-  const habits = seedHabits;
-  const completions = seedCompletions(habits);
-  const state: HabitState = { habits, completions, level: 18, xp: 2450 };
+  const state = defaultState();
   localStorage.setItem(KEY, JSON.stringify(state));
   return state;
 }
 
-let state: HabitState = { habits: seedHabits, completions: {}, level: 18, xp: 2450 };
-let listeners = new Set<() => void>();
+let state: HabitState = defaultState();
+let hydrated = false;
+const listeners = new Set<() => void>();
 
 function persist() {
   if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
   listeners.forEach((l) => l());
 }
-
-function subscribe(l: () => void) {
-  listeners.add(l);
-  return () => listeners.delete(l);
-}
-
-const serverState: HabitState = { habits: seedHabits, completions: {}, level: 18, xp: 2450 };
+function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
+const serverState: HabitState = defaultState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
 
 export function useHabits() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   useEffect(() => {
-    // Load once on client
-    if (state.completions && Object.keys(state.completions).length === 0) {
+    if (!hydrated) {
+      hydrated = true;
       state = load();
       listeners.forEach((l) => l());
     }
@@ -116,21 +148,61 @@ export function toggleHabit(dateISO: string, habitId: string) {
   const day = state.completions[dateISO] ?? {};
   const next = { ...day, [habitId]: !day[habitId] };
   state = { ...state, completions: { ...state.completions, [dateISO]: next } };
-  // Award XP for completions
   if (next[habitId]) state = { ...state, xp: state.xp + 10 };
   persist();
 }
 
-export function setHabitStatus(dateISO: string, habitId: string, status: "done" | "progress" | "none") {
-  const day = state.completions[dateISO] ?? {};
-  const next = { ...day };
-  if (status === "done") next[habitId] = true;
-  else delete next[habitId];
-  state = { ...state, completions: { ...state.completions, [dateISO]: next } };
+export function addHabit(input: Omit<Habit, "id" | "createdAt">) {
+  const id = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+  const h: Habit = { ...input, id, createdAt: todayISO() };
+  state = { ...state, habits: [...state.habits, h] };
   persist();
 }
 
-// ---- Analytics helpers ----
+export function updateHabit(id: string, patch: Partial<Omit<Habit, "id" | "createdAt">>) {
+  state = { ...state, habits: state.habits.map((h) => (h.id === id ? { ...h, ...patch } : h)) };
+  persist();
+}
+
+export function deleteHabit(id: string) {
+  const completions: HabitState["completions"] = {};
+  for (const [d, day] of Object.entries(state.completions)) {
+    const { [id]: _removed, ...rest } = day;
+    completions[d] = rest;
+  }
+  state = { ...state, habits: state.habits.filter((h) => h.id !== id), completions };
+  persist();
+}
+
+export function setNote(dateISO: string, text: string) {
+  const notes = { ...state.notes };
+  if (text) notes[dateISO] = text;
+  else delete notes[dateISO];
+  state = { ...state, notes };
+  persist();
+}
+
+export function setMetric<K extends keyof DailyMetrics>(dateISO: string, key: K, value: DailyMetrics[K] | undefined) {
+  const existing = state.metrics[dateISO] ?? {};
+  const next: DailyMetrics = { ...existing };
+  if (value === undefined || value === null || Number.isNaN(value)) delete next[key];
+  else next[key] = value;
+  const metrics = { ...state.metrics, [dateISO]: next };
+  if (Object.keys(next).length === 0) delete metrics[dateISO];
+  state = { ...state, metrics };
+  persist();
+}
+
+export function setMonthlyGoal(pct: number) {
+  state = { ...state, monthlyGoal: Math.max(0, Math.min(100, Math.round(pct))) };
+  persist();
+}
+
+export function resetAll(mode: "seed" | "empty" = "empty") {
+  state = mode === "seed" ? defaultState() : emptyState();
+  persist();
+}
+
 export function completionsForDate(s: HabitState, dateISO: string) {
   const day = s.completions[dateISO] ?? {};
   const done = s.habits.filter((h) => day[h.id]).length;
@@ -138,6 +210,7 @@ export function completionsForDate(s: HabitState, dateISO: string) {
 }
 
 export function currentStreak(s: HabitState): number {
+  if (s.habits.length === 0) return 0;
   let streak = 0;
   for (let i = 0; i < 400; i++) {
     const day = daysAgoISO(i);
@@ -149,29 +222,26 @@ export function currentStreak(s: HabitState): number {
 }
 
 export function longestStreak(s: HabitState): { days: number; from: string; to: string } {
-  let best = 0, cur = 0, bestEnd = "", curEnd = "";
+  let best = 0, cur = 0, bestEnd = "";
   const daysBack = 200;
   for (let i = daysBack; i >= 0; i--) {
     const day = daysAgoISO(i);
     const { pct } = completionsForDate(s, day);
     if (pct >= 60) {
-      if (cur === 0) curEnd = day;
       cur++;
       if (cur > best) { best = cur; bestEnd = day; }
-    } else {
-      cur = 0;
-    }
+    } else cur = 0;
   }
   const end = new Date(bestEnd || todayISO());
   const start = new Date(end); start.setDate(end.getDate() - best + 1);
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return { days: best, from: fmt(start), to: fmt(end) };
+  return { days: best, from: best ? fmt(start) : "—", to: best ? fmt(end) : "—" };
 }
 
 export function weeklyProgress(s: HabitState) {
   const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const now = new Date();
-  const dow = (now.getDay() + 6) % 7; // Mon=0
+  const dow = (now.getDay() + 6) % 7;
   const monday = new Date(now); monday.setDate(now.getDate() - dow);
   return labels.map((label, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i);
@@ -182,7 +252,6 @@ export function weeklyProgress(s: HabitState) {
 }
 
 export function categoryBreakdown(s: HabitState) {
-  const cats: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle"];
   const colors: Record<HabitCategory, string> = {
     Health: "oklch(0.72 0.18 155)",
     Mind: "oklch(0.68 0.22 350)",
@@ -190,10 +259,9 @@ export function categoryBreakdown(s: HabitState) {
     Learning: "oklch(0.72 0.18 235)",
     Lifestyle: "oklch(0.65 0.22 320)",
   };
-  return cats.map((cat) => {
+  return CATEGORIES.map((cat) => {
     const habits = s.habits.filter((h) => h.category === cat);
     if (habits.length === 0) return { cat, pct: 0, color: colors[cat] };
-    // avg completion over last 30 days
     let sum = 0, n = 0;
     for (let i = 0; i < 30; i++) {
       const iso = daysAgoISO(i);
@@ -205,6 +273,7 @@ export function categoryBreakdown(s: HabitState) {
 }
 
 export function overallProgress(s: HabitState): number {
+  if (s.habits.length === 0) return 0;
   let sum = 0, n = 0;
   for (let i = 0; i < 30; i++) {
     const iso = daysAgoISO(i);
@@ -226,12 +295,10 @@ export function topHabits(s: HabitState) {
 }
 
 export function monthlyHeatmap(s: HabitState) {
-  // 7 rows (Mon..Sun) x daysInMonth cols. Each row shows a habit family / group.
   const now = new Date();
   const year = now.getFullYear(), month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const todayD = now.getDate();
-  // Split habits across 7 rows (some rows may share)
   const rowHabits: string[][] = Array.from({ length: 7 }, () => []);
   s.habits.forEach((h, i) => rowHabits[i % 7].push(h.id));
 
@@ -241,10 +308,7 @@ export function monthlyHeatmap(s: HabitState) {
       const date = new Date(year, month, d);
       const iso = date.toISOString().slice(0, 10);
       const dayData = s.completions[iso];
-      if (!dayData || d > todayD) {
-        cells.push({ day: d, row: r, level: -1, hasData: false });
-        continue;
-      }
+      if (!dayData || d > todayD) { cells.push({ day: d, row: r, level: -1, hasData: false }); continue; }
       const ids = rowHabits[r];
       const done = ids.filter((id) => dayData[id]).length;
       const pct = ids.length ? (done / ids.length) * 100 : 0;
@@ -253,7 +317,6 @@ export function monthlyHeatmap(s: HabitState) {
       else if (pct >= 66) level = 3;
       else if (pct >= 34) level = 2;
       else if (pct > 0) level = 1;
-      else level = 0;
       cells.push({ day: d, row: r, level, hasData: true });
     }
   }
@@ -275,4 +338,4 @@ export function perfectDays(s: HabitState): number {
   return n;
 }
 
-export { todayISO };
+export { todayISO, daysAgoISO };

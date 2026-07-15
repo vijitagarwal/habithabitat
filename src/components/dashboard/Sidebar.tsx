@@ -1,10 +1,10 @@
 import {
   LayoutDashboard, CalendarCheck2, CalendarDays, BarChart3, Grid3x3,
-  Target, Trophy, NotebookPen, Smile, Moon, Droplets, Scale, Settings, CheckCircle2, Quote,
+  Target, Trophy, NotebookPen, Smile, Moon, Droplets, Scale, Settings, CheckCircle2, Quote, X,
 } from "lucide-react";
 import { useHabits } from "@/lib/habits-store";
 
-const nav = [
+export const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "daily", label: "Daily Tracker", icon: CalendarCheck2 },
   { key: "calendar", label: "Calendar View", icon: CalendarDays },
@@ -18,17 +18,21 @@ const nav = [
   { key: "water", label: "Water Tracker", icon: Droplets },
   { key: "weight", label: "Weight Tracker", icon: Scale },
   { key: "settings", label: "Settings", icon: Settings },
-];
+] as const;
 
-interface Props { active: string; onSelect: (k: string) => void; }
+interface Props {
+  active: string;
+  onSelect: (k: string) => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
 
-export function Sidebar({ active, onSelect }: Props) {
+function SidebarBody({ active, onSelect }: { active: string; onSelect: (k: string) => void }) {
   const s = useHabits();
   const xpMax = 3000;
   const pct = Math.min(100, Math.round((s.xp / xpMax) * 100));
-
   return (
-    <aside className="hidden lg:flex w-64 shrink-0 flex-col gap-6 border-r border-sidebar-border bg-sidebar p-5">
+    <>
       <div className="flex items-center gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-xl gradient-brand shadow-lg shadow-primary/30">
           <CheckCircle2 className="h-6 w-6 text-white" />
@@ -38,9 +42,8 @@ export function Sidebar({ active, onSelect }: Props) {
           <div className="text-sm font-bold tracking-wide text-sidebar-foreground">HABIT TRACKER</div>
         </div>
       </div>
-
       <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
-        {nav.map((item) => {
+        {NAV.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.key;
           return (
@@ -59,7 +62,6 @@ export function Sidebar({ active, onSelect }: Props) {
           );
         })}
       </nav>
-
       <div className="rounded-2xl border border-sidebar-border bg-card/60 p-4">
         <div className="flex items-center justify-between text-sm">
           <span className="font-semibold text-sidebar-foreground">Level {s.level}</span>
@@ -70,7 +72,6 @@ export function Sidebar({ active, onSelect }: Props) {
         </div>
         <div className="mt-2 text-xs text-muted-foreground">{s.xp.toLocaleString()} / {xpMax.toLocaleString()} XP</div>
       </div>
-
       <div className="rounded-2xl border border-sidebar-border bg-card/40 p-4 text-xs text-muted-foreground">
         <Quote className="mb-2 h-4 w-4 text-primary/70" />
         <p className="italic leading-relaxed">
@@ -78,6 +79,27 @@ export function Sidebar({ active, onSelect }: Props) {
         </p>
         <p className="mt-2 text-[11px] font-medium text-sidebar-foreground/70">– Robert Collier</p>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function Sidebar({ active, onSelect, mobileOpen, onCloseMobile }: Props) {
+  return (
+    <>
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col gap-6 border-r border-sidebar-border bg-sidebar p-5">
+        <SidebarBody active={active} onSelect={onSelect} />
+      </aside>
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={onCloseMobile} />
+          <aside className="relative flex h-full w-72 flex-col gap-5 overflow-y-auto border-r border-sidebar-border bg-sidebar p-5 shadow-2xl">
+            <button onClick={onCloseMobile} className="absolute right-3 top-3 rounded-lg border border-border bg-background p-1.5">
+              <X className="h-4 w-4" />
+            </button>
+            <SidebarBody active={active} onSelect={(k) => { onSelect(k); onCloseMobile?.(); }} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
