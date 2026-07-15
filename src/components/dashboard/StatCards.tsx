@@ -38,7 +38,7 @@ export function StatCards() {
   const streak = currentStreak(s);
   const longest = longestStreak(s);
   const today = completionsForDate(s, todayISO());
-  const monthlyGoal = 90;
+  const monthlyGoal = s.monthlyGoal;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
