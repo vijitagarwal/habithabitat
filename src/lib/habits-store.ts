@@ -226,28 +226,36 @@ export function topHabits(s: HabitState) {
 }
 
 export function monthlyHeatmap(s: HabitState) {
-  // returns array of {row: 0-6 (Mon..Sun), col: dayOfMonth, level}
+  // 7 rows (Mon..Sun) x daysInMonth cols. Each row shows a habit family / group.
   const now = new Date();
   const year = now.getFullYear(), month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayD = now.getDate();
+  // Split habits across 7 rows (some rows may share)
+  const rowHabits: string[][] = Array.from({ length: 7 }, () => []);
+  s.habits.forEach((h, i) => rowHabits[i % 7].push(h.id));
+
   const cells: { day: number; row: number; level: number; hasData: boolean }[] = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
-    const iso = date.toISOString().slice(0, 10);
-    const dayData = s.completions[iso];
-    const row = (date.getDay() + 6) % 7;
-    if (!dayData || date > now) {
-      cells.push({ day: d, row, level: -1, hasData: false });
-      continue;
+  for (let r = 0; r < 7; r++) {
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const iso = date.toISOString().slice(0, 10);
+      const dayData = s.completions[iso];
+      if (!dayData || d > todayD) {
+        cells.push({ day: d, row: r, level: -1, hasData: false });
+        continue;
+      }
+      const ids = rowHabits[r];
+      const done = ids.filter((id) => dayData[id]).length;
+      const pct = ids.length ? (done / ids.length) * 100 : 0;
+      let level = 0;
+      if (pct === 100) level = 4;
+      else if (pct >= 66) level = 3;
+      else if (pct >= 34) level = 2;
+      else if (pct > 0) level = 1;
+      else level = 0;
+      cells.push({ day: d, row: r, level, hasData: true });
     }
-    const { pct } = completionsForDate(s, iso);
-    let level = 0;
-    if (pct === 100) level = 4;
-    else if (pct >= 75) level = 3;
-    else if (pct >= 40) level = 2;
-    else if (pct > 0) level = 1;
-    else level = 0;
-    cells.push({ day: d, row, level, hasData: true });
   }
   return { cells, daysInMonth };
 }
