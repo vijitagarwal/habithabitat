@@ -18,9 +18,12 @@ function useTheme() {
 
 interface Props {
   onNavigate?: (key: string) => void;
+  onOpenMenu?: () => void;
+  title?: string;
+  subtitle?: string;
 }
 
-export function Header({ onNavigate }: Props) {
+export function Header({ onNavigate, onOpenMenu, title = "Dashboard", subtitle = "Welcome back! Keep going, you're doing amazing. 🚀" }: Props) {
   const { theme, setTheme } = useTheme();
   const [today, setToday] = useState<string>("");
   useEffect(() => {
@@ -29,9 +32,16 @@ export function Header({ onNavigate }: Props) {
 
   return (
     <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Welcome back! Keep going, you're doing amazing. 🚀</p>
+      <div className="flex items-center gap-3">
+        {onOpenMenu && (
+          <button onClick={onOpenMenu} className="rounded-xl border border-border bg-card/60 p-2 lg:hidden" title="Menu">
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <button
