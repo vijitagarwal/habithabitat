@@ -54,9 +54,10 @@ function seedCompletions(habits: Habit[]): Record<string, Record<string, boolean
     out[day] = {};
     for (const h of habits) {
       const rate = rates[h.id] ?? 0.7;
-      // deterministic-ish pseudo random
-      const seed = (i * 13 + h.id.charCodeAt(0) * 7) % 100;
-      out[day][h.id] = seed < rate * 100;
+      // stronger pseudo random using multiple prime mixes
+      const hcode = h.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+      const mix = Math.abs(Math.sin((i + 1) * 9301 + hcode * 49297) * 233280) % 1;
+      out[day][h.id] = mix < rate;
     }
   }
   // Today: partial – first 7 done to match reference
@@ -95,8 +96,9 @@ function subscribe(l: () => void) {
   return () => listeners.delete(l);
 }
 
+const serverState: HabitState = { habits: seedHabits, completions: {}, level: 18, xp: 2450 };
 function getSnapshot() { return state; }
-function getServerSnapshot(): HabitState { return { habits: seedHabits, completions: {}, level: 18, xp: 2450 }; }
+function getServerSnapshot(): HabitState { return serverState; }
 
 export function useHabits() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
