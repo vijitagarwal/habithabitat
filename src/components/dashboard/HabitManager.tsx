@@ -1,7 +1,7 @@
 import * as Icons from "lucide-react";
 import { useState } from "react";
 import {
-  useHabits, addHabit, updateHabit, deleteHabit, resetAll,
+  useHabits, addHabit, updateHabit, deleteHabit, resetAll, clearHistory,
   CATEGORIES, ICON_CHOICES, COLOR_CHOICES, type Habit, type HabitCategory,
 } from "@/lib/habits-store";
 import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
