@@ -180,6 +180,12 @@ export function HabitManager() {
         <p className="mb-4 text-xs text-muted-foreground">Start fresh. This clears all completions and progress from your device.</p>
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={() => { if (confirm("Clear all completions, journal notes, and metrics? Your habits will be kept.")) clearHistory(); }}
+            className="rounded-lg border border-warning/60 bg-warning/10 px-3 py-2 text-xs font-semibold text-warning hover:bg-warning/20"
+          >
+            Clear History Only
+          </button>
+          <button
             onClick={() => { if (confirm("Clear all habits and history? This cannot be undone.")) resetAll("empty"); }}
             className="rounded-lg border border-destructive/60 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/20"
           >
