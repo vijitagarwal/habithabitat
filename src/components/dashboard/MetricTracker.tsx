@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { useHabits, setMetric, todayISO, daysAgoISO, type DailyMetrics } from "@/lib/habits-store";
+import { DatePicker } from "./DatePicker";
 
 interface Cfg {
   key: keyof DailyMetrics;
