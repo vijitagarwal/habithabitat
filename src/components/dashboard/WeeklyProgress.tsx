@@ -34,13 +34,24 @@ export function WeeklyProgress() {
             </defs>
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "oklch(0.7 0.02 260)", fontSize: 12 }} />
             <YAxis
-              domain={[0, 120]} ticks={[0, 25, 50, 75, 100]}
+              domain={[0, 100]} ticks={[0, 25, 50, 75, 100]}
               tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false}
               tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 11 }}
             />
+            <Tooltip
+              cursor={{ fill: "oklch(1 0 0 / 0.05)" }}
+              contentStyle={{
+                background: "oklch(0.18 0.02 260)",
+                border: "1px solid oklch(0.3 0.02 260)",
+                borderRadius: 8,
+                fontSize: 12,
+                color: "oklch(0.95 0.01 260)",
+              }}
+              formatter={(v: number) => [`${v}%`, "Completion"]}
+              labelStyle={{ color: "oklch(0.75 0.02 260)", fontWeight: 600 }}
+            />
             <Bar dataKey="pct" radius={[8, 8, 0, 0]} maxBarSize={44}>
               {data.map((_, i) => (<Cell key={i} fill="url(#bar-grad)" />))}
-              <LabelList dataKey="pct" position="top" offset={10} formatter={(v: number) => `${v}%`} style={{ fill: "oklch(0.9 0.01 260)", fontSize: 11, fontWeight: 600 }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
