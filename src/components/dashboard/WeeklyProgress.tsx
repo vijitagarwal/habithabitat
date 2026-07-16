@@ -1,5 +1,5 @@
 import { useHabits, weeklyProgress } from "@/lib/habits-store";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
