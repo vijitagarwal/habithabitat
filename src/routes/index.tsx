@@ -138,7 +138,7 @@ function Dashboard() {
             title={meta.title}
             subtitle={meta.subtitle}
           />
-          {renderView(safeActive)}
+          {renderView(safeActive, setActive)}
         </main>
       </div>
     </div>
