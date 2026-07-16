@@ -41,7 +41,7 @@ export function StatCards() {
   const monthlyGoal = s.monthlyGoal;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 [&>*]:min-w-0">
       <Card>
         <div className="relative grid place-items-center">
           <CircularProgress value={overall} />
