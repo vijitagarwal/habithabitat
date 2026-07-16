@@ -114,6 +114,7 @@ function renderView(active: string) {
 function Dashboard() {
   const [active, setActive] = useState<string>("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const meta = TITLES[active] ?? TITLES.dashboard;
   // Ensure valid key
   const validKeys = NAV.map((n) => n.key);
@@ -127,6 +128,8 @@ function Dashboard() {
           onSelect={setActive}
           mobileOpen={mobileOpen}
           onCloseMobile={() => setMobileOpen(false)}
+          collapsed={collapsed}
+          onToggleCollapsed={() => setCollapsed((v) => !v)}
         />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           <Header
