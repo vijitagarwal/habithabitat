@@ -28,8 +28,8 @@ export function CalendarView() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr]">
-      <div className="card-glass rounded-2xl p-6">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 [&>*]:min-w-0">
+      <div className="card-glass min-w-0 rounded-2xl p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           <div className="flex items-center gap-1">
