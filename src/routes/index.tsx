@@ -31,23 +31,23 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-function DashboardHome() {
+function DashboardHome({ onNavigate }: { onNavigate: (v: string) => void }) {
   return (
     <>
       <StatCards />
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         <WeeklyProgress />
         <CategoryBreakdown />
         <TodaysHabits />
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         <Heatmap />
         <TopHabits />
         <QuickStats />
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px] [&>*]:min-w-0">
         <Insights />
-        <Achievements />
+        <Achievements onViewAll={() => onNavigate("achievements")} />
       </div>
     </>
   );
