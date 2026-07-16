@@ -15,7 +15,7 @@ export function JournalView() {
       <div className="card-glass rounded-2xl p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-lg font-semibold">Journal</h3>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
+          <DatePicker value={date} onChange={setDate} align="end" />
         </div>
         <textarea
           value={text} onChange={(e) => setText(e.target.value)}
