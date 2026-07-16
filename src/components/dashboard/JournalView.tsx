@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHabits, setNote, todayISO } from "@/lib/habits-store";
+import { DatePicker } from "./DatePicker";
 
 export function JournalView() {
   const s = useHabits();
