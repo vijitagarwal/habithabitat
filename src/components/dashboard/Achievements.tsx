@@ -7,12 +7,12 @@ const items = [
   { icon: Award, label: "Gold Achiever", sub: "90% Goal", from: "oklch(0.8 0.17 75)", to: "oklch(0.65 0.2 45)" },
 ];
 
-export function Achievements() {
+export function Achievements({ onViewAll }: { onViewAll?: () => void } = {}) {
   return (
-    <div className="card-glass rounded-2xl p-5">
+    <div className="card-glass min-w-0 rounded-2xl p-5">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold">Recent Achievements</h3>
-        <button className="text-xs font-medium text-primary hover:underline">View All</button>
+        <button onClick={onViewAll} className="text-xs font-medium text-primary hover:underline">View All</button>
       </div>
       <div className="grid grid-cols-4 gap-3">
         {items.map((i) => (
