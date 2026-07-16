@@ -203,6 +203,11 @@ export function resetAll(mode: "seed" | "empty" = "empty") {
   persist();
 }
 
+export function clearHistory() {
+  state = { ...state, completions: {}, notes: {}, metrics: {}, xp: 0 };
+  persist();
+}
+
 export function completionsForDate(s: HabitState, dateISO: string) {
   const day = s.completions[dateISO] ?? {};
   const done = s.habits.filter((h) => day[h.id]).length;

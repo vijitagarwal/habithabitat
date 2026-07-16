@@ -1,7 +1,7 @@
 import * as Icons from "lucide-react";
 import { useState } from "react";
 import {
-  useHabits, addHabit, updateHabit, deleteHabit, resetAll,
+  useHabits, addHabit, updateHabit, deleteHabit, resetAll, clearHistory,
   CATEGORIES, ICON_CHOICES, COLOR_CHOICES, type Habit, type HabitCategory,
 } from "@/lib/habits-store";
 import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
@@ -179,6 +179,12 @@ export function HabitManager() {
         <h3 className="mb-1 text-lg font-semibold">Reset Data</h3>
         <p className="mb-4 text-xs text-muted-foreground">Start fresh. This clears all completions and progress from your device.</p>
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => { if (confirm("Clear all completions, journal notes, and metrics? Your habits will be kept.")) clearHistory(); }}
+            className="rounded-lg border border-warning/60 bg-warning/10 px-3 py-2 text-xs font-semibold text-warning hover:bg-warning/20"
+          >
+            Clear History Only
+          </button>
           <button
             onClick={() => { if (confirm("Clear all habits and history? This cannot be undone.")) resetAll("empty"); }}
             className="rounded-lg border border-destructive/60 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/20"
