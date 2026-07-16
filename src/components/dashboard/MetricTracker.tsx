@@ -70,7 +70,7 @@ export function MetricTracker({ cfg }: { cfg: Cfg }) {
         </div>
       </div>
 
-      <div className="card-glass rounded-2xl p-6">
+      <div className="card-glass min-w-0 rounded-2xl p-6">
         <h4 className="mb-4 text-sm font-semibold">Last 30 Days</h4>
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
