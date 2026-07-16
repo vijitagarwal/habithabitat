@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { useHabits, setMetric, todayISO, daysAgoISO, type DailyMetrics } from "@/lib/habits-store";
+import { DatePicker } from "./DatePicker";
 
 interface Cfg {
   key: keyof DailyMetrics;
@@ -38,16 +39,15 @@ export function MetricTracker({ cfg }: { cfg: Cfg }) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-      <div className="card-glass rounded-2xl p-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="card-glass min-w-0 rounded-2xl p-6">
         <h3 className="mb-1 text-lg font-semibold">{cfg.emoji} {cfg.label} Tracker</h3>
         <p className="mb-4 text-xs text-muted-foreground">Log your {cfg.label.toLowerCase()} in {cfg.unit}.</p>
 
-        <label className="block text-xs">
+        <div className="block text-xs">
           <div className="mb-1 text-muted-foreground">Date</div>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        </label>
+          <DatePicker value={date} onChange={setDate} size="md" className="w-full" />
+        </div>
 
         <label className="mt-3 block text-xs">
           <div className="mb-1 text-muted-foreground">{cfg.label} ({cfg.unit})</div>
@@ -70,7 +70,7 @@ export function MetricTracker({ cfg }: { cfg: Cfg }) {
         </div>
       </div>
 
-      <div className="card-glass rounded-2xl p-6">
+      <div className="card-glass min-w-0 rounded-2xl p-6">
         <h4 className="mb-4 text-sm font-semibold">Last 30 Days</h4>
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">

@@ -31,23 +31,23 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-function DashboardHome() {
+function DashboardHome({ onNavigate }: { onNavigate: (v: string) => void }) {
   return (
     <>
       <StatCards />
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         <WeeklyProgress />
         <CategoryBreakdown />
         <TodaysHabits />
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         <Heatmap />
         <TopHabits />
         <QuickStats />
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px] [&>*]:min-w-0">
         <Insights />
-        <Achievements />
+        <Achievements onViewAll={() => onNavigate("achievements")} />
       </div>
     </>
   );
@@ -57,11 +57,11 @@ function AnalyticsView() {
   return (
     <div className="space-y-6">
       <StatCards />
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 [&>*]:min-w-0">
         <WeeklyProgress />
         <CategoryBreakdown />
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px] [&>*]:min-w-0">
         <TopHabits />
         <QuickStats />
       </div>
@@ -86,9 +86,9 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   settings: { title: "Settings", subtitle: "Manage your habits and data." },
 };
 
-function renderView(active: string) {
+function renderView(active: string, onNavigate: (v: string) => void) {
   switch (active) {
-    case "dashboard": return <DashboardHome />;
+    case "dashboard": return <DashboardHome onNavigate={onNavigate} />;
     case "daily": return <DailyTracker />;
     case "calendar": return <CalendarView />;
     case "analytics": return <AnalyticsView />;
@@ -107,7 +107,7 @@ function renderView(active: string) {
     case "water": return <MetricTracker cfg={WATER_CFG} />;
     case "weight": return <MetricTracker cfg={WEIGHT_CFG} />;
     case "settings": return <HabitManager />;
-    default: return <DashboardHome />;
+    default: return <DashboardHome onNavigate={onNavigate} />;
   }
 }
 
@@ -138,7 +138,7 @@ function Dashboard() {
             title={meta.title}
             subtitle={meta.subtitle}
           />
-          {renderView(safeActive)}
+          {renderView(safeActive, setActive)}
         </main>
       </div>
     </div>

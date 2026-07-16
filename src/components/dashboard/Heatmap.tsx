@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useHabits, monthlyHeatmap } from "@/lib/habits-store";
 
 const rows = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -11,21 +13,50 @@ const levelColors = [
 
 export function Heatmap() {
   const s = useHabits();
-  const { cells, daysInMonth } = monthlyHeatmap(s);
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
 
-  // Build grid: 7 rows x daysInMonth cols
+  const { cells, daysInMonth } = monthlyHeatmap(s, year, month);
+
   const grid: (typeof cells[number] | null)[][] = Array.from({ length: 7 }, () => Array(daysInMonth).fill(null));
   for (const c of cells) grid[c.row][c.day - 1] = c;
 
   const colTicks = [1, 5, 10, 15, 20, 25, 30].filter((d) => d <= daysInMonth);
   if (daysInMonth === 31 && !colTicks.includes(31)) colTicks.push(31);
 
+  const title = new Date(year, month, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const nav = (delta: number) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear()); setMonth(d.getMonth());
+  };
+  const isCurrent = year === now.getFullYear() && month === now.getMonth();
+
   return (
-    <div className="card-glass rounded-2xl p-6">
-      <h3 className="mb-4 text-lg font-semibold">Monthly Heatmap</h3>
+    <div className="card-glass min-w-0 rounded-2xl p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold">Monthly Heatmap</h3>
+          <p className="text-xs text-muted-foreground">{title}</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => nav(-1)} title="Previous month" className="rounded-lg border border-border bg-background p-2 hover:border-primary/40">
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => { setYear(now.getFullYear()); setMonth(now.getMonth()); }}
+            disabled={isCurrent}
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/40 disabled:opacity-50"
+          >
+            This Month
+          </button>
+          <button onClick={() => nav(1)} disabled={isCurrent} title="Next month" className="rounded-lg border border-border bg-background p-2 hover:border-primary/40 disabled:opacity-50">
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <div className="min-w-max">
-          {/* Header numbers */}
           <div className="mb-1 flex pl-10 text-[10px] text-muted-foreground" style={{ gap: "4px" }}>
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const d = i + 1;

@@ -128,7 +128,7 @@ function persist() {
   listeners.forEach((l) => l());
 }
 function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
-const serverState: HabitState = defaultState();
+const serverState: HabitState = emptyState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
 
@@ -299,10 +299,12 @@ export function topHabits(s: HabitState) {
   }).sort((a, b) => b.pct - a.pct).slice(0, 5);
 }
 
-export function monthlyHeatmap(s: HabitState) {
+export function monthlyHeatmap(s: HabitState, year?: number, month?: number) {
   const now = new Date();
-  const year = now.getFullYear(), month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const y = year ?? now.getFullYear();
+  const m = month ?? now.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const isCurrentMonth = y === now.getFullYear() && m === now.getMonth();
   const todayD = now.getDate();
   const rowHabits: string[][] = Array.from({ length: 7 }, () => []);
   s.habits.forEach((h, i) => rowHabits[i % 7].push(h.id));
@@ -310,10 +312,11 @@ export function monthlyHeatmap(s: HabitState) {
   const cells: { day: number; row: number; level: number; hasData: boolean }[] = [];
   for (let r = 0; r < 7; r++) {
     for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
+      const date = new Date(y, m, d);
       const iso = date.toISOString().slice(0, 10);
       const dayData = s.completions[iso];
-      if (!dayData || d > todayD) { cells.push({ day: d, row: r, level: -1, hasData: false }); continue; }
+      const isFuture = isCurrentMonth && d > todayD;
+      if (!dayData || isFuture) { cells.push({ day: d, row: r, level: -1, hasData: false }); continue; }
       const ids = rowHabits[r];
       const done = ids.filter((id) => dayData[id]).length;
       const pct = ids.length ? (done / ids.length) * 100 : 0;
@@ -325,7 +328,7 @@ export function monthlyHeatmap(s: HabitState) {
       cells.push({ day: d, row: r, level, hasData: true });
     }
   }
-  return { cells, daysInMonth };
+  return { cells, daysInMonth, year: y, month: m };
 }
 
 export function totalCompleted(s: HabitState): number {
