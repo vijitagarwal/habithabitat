@@ -34,10 +34,7 @@ export function DailyTracker({ initialDate }: Props) {
           <button onClick={() => setDate(addDays(date, -1))} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40">
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <input
-            type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs"
-          />
+          <DatePicker value={date} onChange={setDate} />
           <button onClick={() => setDate(addDays(date, 1))} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40">
             <ChevronRight className="h-4 w-4" />
           </button>
