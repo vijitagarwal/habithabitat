@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, CalendarCheck2, CalendarDays, BarChart3, Grid3x3,
   Target, Trophy, NotebookPen, Smile, Moon, Droplets, Scale, Settings, CheckCircle2, Quote, X,
+  PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { useHabits } from "@/lib/habits-store";
 
