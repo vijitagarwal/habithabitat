@@ -128,7 +128,7 @@ function persist() {
   listeners.forEach((l) => l());
 }
 function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
-const serverState: HabitState = defaultState();
+const serverState: HabitState = emptyState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
 
