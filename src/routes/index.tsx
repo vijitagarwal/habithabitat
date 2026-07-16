@@ -86,9 +86,9 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   settings: { title: "Settings", subtitle: "Manage your habits and data." },
 };
 
-function renderView(active: string) {
+function renderView(active: string, onNavigate: (v: string) => void) {
   switch (active) {
-    case "dashboard": return <DashboardHome />;
+    case "dashboard": return <DashboardHome onNavigate={onNavigate} />;
     case "daily": return <DailyTracker />;
     case "calendar": return <CalendarView />;
     case "analytics": return <AnalyticsView />;
@@ -107,7 +107,7 @@ function renderView(active: string) {
     case "water": return <MetricTracker cfg={WATER_CFG} />;
     case "weight": return <MetricTracker cfg={WEIGHT_CFG} />;
     case "settings": return <HabitManager />;
-    default: return <DashboardHome />;
+    default: return <DashboardHome onNavigate={onNavigate} />;
   }
 }
 
