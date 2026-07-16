@@ -2,6 +2,7 @@ import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHabits, toggleHabit, completionsForDate, todayISO } from "@/lib/habits-store";
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight } from "lucide-react";
+import { DatePicker } from "./DatePicker";
 
 function addDays(iso: string, delta: number) {
   const d = new Date(iso + "T00:00:00");
