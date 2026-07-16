@@ -57,11 +57,11 @@ function AnalyticsView() {
   return (
     <div className="space-y-6">
       <StatCards />
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 [&>*]:min-w-0">
         <WeeklyProgress />
         <CategoryBreakdown />
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px] [&>*]:min-w-0">
         <TopHabits />
         <QuickStats />
       </div>
