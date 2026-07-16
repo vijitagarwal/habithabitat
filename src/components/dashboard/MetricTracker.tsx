@@ -39,16 +39,15 @@ export function MetricTracker({ cfg }: { cfg: Cfg }) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-      <div className="card-glass rounded-2xl p-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="card-glass min-w-0 rounded-2xl p-6">
         <h3 className="mb-1 text-lg font-semibold">{cfg.emoji} {cfg.label} Tracker</h3>
         <p className="mb-4 text-xs text-muted-foreground">Log your {cfg.label.toLowerCase()} in {cfg.unit}.</p>
 
-        <label className="block text-xs">
+        <div className="block text-xs">
           <div className="mb-1 text-muted-foreground">Date</div>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        </label>
+          <DatePicker value={date} onChange={setDate} size="md" className="w-full" />
+        </div>
 
         <label className="mt-3 block text-xs">
           <div className="mb-1 text-muted-foreground">{cfg.label} ({cfg.unit})</div>
