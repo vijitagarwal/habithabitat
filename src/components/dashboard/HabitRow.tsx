@@ -139,9 +139,6 @@ export function HabitRow({ habit: h, dateISO, done, pct, value, compact }: Props
   );
 }
 
-export function HabitList({ dateISO, empty }: { dateISO: string; empty?: React.ReactNode }) {
-  return null; // reserved for future consolidation
-}
 
 // Convenience wrapper: given full state, render row
 import { useHabits } from "@/lib/habits-store";
