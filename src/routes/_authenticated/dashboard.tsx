@@ -197,9 +197,7 @@ function DashboardPage() {
 }
 
 // ---------- Scope context (Habit view = all; CAT view = category "CAT Prep") ----------
-import { createContext, useContext } from "react";
-const ScopeCtx = createContext<"habit" | "cat">("habit");
+import { ScopeCtx } from "@/lib/scope";
 function ScopeProvider({ scope, children }: { scope: "habit" | "cat"; children: React.ReactNode }) {
   return <ScopeCtx.Provider value={scope}>{children}</ScopeCtx.Provider>;
 }
-export function useScope() { return useContext(ScopeCtx); }
