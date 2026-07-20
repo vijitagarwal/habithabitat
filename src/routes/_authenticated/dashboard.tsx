@@ -151,8 +151,6 @@ function DashboardPage() {
           onCloseMobile={() => setMobileOpen(false)}
           collapsed={collapsed}
           onToggleCollapsed={() => setCollapsed((v) => !v)}
-          scope={scope}
-          onSignOut={signOut}
         />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           {/* Top scope toggle */}
