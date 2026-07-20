@@ -153,7 +153,7 @@ function emptyState(): HabitState {
 function load(): HabitState {
   if (typeof window === "undefined") return defaultState();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
@@ -166,8 +166,9 @@ function load(): HabitState {
       };
     }
   } catch {}
-  const state = defaultState();
-  localStorage.setItem(KEY, JSON.stringify(state));
+  // For a signed-in user with no data yet, start empty (no demo seed).
+  const state = userKey ? emptyState() : defaultState();
+  localStorage.setItem(KEY(), JSON.stringify(state));
   return state;
 }
 
@@ -176,13 +177,23 @@ let hydrated = false;
 const listeners = new Set<() => void>();
 
 function persist() {
-  if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
+  if (typeof window !== "undefined") localStorage.setItem(KEY(), JSON.stringify(state));
   listeners.forEach((l) => l());
 }
 function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
 const serverState: HabitState = emptyState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
+
+/** Bind the store to a specific user; reloads from that user's localStorage bucket. */
+export function setStoreUser(uid: string | null) {
+  const nextKey = uid ?? null;
+  if (nextKey === userKey && hydrated) return;
+  userKey = nextKey;
+  hydrated = true;
+  state = load();
+  listeners.forEach((l) => l());
+}
 
 export function useHabits() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
