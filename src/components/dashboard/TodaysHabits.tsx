@@ -1,12 +1,14 @@
-import { useHabits, todayISO, completionsForDate, habitsFor } from "@/lib/habits-store";
-import { CheckCircle2, Circle } from "lucide-react";
+import { useHabits, todayISO, habitsFor } from "@/lib/habits-store";
 import { HabitRowConnected } from "./HabitRow";
+import { useScope, filterHabitsByScope } from "@/lib/scope";
 
 export function TodaysHabits() {
   const s = useHabits();
+  const scope = useScope();
   const today = todayISO();
-  const scheduled = habitsFor(s, today);
-  const stats = completionsForDate(s, today);
+  const scheduled = filterHabitsByScope(habitsFor(s, today), scope);
+  const doneCount = scheduled.filter((h) => (s.completions[today] ?? []).includes(h.id)).length;
+  const stats = { done: doneCount, total: scheduled.length };
 
   return (
     <div className="card-glass rounded-2xl p-6">
