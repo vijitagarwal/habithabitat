@@ -207,9 +207,13 @@ function fromDraft(d: Draft): Omit<Habit, "id" | "createdAt"> {
 
 export function HabitManager() {
   const s = useHabits();
+  const scope = useScope();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const visibleHabits = filterHabitsByScope(s.habits, scope);
+  // In CAT scope, new habits default to the "CAT Prep" category.
+  const initialDraft = scope === "cat" ? { ...emptyDraft, category: "CAT Prep" as HabitCategory } : emptyDraft;
 
   return (
     <div className="space-y-6">
