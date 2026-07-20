@@ -402,6 +402,7 @@ export function categoryBreakdown(s: HabitState) {
     Productivity: "oklch(0.75 0.18 55)",
     Learning: "oklch(0.72 0.18 235)",
     Lifestyle: "oklch(0.65 0.22 320)",
+    "CAT Prep": "oklch(0.7 0.22 25)",
   };
   return CATEGORIES.map((cat) => {
     const catHabits = s.habits.filter((h) => h.category === cat);
