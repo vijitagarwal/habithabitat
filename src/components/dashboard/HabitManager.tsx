@@ -234,7 +234,7 @@ export function HabitManager() {
         {adding && (
           <div className="mb-4">
             <DraftForm
-              initial={emptyDraft}
+              initial={initialDraft}
               submitLabel="Create"
               onCancel={() => setAdding(false)}
               onSubmit={(d) => { addHabit(fromDraft(d)); setAdding(false); }}
@@ -243,12 +243,14 @@ export function HabitManager() {
         )}
 
         <ul className="space-y-2">
-          {s.habits.length === 0 && !adding && (
+          {visibleHabits.length === 0 && !adding && (
             <li className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No habits yet. Click "Add Habit" to start from scratch.
+              {scope === "cat"
+                ? 'No CAT prep habits yet. Click "Add Habit" — it will be tagged as CAT Prep automatically.'
+                : 'No habits yet. Click "Add Habit" to start from scratch.'}
             </li>
           )}
-          {s.habits.map((h: Habit) => (
+          {visibleHabits.map((h: Habit) => (
             <li key={h.id} className="rounded-xl border border-border bg-background/30 p-3">
               {editingId === h.id ? (
                 <DraftForm
