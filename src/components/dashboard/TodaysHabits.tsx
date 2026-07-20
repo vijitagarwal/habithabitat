@@ -1,4 +1,5 @@
 import { useHabits, todayISO, habitsFor } from "@/lib/habits-store";
+import { CheckCircle2, Circle } from "lucide-react";
 import { HabitRowConnected } from "./HabitRow";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
 
