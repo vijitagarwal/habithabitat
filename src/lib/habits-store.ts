@@ -1,12 +1,13 @@
 import { useEffect, useSyncExternalStore } from "react";
 
-export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle";
+export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
 
-export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle"];
+export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle", "CAT Prep"];
 export const ICON_CHOICES = [
   "Sparkles", "Dumbbell", "BookOpen", "NotebookPen", "Code2", "Droplets", "Ban",
   "Moon", "GraduationCap", "Footprints", "Heart", "Apple", "Bike", "Music",
   "Palette", "Sun", "Coffee", "Leaf", "Brain", "Star", "Target", "CheckCircle2",
+  "Calculator", "PenTool", "Timer", "Trophy", "Flame",
 ];
 export const COLOR_CHOICES = ["brand", "brand-2", "success", "warning", "danger", "info"];
 
