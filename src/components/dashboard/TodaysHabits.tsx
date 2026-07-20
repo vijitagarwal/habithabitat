@@ -8,7 +8,8 @@ export function TodaysHabits() {
   const scope = useScope();
   const today = todayISO();
   const scheduled = filterHabitsByScope(habitsFor(s, today), scope);
-  const doneCount = scheduled.filter((h) => (s.completions[today] ?? []).includes(h.id)).length;
+  const day = s.completions[today] ?? {};
+  const doneCount = scheduled.filter((h) => day[h.id]).length;
   const stats = { done: doneCount, total: scheduled.length };
 
   return (
