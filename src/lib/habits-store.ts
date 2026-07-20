@@ -1,12 +1,13 @@
 import { useEffect, useSyncExternalStore } from "react";
 
-export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle";
+export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
 
-export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle"];
+export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle", "CAT Prep"];
 export const ICON_CHOICES = [
   "Sparkles", "Dumbbell", "BookOpen", "NotebookPen", "Code2", "Droplets", "Ban",
   "Moon", "GraduationCap", "Footprints", "Heart", "Apple", "Bike", "Music",
   "Palette", "Sun", "Coffee", "Leaf", "Brain", "Star", "Target", "CheckCircle2",
+  "Calculator", "PenTool", "Timer", "Trophy", "Flame",
 ];
 export const COLOR_CHOICES = ["brand", "brand-2", "success", "warning", "danger", "info"];
 
@@ -58,7 +59,9 @@ export interface HabitState {
   xp: number;
 }
 
-const KEY = "habit-tracker-v2";
+const BASE_KEY = "habit-tracker-v2";
+let userKey: string | null = null;
+function KEY() { return userKey ? `${BASE_KEY}::${userKey}` : BASE_KEY; }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const daysAgoISO = (n: number) => {
@@ -150,7 +153,7 @@ function emptyState(): HabitState {
 function load(): HabitState {
   if (typeof window === "undefined") return defaultState();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
@@ -163,8 +166,9 @@ function load(): HabitState {
       };
     }
   } catch {}
-  const state = defaultState();
-  localStorage.setItem(KEY, JSON.stringify(state));
+  // For a signed-in user with no data yet, start empty (no demo seed).
+  const state = userKey ? emptyState() : defaultState();
+  localStorage.setItem(KEY(), JSON.stringify(state));
   return state;
 }
 
@@ -173,13 +177,23 @@ let hydrated = false;
 const listeners = new Set<() => void>();
 
 function persist() {
-  if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
+  if (typeof window !== "undefined") localStorage.setItem(KEY(), JSON.stringify(state));
   listeners.forEach((l) => l());
 }
 function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
 const serverState: HabitState = emptyState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
+
+/** Bind the store to a specific user; reloads from that user's localStorage bucket. */
+export function setStoreUser(uid: string | null) {
+  const nextKey = uid ?? null;
+  if (nextKey === userKey && hydrated) return;
+  userKey = nextKey;
+  hydrated = true;
+  state = load();
+  listeners.forEach((l) => l());
+}
 
 export function useHabits() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -401,6 +415,7 @@ export function categoryBreakdown(s: HabitState) {
     Productivity: "oklch(0.75 0.18 55)",
     Learning: "oklch(0.72 0.18 235)",
     Lifestyle: "oklch(0.65 0.22 320)",
+    "CAT Prep": "oklch(0.7 0.22 25)",
   };
   return CATEGORIES.map((cat) => {
     const catHabits = s.habits.filter((h) => h.category === cat);

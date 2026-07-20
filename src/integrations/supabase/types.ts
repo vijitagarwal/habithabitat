@@ -14,7 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      completions: {
+        Row: {
+          created_at: string
+          date: string
+          done: boolean
+          id: string
+          item_id: string
+          note: string | null
+          updated_at: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          done?: boolean
+          id?: string
+          item_id: string
+          note?: string | null
+          updated_at?: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          done?: boolean
+          id?: string
+          item_id?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          mood: number | null
+          sleep: number | null
+          updated_at: string
+          user_id: string
+          water: number | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          mood?: number | null
+          sleep?: number | null
+          updated_at?: string
+          user_id: string
+          water?: number | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          mood?: number | null
+          sleep?: number | null
+          updated_at?: string
+          user_id?: string
+          water?: number | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      items: {
+        Row: {
+          archived: boolean
+          benchmarks: number[]
+          category: string
+          color: string | null
+          created_at: string
+          direction: string
+          icon: string | null
+          id: string
+          kind: string
+          name: string
+          one_off_date: string | null
+          priority: number
+          schedule: Json
+          unit: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          benchmarks?: number[]
+          category?: string
+          color?: string | null
+          created_at?: string
+          direction?: string
+          icon?: string | null
+          id?: string
+          kind?: string
+          name: string
+          one_off_date?: string | null
+          priority?: number
+          schedule?: Json
+          unit?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          benchmarks?: number[]
+          category?: string
+          color?: string | null
+          created_at?: string
+          direction?: string
+          icon?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          one_off_date?: string | null
+          priority?: number
+          schedule?: Json
+          unit?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          note: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          note?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          monthly_goal: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          monthly_goal?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          monthly_goal?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
