@@ -7,6 +7,7 @@ import {
 } from "@/lib/habits-store";
 import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown } from "lucide-react";
 import { ScheduleEditor } from "./ScheduleEditor";
+import { useScope, filterHabitsByScope } from "@/lib/scope";
 
 type Draft = {
   name: string;
