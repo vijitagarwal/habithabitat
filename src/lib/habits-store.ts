@@ -59,7 +59,9 @@ export interface HabitState {
   xp: number;
 }
 
-const KEY = "habit-tracker-v2";
+const BASE_KEY = "habit-tracker-v2";
+let userKey: string | null = null;
+function KEY() { return userKey ? `${BASE_KEY}::${userKey}` : BASE_KEY; }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const daysAgoISO = (n: number) => {
