@@ -3,6 +3,7 @@ import { useHabits, completionsForDate, todayISO, habitsFor } from "@/lib/habits
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DatePicker } from "./DatePicker";
 import { HabitRowConnected } from "./HabitRow";
+import { useScope, filterHabitsByScope } from "@/lib/scope";
 
 function addDays(iso: string, delta: number) {
   const d = new Date(iso + "T00:00:00");
@@ -14,9 +15,10 @@ interface Props { initialDate?: string; }
 
 export function DailyTracker({ initialDate }: Props) {
   const s = useHabits();
+  const scope = useScope();
   const [date, setDate] = useState(initialDate ?? todayISO());
   useEffect(() => { if (initialDate) setDate(initialDate); }, [initialDate]);
-  const scheduled = habitsFor(s, date);
+  const scheduled = filterHabitsByScope(habitsFor(s, date), scope);
   const stats = completionsForDate(s, date);
   const [label, setLabel] = useState("");
   useEffect(() => {
