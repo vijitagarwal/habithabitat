@@ -20,14 +20,17 @@ import { CalendarView } from "@/components/dashboard/CalendarView";
 import { JournalView } from "@/components/dashboard/JournalView";
 import { GoalsView } from "@/components/dashboard/GoalsView";
 import { MetricTracker, MOOD_CFG, SLEEP_CFG, WATER_CFG, WEIGHT_CFG } from "@/components/dashboard/MetricTracker";
+import { CatDashboardShell } from "@/components/cat-dashboard/CatDashboardShell";
 import { GraduationCap, LayoutGrid, LogOut } from "lucide-react";
+import { ScopeCtx } from "@/lib/scope";
 
-const search = z.object({
+const searchSchema = z.object({
   scope: z.enum(["habit", "cat"]).optional(),
-}).parse;
+});
+type SearchParams = z.infer<typeof searchSchema>;
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  validateSearch: (s) => search(s),
+  validateSearch: (s: Record<string, unknown>): SearchParams => searchSchema.parse(s),
   component: DashboardPage,
 });
 
@@ -121,6 +124,8 @@ function DashboardPage() {
   const validKeys = NAV.map((n) => n.key);
   const safeActive = validKeys.includes(active as (typeof validKeys)[number]) ? active : "dashboard";
 
+  const catActive = scope === "cat";
+
   // Bind the habit store to the signed-in user's isolated localStorage bucket.
   useEffect(() => {
     let cancelled = false;
@@ -139,11 +144,21 @@ function DashboardPage() {
     nav({ to: "/auth", replace: true });
   }
 
-  const catActive = scope === "cat";
+  // ── CAT scope: full CAT dashboard shell (sidebar has scope toggle + sign out)
+  if (catActive) {
+    return (
+      <div className="dark h-screen overflow-hidden bg-background text-foreground">
+        <ScopeCtx.Provider value="cat">
+          <CatDashboardShell />
+        </ScopeCtx.Provider>
+      </div>
+    );
+  }
 
+  // ── Habit scope ───────────────────────────────────────────────────
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
-      <div className="flex min-h-screen">
+    <div className="dark h-screen overflow-hidden bg-background text-foreground">
+      <div className="flex h-full">
         <Sidebar
           active={safeActive}
           onSelect={setActive}
@@ -152,52 +167,44 @@ function DashboardPage() {
           collapsed={collapsed}
           onToggleCollapsed={() => setCollapsed((v) => !v)}
         />
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
-          {/* Top scope toggle */}
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div className="inline-flex rounded-xl border border-border bg-card/60 p-1 text-sm shadow-sm">
+        <main className="flex flex-1 flex-col overflow-hidden">
+          {/* ── Topbar strip: scope toggle + sign out ── */}
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-sm">
+            <div className="inline-flex rounded-xl border border-border bg-card/60 p-0.5 shadow-sm">
               <button
                 onClick={() => nav({ to: "/dashboard", search: { scope: "habit" } })}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition ${
-                  !catActive ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition bg-primary text-primary-foreground shadow"
               >
                 <LayoutGrid className="h-4 w-4" /> Habits
               </button>
               <button
                 onClick={() => nav({ to: "/dashboard", search: { scope: "cat" } })}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition ${
-                  catActive ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition text-muted-foreground hover:text-foreground"
               >
                 <GraduationCap className="h-4 w-4" /> CAT Prep
               </button>
             </div>
             <button
               onClick={signOut}
-              className="hidden items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-foreground sm:inline-flex"
+              className="hidden items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:inline-flex transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>
           </div>
-          <Header
-            onNavigate={setActive}
-            onOpenMenu={() => setMobileOpen(true)}
-            title={catActive ? `CAT · ${meta.title}` : meta.title}
-            subtitle={catActive ? "Your CAT prep tasks, filtered from your habits." : meta.subtitle}
-          />
-          {/* Scope filter is applied inside components via the useScope hook (see below). */}
-          <ScopeProvider scope={scope}>
-            {renderView(safeActive, setActive)}
-          </ScopeProvider>
+          {/* ── Scrollable content ── */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <Header
+              onNavigate={setActive}
+              onOpenMenu={() => setMobileOpen(true)}
+              title={meta.title}
+              subtitle={meta.subtitle}
+            />
+            <ScopeCtx.Provider value="habit">
+              {renderView(safeActive, setActive)}
+            </ScopeCtx.Provider>
+          </div>
         </main>
       </div>
     </div>
   );
-}
-
-// ---------- Scope context (Habit view = all; CAT view = category "CAT Prep") ----------
-import { ScopeCtx } from "@/lib/scope";
-function ScopeProvider({ scope, children }: { scope: "habit" | "cat"; children: React.ReactNode }) {
-  return <ScopeCtx.Provider value={scope}>{children}</ScopeCtx.Provider>;
 }

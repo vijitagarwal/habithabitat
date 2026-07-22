@@ -1,23 +1,41 @@
 import { ClipboardList, CheckCircle2, Star, TrendingUp } from "lucide-react";
-import { useHabits, totalCompleted, perfectDays, overallProgress } from "@/lib/habits-store";
+import { useScopedStats } from "@/lib/scope-aware-stats";
 
 export function QuickStats() {
-  const s = useHabits();
-  const totalHabits = s.habits.length;
-  const completed = totalCompleted(s);
-  const perfect = perfectDays(s);
-  const rate = overallProgress(s);
+  const { habits, totalDone, perfect, overall, isCat } = useScopedStats();
 
   const items = [
-    { label: "Total Habits", value: totalHabits, icon: ClipboardList, tint: "oklch(0.72 0.18 235)" },
-    { label: "Total Completed", value: completed.toLocaleString(), icon: CheckCircle2, tint: "oklch(0.72 0.18 155)" },
-    { label: "Perfect Days", value: perfect, icon: Star, tint: "oklch(0.8 0.17 75)" },
-    { label: "Success Rate", value: `${rate}%`, icon: TrendingUp, tint: "oklch(0.72 0.18 275)" },
+    {
+      label: isCat ? "CAT Prep Habits" : "Total Habits",
+      value: habits.length,
+      icon: ClipboardList,
+      tint: "oklch(0.72 0.18 235)",
+    },
+    {
+      label: "Total Completed",
+      value: totalDone.toLocaleString(),
+      icon: CheckCircle2,
+      tint: "oklch(0.72 0.18 155)",
+    },
+    {
+      label: "Perfect Days",
+      value: perfect,
+      icon: Star,
+      tint: "oklch(0.8 0.17 75)",
+    },
+    {
+      label: isCat ? "CAT Success Rate" : "Success Rate",
+      value: `${overall}%`,
+      icon: TrendingUp,
+      tint: isCat ? "oklch(0.7 0.22 25)" : "oklch(0.72 0.18 275)",
+    },
   ];
 
   return (
     <div className="card-glass rounded-2xl p-5">
-      <h3 className="mb-3 text-base font-semibold">Quick Stats</h3>
+      <h3 className="mb-3 text-base font-semibold">
+        {isCat ? "CAT Quick Stats" : "Quick Stats"}
+      </h3>
       <div className="grid grid-cols-2 gap-3">
         {items.map((i) => (
           <div key={i.label} className="rounded-xl border border-border bg-background/30 p-3">

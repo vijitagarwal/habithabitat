@@ -1,5 +1,6 @@
 import { Flame, Trophy, Target, CheckCircle2 } from "lucide-react";
-import { useHabits, overallProgress, currentStreak, longestStreak, completionsForDate, todayISO } from "@/lib/habits-store";
+import { useScopedStats } from "@/lib/scope-aware-stats";
+import { todayISO } from "@/lib/habits-store";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -9,7 +10,7 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
-function CircularProgress({ value, size = 60, stroke = 6, gradient = true }: { value: number; size?: number; stroke?: number; gradient?: boolean }) {
+function CircularProgress({ value, size = 60, stroke = 6 }: { value: number; size?: number; stroke?: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
@@ -20,11 +21,15 @@ function CircularProgress({ value, size = 60, stroke = 6, gradient = true }: { v
           <stop offset="0%" stopColor="oklch(0.72 0.18 235)" />
           <stop offset="100%" stopColor="oklch(0.68 0.22 320)" />
         </linearGradient>
+        <linearGradient id="ring-grad-cat" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="oklch(0.7 0.22 25)" />
+          <stop offset="100%" stopColor="oklch(0.75 0.18 55)" />
+        </linearGradient>
       </defs>
       <circle cx={size / 2} cy={size / 2} r={r} stroke="oklch(0.3 0.03 265)" strokeWidth={stroke} fill="none" />
       <circle
         cx={size / 2} cy={size / 2} r={r}
-        stroke={gradient ? "url(#ring-grad)" : "oklch(0.72 0.18 155)"}
+        stroke="url(#ring-grad)"
         strokeWidth={stroke} fill="none"
         strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
       />
@@ -33,12 +38,7 @@ function CircularProgress({ value, size = 60, stroke = 6, gradient = true }: { v
 }
 
 export function StatCards() {
-  const s = useHabits();
-  const overall = overallProgress(s);
-  const streak = currentStreak(s);
-  const longest = longestStreak(s);
-  const today = completionsForDate(s, todayISO());
-  const monthlyGoal = s.monthlyGoal;
+  const { overall, streak, longest, todayStats, monthlyGoal, isCat } = useScopedStats();
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 [&>*]:min-w-0">
@@ -48,9 +48,13 @@ export function StatCards() {
           <div className="absolute text-sm font-bold">{overall}%</div>
         </div>
         <div>
-          <div className="text-xs text-muted-foreground">Overall Progress</div>
+          <div className="text-xs text-muted-foreground">
+            {isCat ? "CAT Prep Progress" : "Overall Progress"}
+          </div>
           <div className="mt-1 text-base font-semibold">Last 30 days</div>
-          <div className="mt-1 text-xs font-medium text-success">+12% vs last month</div>
+          <div className={`mt-1 text-xs font-medium ${overall >= 60 ? "text-success" : "text-warning"}`}>
+            {overall >= 80 ? "Excellent 🔥" : overall >= 60 ? "On track 👍" : "Needs focus ⚡"}
+          </div>
         </div>
       </Card>
 
@@ -86,15 +90,17 @@ export function StatCards() {
             <circle cx={30} cy={30} r={25} stroke="oklch(0.3 0.03 265)" strokeWidth={6} fill="none" />
             <circle cx={30} cy={30} r={25} stroke="oklch(0.72 0.18 155)" strokeWidth={6} fill="none"
               strokeDasharray={2 * Math.PI * 25}
-              strokeDashoffset={2 * Math.PI * 25 - (today.pct / 100) * 2 * Math.PI * 25}
+              strokeDashoffset={2 * Math.PI * 25 - (todayStats.pct / 100) * 2 * Math.PI * 25}
               strokeLinecap="round" />
           </svg>
           <CheckCircle2 className="absolute h-6 w-6 text-success" />
         </div>
         <div>
-          <div className="text-xs text-muted-foreground">Completion Today</div>
-          <div className="mt-0.5 text-2xl font-bold">{today.done} <span className="text-sm text-muted-foreground">/ {today.total}</span></div>
-          <div className="mt-0.5 text-xs font-medium text-success">{today.pct}% completed</div>
+          <div className="text-xs text-muted-foreground">
+            {isCat ? "CAT Tasks Today" : "Completion Today"}
+          </div>
+          <div className="mt-0.5 text-2xl font-bold">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
+          <div className="mt-0.5 text-xs font-medium text-success">{todayStats.pct}% completed</div>
         </div>
       </Card>
 
@@ -105,8 +111,9 @@ export function StatCards() {
         <div>
           <div className="text-xs text-muted-foreground">Monthly Goal</div>
           <div className="mt-0.5 text-2xl font-bold">{monthlyGoal}%</div>
-          <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-success">
-            On Track <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          <div className={`mt-0.5 flex items-center gap-1 text-xs font-medium ${overall >= monthlyGoal ? "text-success" : "text-warning"}`}>
+            {overall >= monthlyGoal ? "On Track" : "Behind target"}
+            <span className={`h-1.5 w-1.5 rounded-full ${overall >= monthlyGoal ? "bg-success" : "bg-warning"}`} />
           </div>
         </div>
       </Card>

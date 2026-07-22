@@ -1,17 +1,18 @@
-import { useHabits, weeklyProgress } from "@/lib/habits-store";
+import { useScopedStats } from "@/lib/scope-aware-stats";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 export function WeeklyProgress() {
-  const s = useHabits();
-  const data = weeklyProgress(s);
+  const { weeklyData, isCat } = useScopedStats();
   const [range, setRange] = useState("This Week");
 
   return (
     <div className="card-glass rounded-2xl p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Weekly Progress</h3>
+        <h3 className="text-lg font-semibold">
+          {isCat ? "CAT Prep — Weekly Progress" : "Weekly Progress"}
+        </h3>
         <div className="relative">
           <select
             value={range} onChange={(e) => setRange(e.target.value)}
@@ -25,11 +26,11 @@ export function WeeklyProgress() {
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 32, right: 12, left: -18, bottom: 0 }}>
+          <BarChart data={weeklyData} margin={{ top: 32, right: 12, left: -18, bottom: 0 }}>
             <defs>
               <linearGradient id="bar-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="oklch(0.72 0.18 235)" />
-                <stop offset="100%" stopColor="oklch(0.65 0.24 300)" />
+                <stop offset="0%" stopColor={isCat ? "oklch(0.7 0.22 25)" : "oklch(0.72 0.18 235)"} />
+                <stop offset="100%" stopColor={isCat ? "oklch(0.75 0.18 55)" : "oklch(0.65 0.24 300)"} />
               </linearGradient>
             </defs>
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "oklch(0.7 0.02 260)", fontSize: 12 }} />
@@ -47,11 +48,11 @@ export function WeeklyProgress() {
                 fontSize: 12,
                 color: "oklch(0.95 0.01 260)",
               }}
-              formatter={(v: number) => [`${v}%`, "Completion"]}
+              formatter={(v: number) => [`${v}%`, isCat ? "CAT Completion" : "Completion"]}
               labelStyle={{ color: "oklch(0.75 0.02 260)", fontWeight: 600 }}
             />
             <Bar dataKey="pct" radius={[8, 8, 0, 0]} maxBarSize={44}>
-              {data.map((_, i) => (<Cell key={i} fill="url(#bar-grad)" />))}
+              {weeklyData.map((_, i) => <Cell key={i} fill="url(#bar-grad)" />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
