@@ -19,7 +19,14 @@ export default function TopicTracker() {
   const load = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase.from('topic_progress').select('*').eq('user_id', user.id).order('section').order('topic_name');
-    if (data) setTopics(data as TopicProgress[]);
+    if (!data || data.length === 0) {
+      // First visit: seed all default topics for this user
+      const seeds = DEFAULT_TOPICS.map((t) => ({ ...t, user_id: user.id, updated_at: new Date().toISOString() }));
+      const { data: inserted } = await supabase.from('topic_progress').insert(seeds).select();
+      if (inserted) setTopics(inserted as TopicProgress[]);
+    } else {
+      setTopics(data as TopicProgress[]);
+    }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
