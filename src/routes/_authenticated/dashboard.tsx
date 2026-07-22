@@ -21,7 +21,7 @@ import { JournalView } from "@/components/dashboard/JournalView";
 import { GoalsView } from "@/components/dashboard/GoalsView";
 import { MetricTracker, MOOD_CFG, SLEEP_CFG, WATER_CFG, WEIGHT_CFG } from "@/components/dashboard/MetricTracker";
 import { CatDashboardShell } from "@/components/cat-dashboard/CatDashboardShell";
-import { GraduationCap, LayoutGrid, LogOut } from "lucide-react";
+import { GraduationCap, LayoutGrid } from "lucide-react";
 import { ScopeCtx } from "@/lib/scope";
 
 const searchSchema = z.object({
@@ -184,18 +184,13 @@ function DashboardPage() {
                 <GraduationCap className="h-4 w-4" /> CAT Prep
               </button>
             </div>
-            <button
-              onClick={signOut}
-              className="hidden items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:inline-flex transition-colors"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign out
-            </button>
           </div>
           {/* ── Scrollable content ── */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <Header
               onNavigate={setActive}
               onOpenMenu={() => setMobileOpen(true)}
+              onSignOut={signOut}
               title={meta.title}
               subtitle={meta.subtitle}
             />

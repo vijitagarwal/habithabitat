@@ -13,6 +13,7 @@
 import { useState, useEffect, Suspense, lazy, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import './cat-styles.css';
+import { ProfileModal } from '@/components/dashboard/ProfileModal';
 import {
   Home, Zap, Map, Wind, Brain, Timer,
   BarChart2, BookOpen, BookMarked, AlertCircle, Flame,
@@ -234,7 +235,7 @@ function CatSidebar({
         ))}
       </nav>
 
-      {/* ── Footer: scope toggle + sign out ── */}
+      {/* ── Footer: scope toggle + profile/sign out ── */}
       <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
         <button
           onClick={onScopeSwitch}
@@ -244,14 +245,11 @@ function CatSidebar({
           <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
           {!collapsed && <span>Habit Tracker</span>}
         </button>
-        <button
-          onClick={onSignOut}
-          title={collapsed ? 'Sign out' : undefined}
-          className={`flex w-full items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} rounded-xl py-2 text-sm font-medium text-sidebar-foreground/75 hover:bg-destructive/15 hover:text-destructive transition-colors`}
-        >
-          <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-          {!collapsed && <span>Sign out</span>}
-        </button>
+        {/* Profile dropdown (includes sign-out) */}
+        <div className={`flex ${collapsed ? 'justify-center' : 'items-center gap-3 px-1'} py-1`}>
+          <ProfileModal onSignOut={onSignOut} compact={collapsed} />
+          {!collapsed && <span className="text-sm font-medium text-sidebar-foreground/75">Profile &amp; Sign out</span>}
+        </div>
       </div>
     </div>
   );

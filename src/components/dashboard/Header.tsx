@@ -1,5 +1,6 @@
-import { CalendarDays, ChevronDown, Menu, Moon, Sun, User } from "lucide-react";
+import { CalendarDays, ChevronDown, Moon, Sun, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ProfileModal } from "./ProfileModal";
 
 function useTheme() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -19,11 +20,18 @@ function useTheme() {
 interface Props {
   onNavigate?: (key: string) => void;
   onOpenMenu?: () => void;
+  onSignOut?: () => void;
   title?: string;
   subtitle?: string;
 }
 
-export function Header({ onNavigate, onOpenMenu, title = "Dashboard", subtitle = "Welcome back! Keep going, you're doing amazing. 🚀" }: Props) {
+export function Header({
+  onNavigate,
+  onOpenMenu,
+  onSignOut,
+  title = "Dashboard",
+  subtitle = "Welcome back! Keep going, you're doing amazing. 🚀",
+}: Props) {
   const { theme, setTheme } = useTheme();
   const [today, setToday] = useState<string>("");
   useEffect(() => {
@@ -44,28 +52,25 @@ export function Header({ onNavigate, onOpenMenu, title = "Dashboard", subtitle =
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {/* Date picker shortcut */}
         <button
           onClick={() => onNavigate?.("calendar")}
-          className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-medium hover:border-primary/40"
+          className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-medium hover:border-primary/40 transition-colors"
         >
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
           <span suppressHydrationWarning>{today || "\u00A0"}</span>
           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
+        {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-medium hover:border-primary/40"
+          className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-medium hover:border-primary/40 transition-colors"
         >
           {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           <span className="capitalize">{theme}</span>
         </button>
-        <button
-          onClick={() => onNavigate?.("settings")}
-          title="Profile & Settings"
-          className="grid h-10 w-10 place-items-center rounded-full gradient-brand text-sm font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90"
-        >
-          <User className="h-5 w-5" />
-        </button>
+        {/* Profile dropdown (includes sign-out) */}
+        <ProfileModal onSignOut={onSignOut} />
       </div>
     </header>
   );
