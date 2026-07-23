@@ -4,7 +4,7 @@ import { todayISO } from "@/lib/habits-store";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="card-glass flex items-center gap-4 rounded-2xl p-5 transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+    <div className="card-glass flex items-center gap-4 rounded-2xl p-5 min-h-[104px] transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5">
       {children}
     </div>
   );

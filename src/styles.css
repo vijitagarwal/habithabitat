@@ -104,7 +104,17 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+  body {
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--brand) 14%, transparent), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, color-mix(in oklab, var(--brand-2) 12%, transparent), transparent 60%);
+    background-attachment: fixed;
+  }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
 }
 
@@ -118,7 +128,21 @@
   color: transparent;
 }
 @utility card-glass {
-  background-color: color-mix(in oklab, var(--card) 92%, transparent);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(8px);
+  background-color: color-mix(in oklab, var(--card) 88%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 85%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, white 4%, transparent) inset,
+    0 12px 30px -18px oklch(0.08 0.02 265 / 0.6);
+}
+@utility section-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--muted-foreground) 90%, var(--brand));
+}
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--border) 80%, transparent) transparent;
 }
