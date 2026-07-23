@@ -176,13 +176,21 @@ function DashboardPage() {
               <div className="inline-flex rounded-xl border border-border bg-card/70 p-0.5 shadow-sm">
                 <button
                   onClick={() => nav({ to: "/dashboard", search: { scope: "habit" } })}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition gradient-brand text-white shadow shadow-primary/25"
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    !catActive
+                      ? "gradient-brand text-white shadow shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
                   <LayoutGrid className="h-4 w-4" /> Habits
                 </button>
                 <button
                   onClick={() => nav({ to: "/dashboard", search: { scope: "cat" } })}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition text-muted-foreground hover:text-foreground"
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    catActive
+                      ? "gradient-brand text-white shadow shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
                   <GraduationCap className="h-4 w-4" /> CAT Prep
                 </button>
