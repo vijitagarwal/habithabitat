@@ -392,6 +392,32 @@ All `useKV` keys are namespaced per user via the bridge.
 - Fields: display_name, bio, target_college, target_percentile, city, phone
 - Sign-out button moved into the Profile dropdown
 
+### Branding (2026-07-23, commit 49e12e5)
+- `public/favicon.ico`: replaced Lovable favicon with custom HabitHabitat icon (amber + teal bar chart on dark navy, multi-size ICO: 16/32/48/64/128px)
+- `public/icon-192.png`, `icon-512.png`: PNG icons for Android/PWA
+- `public/apple-touch-icon.png`: 180x180 for iOS home screen add-to-homescreen
+- `src/routes/__root.tsx`: title changed to `"HabitHabitat"`, description updated, added `theme-color: #0f1117`, `apple-touch-icon` link, PNG icon link
+- Vercel project display name: change manually in Vercel dashboard → Settings → General → Project Name
+
+### Bug Fixes: Calendar, Date Navigation, Overflow (2026-07-23, commit 7119097)
+
+#### UTC Timezone Off-by-One (Critical fix)
+- **Root cause**: `new Date(year, month, day).toISOString().slice(0, 10)` converts local time to UTC. In IST (+5:30), midnight local = 6:30 PM previous day UTC → calendar showed yesterday's data when clicking any date.
+- **Fix in `CalendarView.tsx`**: Build ISO strings manually: `` `${year}-${mm}-${dd}` `` — no timezone conversion.
+- **Fix in `DailyTracker.tsx` `addDays()`**: Same fix — after `setDate()`, format result as local string. Day navigation arrows now move exactly ±1 day.
+- **Pattern to remember**: NEVER use `new Date(y, m, d).toISOString()` for date comparisons — always format local dates as strings manually.
+
+#### HabitRow Card Overflow
+- Long unit/value stat text (e.g. `0c,ct,pyq,ques · 0%`) was bleeding outside card boundaries in the 2-column grid.
+- `HabitRow.tsx`: Added `min-w-0 overflow-hidden` to outer `<div>`, `truncate max-w-[120px]` to stat `<span>`, `shrink-0` to input group.
+- `DailyTracker.tsx`: Added `[&>*]:min-w-0` to `<ul>` and `className="min-w-0"` to each `<li>` to properly contain grid cells.
+
+#### Header Date Button → Real Date Picker
+- Was: clicking the date button in the top-right header navigated to Calendar view (`onNavigate("calendar")`)
+- Now: replaced with a `<DatePicker>` popover — clicking opens an inline calendar, picking a date switches to Daily Tracker pre-loaded to that date.
+- `Header.tsx`: Added `DatePicker` import + `onDateChange?: (iso: string) => void` prop; removed old date state/effect.
+- `dashboard.tsx`: Added `headerDate` state, wired `onDateChange={(iso) => { setHeaderDate(iso); setActive("daily"); }}`, passes `headerDate` as `initialDate` to `DailyTracker`.
+
 ---
 
 ## 14. Known Issues & Future Work
@@ -450,6 +476,9 @@ const { data } = await (supabase as any).from('profiles').select('*').eq('id', u
 ## 16. Git History (latest commits)
 
 ```
+7119097  fix: calendar date off-by-one, HabitRow overflow, header date picker
+49e12e5  brand: replace Lovable favicon with HabitHabitat icon, update page title and meta
+ea1660d  feat: CAT overview habits widget, checklist categories+edit, tech ladder CRUD, habit createdAt fix, updated project summary
 ca5c6da  chore: add vercel.json for Vercel deployment
 bfba8dd  feat: profile modal + extended profiles migration
 9ba83d9  feat: TopicTracker auto-seed DEFAULT_TOPICS
