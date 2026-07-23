@@ -169,21 +169,36 @@ function DashboardPage() {
           onToggleCollapsed={() => setCollapsed((v) => !v)}
         />
         <main className="flex flex-1 flex-col overflow-hidden">
-          {/* ── Topbar strip: scope toggle + sign out ── */}
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-sm">
-            <div className="inline-flex rounded-xl border border-border bg-card/60 p-0.5 shadow-sm">
-              <button
-                onClick={() => nav({ to: "/dashboard", search: { scope: "habit" } })}
-                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition bg-primary text-primary-foreground shadow"
-              >
-                <LayoutGrid className="h-4 w-4" /> Habits
-              </button>
-              <button
-                onClick={() => nav({ to: "/dashboard", search: { scope: "cat" } })}
-                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition text-muted-foreground hover:text-foreground"
-              >
-                <GraduationCap className="h-4 w-4" /> CAT Prep
-              </button>
+          {/* ── Topbar strip: scope toggle ── */}
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 bg-background/70 px-4 py-2.5 backdrop-blur-md">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="section-eyebrow hidden sm:inline text-muted-foreground/70">Workspace</span>
+              <div className="inline-flex rounded-xl border border-border bg-card/70 p-0.5 shadow-sm">
+                <button
+                  onClick={() => nav({ to: "/dashboard", search: { scope: "habit" } })}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    !catActive
+                      ? "gradient-brand text-white shadow shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <LayoutGrid className="h-4 w-4" /> Habits
+                </button>
+                <button
+                  onClick={() => nav({ to: "/dashboard", search: { scope: "cat" } })}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    catActive
+                      ? "gradient-brand text-white shadow shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <GraduationCap className="h-4 w-4" /> CAT Prep
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="hidden sm:inline">Signed in</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             </div>
           </div>
           {/* ── Scrollable content ── */}

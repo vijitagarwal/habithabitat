@@ -6,20 +6,22 @@ import {
 import { useHabits } from "@/lib/habits-store";
 
 export const NAV = [
-  { key: "dashboard",    label: "Dashboard",     icon: LayoutDashboard },
-  { key: "daily",        label: "Daily Tracker",  icon: CalendarCheck2 },
-  { key: "calendar",     label: "Calendar View",  icon: CalendarDays },
-  { key: "analytics",    label: "Analytics",      icon: BarChart3 },
-  { key: "heatmap",      label: "Heatmap",        icon: Grid3x3 },
-  { key: "goals",        label: "Goals",          icon: Target },
-  { key: "achievements", label: "Achievements",   icon: Trophy },
-  { key: "journal",      label: "Journal",        icon: NotebookPen },
-  { key: "mood",         label: "Mood Tracker",   icon: Smile },
-  { key: "sleep",        label: "Sleep Tracker",  icon: Moon },
-  { key: "water",        label: "Water Tracker",  icon: Droplets },
-  { key: "weight",       label: "Weight Tracker", icon: Scale },
-  { key: "settings",     label: "Settings",       icon: Settings },
+  { key: "dashboard",    label: "Dashboard",     icon: LayoutDashboard, group: "Overview" },
+  { key: "daily",        label: "Daily Tracker",  icon: CalendarCheck2, group: "Overview" },
+  { key: "calendar",     label: "Calendar View",  icon: CalendarDays,   group: "Overview" },
+  { key: "analytics",    label: "Analytics",      icon: BarChart3,      group: "Insights" },
+  { key: "heatmap",      label: "Heatmap",        icon: Grid3x3,        group: "Insights" },
+  { key: "goals",        label: "Goals",          icon: Target,         group: "Insights" },
+  { key: "achievements", label: "Achievements",   icon: Trophy,         group: "Insights" },
+  { key: "journal",      label: "Journal",        icon: NotebookPen,    group: "Wellness" },
+  { key: "mood",         label: "Mood Tracker",   icon: Smile,          group: "Wellness" },
+  { key: "sleep",        label: "Sleep Tracker",  icon: Moon,           group: "Wellness" },
+  { key: "water",        label: "Water Tracker",  icon: Droplets,       group: "Wellness" },
+  { key: "weight",       label: "Weight Tracker", icon: Scale,          group: "Wellness" },
+  { key: "settings",     label: "Settings",       icon: Settings,       group: "System" },
 ] as const;
+
+const GROUP_ORDER = ["Overview", "Insights", "Wellness", "System"] as const;
 
 interface Props {
   active: string;
@@ -82,24 +84,47 @@ function SidebarContent({
       </div>
 
       {/* ── Nav (independent scroll) ── */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2 scrollbar-thin">
-        {NAV.map((item) => {
-          const Icon = item.icon;
-          const isActive = active === item.key;
+      <nav className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
+        {GROUP_ORDER.map((group) => {
+          const items = NAV.filter((n) => n.group === group);
+          if (items.length === 0) return null;
           return (
-            <button
-              key={item.key}
-              onClick={() => onSelect(item.key)}
-              title={collapsed ? item.label : undefined}
-              className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
-              }`}
-            >
-              <Icon className="shrink-0" strokeWidth={isActive ? 2.2 : 1.8} size={18} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </button>
+            <div key={group} className="mb-3">
+              {!collapsed && (
+                <div className="section-eyebrow px-3 pb-1.5 pt-1 text-muted-foreground/70">
+                  {group}
+                </div>
+              )}
+              {collapsed && <div className="mx-3 mb-1.5 h-px bg-sidebar-border/60" />}
+              <div className="space-y-0.5">
+                {items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = active === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => onSelect(item.key)}
+                      title={collapsed ? item.label : undefined}
+                      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2.5 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-gradient-to-r from-primary/25 via-primary/10 to-transparent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
+                      }`}
+                    >
+                      {isActive && (
+                        <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full gradient-brand" />
+                      )}
+                      <Icon
+                        className={`shrink-0 ${isActive ? "text-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"}`}
+                        strokeWidth={isActive ? 2.2 : 1.8}
+                        size={18}
+                      />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </nav>
