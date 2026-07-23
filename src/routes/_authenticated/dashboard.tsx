@@ -89,10 +89,10 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   settings: { title: "Settings", subtitle: "Manage your habits and data." },
 };
 
-function renderView(active: string, onNavigate: (v: string) => void) {
+function renderView(active: string, onNavigate: (v: string) => void, initialDate?: string) {
   switch (active) {
     case "dashboard": return <DashboardHome onNavigate={onNavigate} />;
-    case "daily": return <DailyTracker />;
+    case "daily": return <DailyTracker initialDate={initialDate} />;
     case "calendar": return <CalendarView />;
     case "analytics": return <AnalyticsView />;
     case "heatmap": return <Heatmap />;
@@ -120,6 +120,7 @@ function DashboardPage() {
   const [active, setActive] = useState<string>("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [headerDate, setHeaderDate] = useState<string | undefined>(undefined);
   const meta = TITLES[active] ?? TITLES.dashboard;
   const validKeys = NAV.map((n) => n.key);
   const safeActive = validKeys.includes(active as (typeof validKeys)[number]) ? active : "dashboard";
@@ -189,13 +190,14 @@ function DashboardPage() {
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <Header
               onNavigate={setActive}
+              onDateChange={(iso) => { setHeaderDate(iso); setActive("daily"); }}
               onOpenMenu={() => setMobileOpen(true)}
               onSignOut={signOut}
               title={meta.title}
               subtitle={meta.subtitle}
             />
             <ScopeCtx.Provider value="habit">
-              {renderView(safeActive, setActive)}
+              {renderView(safeActive, setActive, headerDate)}
             </ScopeCtx.Provider>
           </div>
         </main>

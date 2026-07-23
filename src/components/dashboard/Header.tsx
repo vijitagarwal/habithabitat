@@ -1,6 +1,8 @@
 import { CalendarDays, ChevronDown, Moon, Sun, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProfileModal } from "./ProfileModal";
+import { DatePicker } from "./DatePicker";
+import { todayISO } from "@/lib/habits-store";
 
 function useTheme() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -19,6 +21,7 @@ function useTheme() {
 
 interface Props {
   onNavigate?: (key: string) => void;
+  onDateChange?: (iso: string) => void;
   onOpenMenu?: () => void;
   onSignOut?: () => void;
   title?: string;
@@ -27,16 +30,14 @@ interface Props {
 
 export function Header({
   onNavigate,
+  onDateChange,
   onOpenMenu,
   onSignOut,
   title = "Dashboard",
   subtitle = "Welcome back! Keep going, you're doing amazing. 🚀",
 }: Props) {
   const { theme, setTheme } = useTheme();
-  const [today, setToday] = useState<string>("");
-  useEffect(() => {
-    setToday(new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
-  }, []);
+  const [pickerDate, setPickerDate] = useState(todayISO());
 
   return (
     <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -52,15 +53,16 @@ export function Header({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {/* Date picker shortcut */}
-        <button
-          onClick={() => onNavigate?.("calendar")}
-          className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-medium hover:border-primary/40 transition-colors"
-        >
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <span suppressHydrationWarning>{today || "\u00A0"}</span>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
+        {/* Date picker — opens inline calendar, optionally notifies parent */}
+        <DatePicker
+          value={pickerDate}
+          onChange={(iso) => {
+            setPickerDate(iso);
+            onDateChange?.(iso);
+          }}
+          align="end"
+          size="md"
+        />
         {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

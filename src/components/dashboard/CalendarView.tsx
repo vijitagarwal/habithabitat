@@ -44,7 +44,10 @@ export function CalendarView() {
         <div className="grid grid-cols-7 gap-1">
           {cells.map((d, i) => {
             if (d === null) return <div key={i} />;
-            const iso = new Date(year, month, d).toISOString().slice(0, 10);
+            const yy = String(year);
+            const mm = String(month + 1).padStart(2, "0");
+            const dd = String(d).padStart(2, "0");
+            const iso = `${yy}-${mm}-${dd}`;
             const { pct, done, total } = completionsForDate(s, iso);
             const isSelected = iso === selected;
             const isToday = iso === todayISO();

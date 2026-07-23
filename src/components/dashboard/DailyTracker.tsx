@@ -8,7 +8,10 @@ import { useScope, filterHabitsByScope } from "@/lib/scope";
 function addDays(iso: string, delta: number) {
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + delta);
-  return d.toISOString().slice(0, 10);
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
 }
 
 interface Props { initialDate?: string; }
@@ -58,9 +61,9 @@ export function DailyTracker({ initialDate }: Props) {
           No habits scheduled for this date.
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2 [&>*]:min-w-0">
           {scheduled.map((h) => (
-            <li key={h.id}>
+            <li key={h.id} className="min-w-0">
               <HabitRowConnected habit={h} dateISO={date} />
             </li>
           ))}

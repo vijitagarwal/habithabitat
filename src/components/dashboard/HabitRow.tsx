@@ -42,8 +42,8 @@ export function HabitRow({ habit: h, dateISO, done, pct, value, compact }: Props
     : done ? "border-success/30 bg-success/5" : "border-border bg-background/30 hover:border-primary/40";
 
   return (
-    <div className={`rounded-xl border ${rowTone} px-3 py-2.5 transition`}>
-      <div className="flex items-center justify-between gap-3">
+    <div className={`rounded-xl border ${rowTone} px-3 py-2.5 transition min-w-0 overflow-hidden`}>
+      <div className="flex items-center justify-between gap-2 min-w-0">
         <button
           onClick={() => { if (!hasBenchmarks) toggleHabit(dateISO, h.id); }}
           className="flex flex-1 items-center gap-3 text-left"
@@ -55,7 +55,7 @@ export function HabitRow({ habit: h, dateISO, done, pct, value, compact }: Props
           >
             <Icon className="h-4 w-4" />
           </span>
-          <span className="min-w-0">
+          <span className="min-w-0 flex-1 overflow-hidden">
             <span className="block truncate text-sm font-medium">{h.name}</span>
             {!compact && (
               <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -71,7 +71,7 @@ export function HabitRow({ habit: h, dateISO, done, pct, value, compact }: Props
         </button>
         <div className="flex shrink-0 items-center gap-2">
           {hasBenchmarks ? (
-            <span className={`text-xs font-semibold ${pct >= 100 ? "text-success" : pct > 0 ? "text-warning" : "text-muted-foreground"}`}>
+            <span className={`text-xs font-semibold truncate max-w-[120px] block ${pct >= 100 ? "text-success" : pct > 0 ? "text-warning" : "text-muted-foreground"}`}>
               {value || 0}{unit} · {Math.round(pct)}%
             </span>
           ) : done ? (
@@ -111,7 +111,7 @@ export function HabitRow({ habit: h, dateISO, done, pct, value, compact }: Props
               </button>
             );
           })}
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-1 shrink-0">
             <input
               type="number"
               inputMode="decimal"
