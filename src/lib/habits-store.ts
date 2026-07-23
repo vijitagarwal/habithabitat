@@ -212,6 +212,9 @@ export function useHabits() {
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function isScheduledOn(h: Habit, iso: string): boolean {
+  // Never show a habit on dates before it was created
+  if (h.createdAt && iso < h.createdAt) return false;
+
   const sch = h.schedule ?? { type: "daily" };
   const d = new Date(iso + "T00:00:00");
   const dow = d.getDay();

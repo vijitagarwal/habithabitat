@@ -8,9 +8,13 @@ import { supabase } from '../bridge';
 import { SegmentedBar } from '../ui/ProgressBar';
 import type { BreathLog, MeditateLog } from '../types';
 import { CHECKLIST } from '../data/static';
+import { useHabits, habitsFor, todayISO, completionsForDate, toggleHabit } from '@/lib/habits-store';
+import { filterHabitsByScope } from '@/lib/scope';
 
 export default function Overview() {
   const { user } = useAuth();
+  const habitState = useHabits();
+  const today = todayISO();
   const [diff, setDiff] = useState(0);
   const [pct, setPct]   = useState(0);
   const [dayNum, setDayNum] = useState(0);
@@ -61,6 +65,11 @@ export default function Overview() {
     { pct: ((p2End - p1End) / totalDays) * 100,          color: 'var(--teal)',  label: 'Phase 2' },
     { pct: ((totalDays - p2End) / totalDays) * 100,      color: 'var(--amber)', label: 'Phase 3' },
   ];
+
+  const catHabits = filterHabitsByScope(habitsFor(habitState, today), 'cat');
+  const catDone   = catHabits.filter((h) => !!habitState.completions[today]?.[h.id]).length;
+  const catTotal  = catHabits.length;
+  const catPct    = catTotal > 0 ? Math.round((catDone / catTotal) * 100) : 0;
 
   const metrics = [
     { label: 'Breath Streak', value: `${breathLog.streak}d`,                icon: '🌬️', color: 'var(--lav)' },
@@ -159,6 +168,65 @@ export default function Overview() {
             </div>
           </motion.div>
         ))}
+      </div>
+
+      {/* ── Today's CAT Prep Habits ── */}
+      <div style={{ marginTop: 28, borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div>
+            <p className="section-eyebrow" style={{ marginBottom: 0 }}>Today's CAT Prep</p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>{catDone}/{catTotal} habits done</p>
+          </div>
+          {catTotal > 0 && (
+            <span style={{ fontSize: '0.8rem', color: catPct >= 80 ? 'var(--teal)' : 'var(--amber)', fontWeight: 700 }}>{catPct}%</span>
+          )}
+        </div>
+
+        {catTotal === 0 ? (
+          <div className="card" style={{ padding: '14px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.83rem' }}>
+            No CAT Prep habits yet.{' '}
+            <span style={{ color: 'var(--amber)' }}>Add habits with category "CAT Prep" in the Habit Tracker.</span>
+          </div>
+        ) : (
+          <>
+            <div style={{ height: 4, background: 'var(--bg-raised)', borderRadius: 99, overflow: 'hidden', marginBottom: 10 }}>
+              <div style={{ height: '100%', width: `${catPct}%`, background: 'var(--amber)', borderRadius: 99, transition: 'width 0.4s ease' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {catHabits.map((h) => {
+                const done = !!habitState.completions[today]?.[h.id];
+                return (
+                  <motion.button
+                    key={h.id}
+                    onClick={() => toggleHabit(today, h.id)}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px', borderRadius: 10, width: '100%',
+                      background: done ? 'rgba(34,197,94,0.08)' : 'var(--bg-base)',
+                      border: `1px solid ${done ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
+                      cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <div style={{
+                      width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                      border: `2px solid ${done ? '#22c55e' : 'var(--border-bright)'}`,
+                      background: done ? '#22c55e' : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.2s ease',
+                    }}>
+                      {done && <span style={{ color: '#fff', fontSize: '0.6rem', fontWeight: 700 }}>✓</span>}
+                    </div>
+                    <span style={{ fontSize: '0.88rem', color: done ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: done ? 'line-through' : 'none', flex: 1 }}>
+                      {h.name}
+                    </span>
+                    {done && <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Done ✓</span>}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

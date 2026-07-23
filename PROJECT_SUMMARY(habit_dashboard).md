@@ -1,6 +1,28 @@
-# bright-habit-view — Complete Project Summary
+# HabitHabitat — Complete Project Summary (Updated 2026-07-23)
 
-> **Purpose**: Exhaustive technical reference for porting this codebase. Written for an AI assistant with no prior context.
+> **Purpose**: Exhaustive technical reference for continuing this codebase. Written for an AI assistant with zero prior context. Read this entire file before making any changes.
+
+---
+
+## 0. Quick Facts
+
+| Field | Value |
+|---|---|
+| **Live URL** | https://habithabitat.vercel.app |
+| **GitHub repo** | `vijitagarwal/habithabitat` (was: `bright-habit-view`) |
+| **Local folder** | `e:\Desktop\operating system\all-in-one\bright-habit-view` |
+| **Supabase project** | `umjrxaczrmcstwajtumh` (project name: `mission_control`) |
+| **Supabase URL** | `https://umjrxaczrmcstwajtumh.supabase.co` |
+| **Deployment** | Vercel (Hobby), env var `NITRO_PRESET=vercel` |
+| **Auth** | Supabase magic link (email OTP) — magic link works; email+password sign-up is disabled |
+
+### ⚠️ Both Folders Explanation
+
+There are **two folders** in `all-in-one/`:
+- **`bright-habit-view/`** ← **THE ACTIVE PROJECT** (deployed to habithabitat.vercel.app)
+- **`mission-cat-pro/`** ← **ARCHIVED reference** — the old standalone CAT dashboard (separate repo `vijitagarwal/Mission-Control-and-tracking-2026..`), deployed separately on Vercel. It is NOT used in the current workflow. All CAT features have been merged into `bright-habit-view`.
+
+**Only `bright-habit-view/` should be edited going forward.**
 
 ---
 
@@ -8,578 +30,441 @@
 
 | Concern | Choice |
 |---|---|
-| Framework | **TanStack Start** (SSR-capable Vite-based React meta-framework) |
+| Framework | **TanStack Start** (SSR, Vite-based React meta-framework) |
 | Language | TypeScript 5.8 |
 | Bundler | Vite 8 |
-| Router | `@tanstack/react-router` (file-based, type-safe, `createFileRoute`) |
-| Server | `@tanstack/react-start` + Nitro |
-| Data fetching | `@tanstack/react-query` (QueryClient passed via router context) |
+| Router | `@tanstack/react-router` (file-based, type-safe) |
+| Server | `@tanstack/react-start` + Nitro (preset: `vercel` at build time) |
 | Auth + DB | **Supabase** (`@supabase/supabase-js` v2) |
-| CSS | TailwindCSS v4 (`@tailwindcss/vite`) + CSS variables (OKLCH colour palette) |
-| UI Components | **shadcn/ui** pattern — Radix-UI primitives wrapped in `src/components/ui/` |
-| Charts | **Recharts** (BarChart, LineChart) |
-| Icons | **lucide-react** (used everywhere; icon names are strings resolved at runtime via `import * as Icons`) |
-| Form | react-hook-form + zod |
-| Date picker | react-day-picker v9 |
-| Toast | sonner |
-| State | Custom `useSyncExternalStore` module-level singleton (`src/lib/habits-store.ts`) — **NO Redux, NO Zustand, NO server sync yet** |
-| Persistence | **localStorage only** — Supabase tables exist in migrations but are NOT read/written by any component |
-| Package manager | Bun (also has package-lock.json for npm compat) |
+| CSS | TailwindCSS v4 (`@tailwindcss/vite`) + CSS variables (OKLCH palette) |
+| UI Primitives | **shadcn/ui** — Radix-UI components in `src/components/ui/` |
+| Charts | **Recharts** |
+| Icons | **lucide-react** |
+| State | Custom `useSyncExternalStore` singleton (`src/lib/habits-store.ts`) — NO Redux, NO Zustand |
+| Persistence | **localStorage only** — Supabase tables exist but data sync not yet wired (future work) |
+| Config | `@lovable.dev/vite-tanstack-config` wraps vite.config.ts (defaults to Cloudflare Workers; override with `NITRO_PRESET=vercel`) |
 
 ---
 
 ## 2. Full File Tree
 
 ```
-bright-habit-view/
-├── .env                          # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
-├── .gitignore
-├── .prettierrc / .prettierignore
-├── AGENTS.md                     # Coding conventions for AI agents
-├── bun.lock
-├── bunfig.toml
-├── components.json               # shadcn/ui config (baseColor, style, etc.)
-├── eslint.config.js
-├── package.json
-├── package-lock.json
+bright-habit-view/            (GitHub: vijitagarwal/habithabitat)
+├── .env                      # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_SUPABASE_PUBLISHABLE_KEY
+├── vercel.json               # { buildCommand, installCommand, framework: null }
+├── vite.config.ts            # @lovable.dev/vite-tanstack-config; server entry: "server"
 ├── tsconfig.json
-├── vite.config.ts
-├── public/
-│   └── favicon.ico
+├── package.json
+├── PROJECT_SUMMARY(habit_dashboard).md   ← THIS FILE
+├── AGENTS.md                 # AI coding conventions
 ├── supabase/
-│   ├── config.toml
 │   └── migrations/
-│       ├── 20260720032741_….sql  # Main schema: items, completions, daily_metrics, journal_entries, user_settings
-│       └── 20260720032800_….sql  # (minor follow-up, ~177 bytes)
+│       ├── 20260722_unified_habit_tables.sql   # items, completions, daily_metrics, journal_entries, user_settings
+│       ├── 20260723_profiles_extended.sql       # profiles table with display_name, bio, target_college, etc.
+│       └── (earlier migrations)
 └── src/
-    ├── start.ts                  # TanStack Start entry point
-    ├── server.ts                 # Nitro/server entry; createRouter, createStartHandler
-    ├── router.tsx                # createRouter() — wraps QueryClient, attaches routeTree
-    ├── routeTree.gen.ts          # Auto-generated by TanStack Router Vite plugin
-    ├── styles.css                # Global CSS: Tailwind @import, CSS variable tokens (light/dark)
-    ├── hooks/
-    │   └── use-mobile.tsx        # useIsMobile() — 768px breakpoint via matchMedia
+    ├── start.ts              # TanStack Start entry
+    ├── server.ts             # Nitro/SSR entry
+    ├── router.tsx            # createRouter() — QueryClient + routeTree
+    ├── routeTree.gen.ts      # Auto-generated
+    ├── styles.css            # Global CSS: Tailwind @import + OKLCH token vars
     ├── lib/
-    │   ├── habits-store.ts       # THE core stNate module (521 lines) — all types, store, actions, aggregates
-    │   ├── scope.ts              # ScopeCtx React context; filterHabitsByScope()
-    │   ├── utils.ts              # cn() helper (clsx + tailwind-merge)
-    │   ├── error-capture.ts      # Error capture utility
-    │   ├── error-page.ts         # Error page rendering utility
-    │   └── lovable-error-reporting.ts  # reportLovableError() used in root error boundary
-    ├── integrations/
-    │   ├── lovable/              # @lovable.dev/cloud-auth-js wrapper (Google OAuth)
-    │   └── supabase/
-    │       ├── client.ts         # createClient (singleton proxy, lazy init)
-    │       ├── client.server.ts  # Server-side Supabase client
-    │       ├── types.ts          # Auto-generated DB types (Database, Tables<>, etc.)
-    │       ├── auth-middleware.ts # requireSupabaseAuth TanStack middleware (server functions)
-    │       └── auth-attacher.ts  # Auth header attacher
+    │   ├── habits-store.ts   # Core state module (530+ lines) — all types, store, actions, aggregates
+    │   ├── scope.ts          # ScopeCtx + filterHabitsByScope()
+    │   ├── utils.ts          # cn() helper
+    │   └── (other utils)
+    ├── integrations/supabase/
+    │   ├── client.ts         # createClient singleton
+    │   └── types.ts          # Auto-generated DB types (profiles table not yet typed here — use `(supabase as any)`)
     ├── routes/
-    │   ├── __root.tsx            # Root route: QueryClientProvider, head/meta, error/404 boundaries
-    │   ├── index.tsx             # "/" — redirects to /dashboard (authed) or /auth
-    │   ├── auth.tsx              # "/auth" — sign-in/sign-up/Google OAuth page
+    │   ├── __root.tsx        # Root: QueryClientProvider, head/meta, error boundary
+    │   ├── index.tsx         # "/" — redirects to /dashboard or /auth
+    │   ├── auth.tsx          # "/auth" — magic link sign-in page
     │   └── _authenticated/
-    │       ├── route.tsx         # Layout route guard: calls supabase.auth.getUser(), redirects to /auth if not authed
-    │       └── dashboard.tsx     # "/dashboard" — main app shell (204 lines)
+    │       ├── route.tsx     # Layout guard: getUser() or redirect /auth
+    │       └── dashboard.tsx # "/dashboard" — main app shell with scope toggle
     └── components/
-        ├── ui/                   # 46 shadcn/ui components (see Section 4)
-        └── dashboard/            # 20 app-specific components (see Section 5)
+        ├── ui/               # 46 shadcn/ui components
+        ├── dashboard/        # Habit dashboard components (see Section 5)
+        └── cat-dashboard/    # CAT Prep dashboard (see Section 6)
 ```
 
 ---
 
 ## 3. Routing Architecture
 
-### Route Tree
-
 ```
-/ (root — __root.tsx)
-  /                       → redirects: session? /dashboard : /auth
-  /auth                   → AuthPage (sign in / sign up / Google)
-  /_authenticated         → Layout guard (checks supabase.auth.getUser())
-    /dashboard            → DashboardPage (main shell, ?scope=habit|cat)
+/ (root)
+  /                     → redirect: session? /dashboard : /auth
+  /auth                 → Magic link sign-in (Google OAuth via lovable SDK also present)
+  /_authenticated       → Layout guard (supabase.auth.getUser())
+    /dashboard          → DashboardPage (?scope=habit|cat)
 ```
 
-### Route Details
-
-| Route file | Route path | Guard | Component |
-|---|---|---|---|
-| `routes/__root.tsx` | — | none | `RootComponent` (QueryClientProvider + Outlet) |
-| `routes/index.tsx` | `/` | `beforeLoad` redirects | `null` |
-| `routes/auth.tsx` | `/auth` | `beforeLoad`: if session → redirect `/dashboard` | `AuthPage` |
-| `routes/_authenticated/route.tsx` | `/_authenticated` | `beforeLoad`: `getUser()` or redirect `/auth` | `<Outlet />` |
-| `routes/_authenticated/dashboard.tsx` | `/_authenticated/dashboard` | inherits guard | `DashboardPage` |
-
-**Search params on `/dashboard`**: `scope: "habit" | "cat"` (validated with zod). Drives the Habit vs CAT Prep scope toggle.
+**Search param**: `scope: "habit" | "cat"` (zod-validated). Controls which dashboard shell renders.
 
 ---
 
-## 4. shadcn/ui Components in `src/components/ui/`
+## 4. Dual Dashboard Architecture
 
-All 46 are standard shadcn/ui wrappers over Radix-UI. Only a subset is actually used by dashboard components:
+The app has **two separate dashboard shells** toggled by `?scope=`:
 
-**Used in dashboard**: `button`, `badge`, `card`, `calendar`, `chart`, `checkbox`, `dialog`, `dropdown-menu`, `input`, `label`, `popover`, `progress`, `scroll-area`, `select`, `separator`, `sheet`, `skeleton`, `switch`, `table`, `tabs`, `textarea`, `toggle`, `tooltip`, `sonner`
+### 4a. Habit Dashboard (`scope=habit`)
+- Renders: Sidebar + Header + view content via `renderView(activeKey)`
+- Side bar is collapsible with icon-only mode
+- Views: Dashboard Home, Daily Tracker, Calendar, Analytics, Heatmap, Goals, Achievements, Journal, Mood/Sleep/Water/Weight trackers, Habit Manager (Settings)
+- **Habit data**: localStorage via `habits-store.ts`
 
-**Present but likely unused** (installed as library baseline): `accordion`, `alert`, `alert-dialog`, `aspect-ratio`, `avatar`, `breadcrumb`, `carousel`, `collapsible`, `command`, `context-menu`, `drawer`, `form`, `hover-card`, `input-otp`, `menubar`, `navigation-menu`, `pagination`, `radio-group`, `resizable`, `sidebar`, `slider`, `toggle-group`
+### 4b. CAT Dashboard (`scope=cat`)
+- Renders: `CatDashboardShell` — a completely separate layout with its own sidebar and sections
+- CAT sidebar has icon-only collapsed mode (same style as habit sidebar)
+- Sections (navigated by `#anchor` scroll or sidebar click):
+  - **Overview** — countdown timer, campaign progress, metrics cards, + **Today's CAT Prep habits widget**
+  - **Topic Tracker** — per-topic study progress with Supabase DB backend
+  - **Weekly Board** — kanban-style task board (useKV persisted)
+  - **Error Log** — mistake log with Supabase DB backend
+  - **Checklist** — categorized checklist, fully editable (useKV)
+  - **Breathwork** — guided breathing timer
+  - **Meditation** — guided meditation timer
+  - **Tech Ladder** — chronological tech commitments, fully editable (useKV)
+  - **Standing Orders** — static principles display
+- Imports `cat-styles.css` which is **scoped** inside `CatDashboardShell` to avoid leaking to the habit dashboard
+- CAT data: mix of `useKV` (localStorage via bridge) and Supabase direct queries
 
 ---
 
-## 5. Dashboard Components (`src/components/dashboard/`)
+## 5. Habit Dashboard Components (`src/components/dashboard/`)
 
-### 5a. View-level Components (rendered by `renderView()` in `dashboard.tsx`)
+### View Components (rendered by `renderView()`)
 
-| Component | File | View key | What it renders |
-|---|---|---|---|
-| `DashboardHome` (inline) | `dashboard.tsx` | `dashboard` | Composes StatCards + WeeklyProgress + CategoryBreakdown + TodaysHabits + Heatmap + TopHabits + QuickStats + Insights + Achievements |
-| `DailyTracker` | `DailyTracker.tsx` | `daily` | Date-nav header + progress bar + list of `HabitRowConnected` for selected date |
-| `CalendarView` | `CalendarView.tsx` | `calendar` | Month grid (colour-coded cells) + `DailyTracker` for selected day |
-| `AnalyticsView` (inline) | `dashboard.tsx` | `analytics` | StatCards + WeeklyProgress + CategoryBreakdown + TopHabits + QuickStats + Insights |
-| `Heatmap` | `Heatmap.tsx` | `heatmap` | Month/year navigator + 7-row habit heatmap grid |
-| `GoalsView` | `GoalsView.tsx` | `goals` | Monthly goal slider + per-habit 30-day bar charts |
-| `Achievements` | `Achievements.tsx` | `achievements` | Static grid of 4 badge items (hardcoded, not data-driven) |
-| `JournalView` | `JournalView.tsx` | `journal` | Textarea for daily notes + recent entries sidebar |
-| `MetricTracker` (mood) | `MetricTracker.tsx` | `mood` | Input + 30-day LineChart for `mood` key |
-| `MetricTracker` (sleep) | `MetricTracker.tsx` | `sleep` | Input + 30-day LineChart for `sleep` key |
-| `MetricTracker` (water) | `MetricTracker.tsx` | `water` | Input + 30-day LineChart for `water` key |
-| `MetricTracker` (weight) | `MetricTracker.tsx` | `weight` | Input + 30-day LineChart for `weight` key |
-| `HabitManager` | `HabitManager.tsx` | `settings` | CRUD list of habits + DraftForm + Reset Data section |
-
-### 5b. Widget Components (used inside DashboardHome / Analytics)
-
-| Component | File | Data source | Purpose |
-|---|---|---|---|
-| `StatCards` | `StatCards.tsx` | `overallProgress`, `currentStreak`, `longestStreak`, `completionsForDate` | 5 KPI cards (overall %, streak, longest streak, today's done/total, monthly goal %) |
-| `WeeklyProgress` | `WeeklyProgress.tsx` | `weeklyProgress()` | Recharts BarChart — Mon–Sun completion % for current week |
-| `CategoryBreakdown` | `CategoryBreakdown.tsx` | `categoryBreakdown()` | Category-level 30-day % as horizontal bars |
-| `TodaysHabits` | `TodaysHabits.tsx` | `habitsFor`, `useHabits` | Compact list of today's habits using `HabitRowConnected` |
-| `Heatmap` | `Heatmap.tsx` | `monthlyHeatmap()` | 7×N grid; colour levels 0–4 (grey/dim/orange/yellow/green) |
-| `TopHabits` | `TopHabits.tsx` | `topHabits()` | Top 5 habits by 30-day %, sorted descending |
-| `QuickStats` | `QuickStats.tsx` | `totalCompleted`, `perfectDays`, `currentStreak` | 3 stat tiles (total completions, perfect days, current streak) |
-| `Insights` | `Insights.tsx` | (likely static or lightweight) | Motivational/AI-style insight text panel |
-| `Achievements` | `Achievements.tsx` | hardcoded | 4 static achievement badges (not data-driven) |
-
-### 5c. Utility/Sub-Components
-
-| Component | File | Purpose |
+| Key | Component | Description |
 |---|---|---|
-| `Sidebar` / `SidebarBody` | `Sidebar.tsx` | Left nav with `NAV` array, collapsible, mobile overlay, Level/XP widget |
-| `Header` | `Header.tsx` | Page title, date button, dark/light toggle (localStorage `theme`), user avatar |
-| `HabitRow` | `HabitRow.tsx` | Single habit row for tracker views; handles boolean toggle OR numeric value input |
-| `HabitRowConnected` | `HabitRow.tsx` | Wrapper that reads from store and passes props to `HabitRow` |
-| `HabitManager` | `HabitManager.tsx` | Full CRUD UI for habits; contains `DraftForm`, `BenchmarkEditor`, `IconPreview` |
-| `ScheduleEditor` | `ScheduleEditor.tsx` | Schedule type picker + conditional day/date selectors |
-| `DatePicker` | `DatePicker.tsx` | Popover wrapping `react-day-picker` Calendar, returns ISO string |
-| `MetricTracker` | `MetricTracker.tsx` | Generic metric log+chart; 4 named configs exported |
+| `dashboard` | inline in `dashboard.tsx` | Home: StatCards + WeeklyProgress + CategoryBreakdown + TodaysHabits + Heatmap + TopHabits |
+| `daily` | `DailyTracker` | Date nav + habit list for selected date |
+| `calendar` | `CalendarView` | Month grid + DailyTracker for selected day |
+| `analytics` | inline | StatCards + charts |
+| `heatmap` | `Heatmap` | Monthly heatmap grid |
+| `goals` | `GoalsView` | Monthly goal slider + per-habit bar charts |
+| `achievements` | `Achievements` | Static badge grid |
+| `journal` | `JournalView` | Daily notes textarea |
+| `mood/sleep/water/weight` | `MetricTracker` | Input + LineChart |
+| `settings` | `HabitManager` | Full habit CRUD + reset |
+
+### Key Supporting Components
+
+| Component | Purpose |
+|---|---|
+| `Sidebar.tsx` | Collapsible left nav (icon-only when collapsed), Level/XP widget at bottom |
+| `Header.tsx` | Page title + dark/light toggle + **ProfileModal** trigger |
+| `ProfileModal.tsx` | Avatar dropdown + view/edit user profile + sign-out button |
+| `HabitRow.tsx` + `HabitRowConnected` | Single habit row; boolean toggle OR numeric benchmark input |
+| `HabitManager.tsx` | CRUD for habits; DraftForm with all fields |
+| `ScheduleEditor.tsx` | Schedule type picker + conditional day/date selectors |
 
 ---
 
-## 6. Core State: `src/lib/habits-store.ts`
+## 6. CAT Dashboard: `src/components/cat-dashboard/`
 
-### 6a. TypeScript Interfaces
+### Bridge Pattern
+`bridge.ts` re-exports Supabase client, auth hook, toast hook, and a `useKV` hook:
+- `useKV<T>(key, default)` → `{ value: T, setValue: (v: T) => Promise<void>, loading: boolean }` — localStorage-backed with SSR safety
+
+### Key Data Files
+- `data/static.ts` — static seed data: TECH_LADDER (now overridden by useKV), CHECKLIST (now overridden by checklist_v2 KV key), STANDING_ORDERS, BREATH_PATTERNS
+- `data/dates.ts` — DATE_CFG: campaign dates (CAMPAIGN_START, EXAM_DATE, phase dates)
+- `engine/schedule.ts` — getCampaignProgress, getStatus, pad2
+
+### CAT Sections (files in `sections/`)
+
+| Section | File | Data source | Notes |
+|---|---|---|---|
+| Overview | `Overview.tsx` | useKV + Supabase + habits-store | Campaign countdown, metrics, **CAT Prep habits strip** (shows today's CAT Prep habits from habits-store, toggleable) |
+| Topic Tracker | `TopicTracker.tsx` | Supabase `topic_tracker` table | Auto-seeds DEFAULT_TOPICS on first load |
+| Weekly Board | `WeeklyBoard.tsx` | useKV `weekly_board` | Kanban board |
+| Error Log | `ErrorLog.tsx` | Supabase `error_log` table | Mistake logger |
+| Checklist | `Checklist.tsx` | useKV `checklist_v2` | **Fully rewritten**: categorized items, add/edit/delete all items, add custom categories |
+| Breathwork | `Breathwork.tsx` | useKV `breath_log` | Guided breathing with pattern selector |
+| Meditation | `Meditation.tsx` | useKV `meditate_log` | Guided meditation timer |
+| Tech Ladder | `TechLadder.tsx` | useKV `tech_ladder` | **Fully rewritten**: chronological, fully editable (add/edit/delete), sorted by startDate |
+| Standing Orders | `StandingOrders.tsx` | static | Principles display |
+
+---
+
+## 7. Core State: `src/lib/habits-store.ts`
+
+### Key Types
 
 ```ts
 type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
 type HabitDirection = "build" | "break";
-type ScheduleType = "daily" | "weekdays" | "weekly" | "monthly" | "oneoff";
-
-interface Schedule {
-  type: ScheduleType;
-  weekdays?: number[];   // 0=Sun..6=Sat
-  monthDay?: number | "last";
-  date?: string;         // ISO, for "oneoff"
-}
 
 interface Habit {
   id: string;
   name: string;
-  icon: string;          // lucide-react icon name string
+  icon: string;          // lucide-react icon name
   category: HabitCategory;
-  color: string;         // CSS token name: "brand" | "brand-2" | "success" | "warning" | "danger" | "info"
-  createdAt: string;     // ISO date
+  color: string;         // CSS token: "brand"|"brand-2"|"success"|"warning"|"danger"|"info"
+  createdAt: string;     // ISO date — CRITICAL: habits never appear on dates before createdAt
   direction?: HabitDirection;
-  unit?: string;         // "L", "g", "hrs", "pages", etc.
-  benchmarks?: number[]; // sorted ascending; empty = boolean check-off habit
+  unit?: string;
+  benchmarks?: number[]; // sorted ascending; empty = boolean habit
   schedule?: Schedule;
-}
-
-interface DailyMetrics {
-  mood?: number;         // 1–5
-  sleep?: number;        // hours
-  water?: number;        // glasses
-  weight?: number;       // kg
 }
 
 interface HabitState {
   habits: Habit[];
-  completions: Record<string, Record<string, boolean>>;  // { [ISO date]: { [habitId]: boolean } }
-  values: Record<string, Record<string, number>>;        // { [ISO date]: { [habitId]: number } } — benchmarked habits
-  notes: Record<string, string>;                         // { [ISO date]: journalText }
-  metrics: Record<string, DailyMetrics>;                 // { [ISO date]: DailyMetrics }
-  monthlyGoal: number;   // 0–100
+  completions: Record<string, Record<string, boolean>>;
+  values: Record<string, Record<string, number>>;
+  notes: Record<string, string>;
+  metrics: Record<string, DailyMetrics>;
+  monthlyGoal: number;
   level: number;
   xp: number;
 }
 ```
 
-### 6b. Constants
-
-```ts
-CATEGORIES = ["Health", "Mind", "Productivity", "Learning", "Lifestyle", "CAT Prep"]
-ICON_CHOICES = ["Sparkles", "Dumbbell", "BookOpen", "NotebookPen", "Code2", "Droplets", "Ban",
-                "Moon", "GraduationCap", "Footprints", "Heart", "Apple", "Bike", "Music",
-                "Palette", "Sun", "Coffee", "Leaf", "Brain", "Star", "Target", "CheckCircle2",
-                "Calculator", "PenTool", "Timer", "Trophy", "Flame"]
-COLOR_CHOICES = ["brand", "brand-2", "success", "warning", "danger", "info"]
+### localStorage Key Scheme
+```
+"habit-tracker-v2"         → unauthenticated/demo user
+"habit-tracker-v2::<uuid>" → signed-in user (bound by setStoreUser(uid))
 ```
 
-### 6c. localStorage Key Scheme
-
+### Critical Fix: `isScheduledOn` createdAt guard
 ```ts
-BASE_KEY = "habit-tracker-v2"
-// Unauthenticated: localStorage key = "habit-tracker-v2"
-// Authenticated:   localStorage key = "habit-tracker-v2::<supabase-user-uuid>"
+// IMPORTANT: habits never show on dates before they were created
+if (h.createdAt && iso < h.createdAt) return false;
 ```
+This prevents break/limit habits (e.g. Sugar) from retroactively showing as "completed" for historical days before the habit was added.
 
-When a user signs in, `setStoreUser(uid)` switches the key and reloads state from that bucket. New users with no existing key get `emptyState()` (blank); unauthenticated gets `defaultState()` (seed demo data).
-
-### 6d. All Exported Store Actions
-
-| Function | Signature | What it does |
-|---|---|---|
-| `setStoreUser` | `(uid: string \| null) => void` | Binds store to user's localStorage bucket |
-| `useHabits` | `() => HabitState` | React hook; subscribes via `useSyncExternalStore` |
-| `toggleHabit` | `(dateISO, habitId) => void` | Flips boolean completion; adds +10 XP if marking done; no-op for benchmarked habits |
-| `setHabitValue` | `(dateISO, habitId, value: number) => void` | Sets numeric value for benchmarked habit; 0 or NaN deletes the entry |
-| `addHabit` | `(input: Omit<Habit, "id" \| "createdAt">) => void` | Generates slug+random ID, defaults schedule to daily |
-| `updateHabit` | `(id, patch) => void` | Partial update of habit fields |
-| `deleteHabit` | `(id) => void` | Removes habit + all its completions + values |
-| `setNote` | `(dateISO, text) => void` | Saves/deletes journal entry for date |
-| `setMetric` | `<K extends keyof DailyMetrics>(dateISO, key, value) => void` | Saves/clears a single daily metric |
-| `setMonthlyGoal` | `(pct: number) => void` | Clamps to 0–100, persists |
-| `resetAll` | `(mode: "seed" \| "empty") => void` | Wipes entire state; "seed" restores 10 demo habits with 60 days of synthetic history |
-| `clearHistory` | `() => void` | Clears completions, values, notes, metrics, xp; keeps habit definitions |
-
-### 6e. All Exported Aggregate Functions (pure, no side effects)
-
-| Function | Returns | Description |
-|---|---|---|
-| `isScheduledOn(h, iso)` | `boolean` | Whether habit is active on given date per its Schedule |
-| `scheduleLabel(h)` | `string` | Human-readable schedule string (e.g. "Every Mon", "Daily") |
-| `habitsFor(s, iso)` | `Habit[]` | Filters habits to only those scheduled on `iso` |
-| `habitTarget(h)` | `number` | Max benchmark value; 0 for boolean habits |
-| `habitPct(s, h, iso)` | `number` (0–100) | % completion for date. Boolean: 0 or 100. Build: value/target×100. Break: 100−(value/target×100) |
-| `habitValue(s, h, iso)` | `number` | Raw numeric value for date (0 if missing) |
-| `completionsForDate(s, dateISO)` | `{ done, total, pct }` | Day-level aggregated stats across all scheduled habits |
-| `currentStreak(s)` | `number` | Consecutive days with ≥60% completion going backwards from today |
-| `longestStreak(s)` | `{ days, from, to }` | Over last 200 days |
-| `weeklyProgress(s)` | `Array<{ day, pct, date }>` | Mon–Sun completion % for current week |
-| `categoryBreakdown(s)` | `Array<{ cat, pct, color }>` | Per-category 30-day average completion % |
-| `overallProgress(s)` | `number` | 30-day average across all habits (scheduling-aware) |
-| `topHabits(s)` | top 5 `{ habit, pct }` | Sorted by 30-day % desc |
-| `monthlyHeatmap(s, year?, month?)` | `{ cells, daysInMonth, year, month }` | 7 rows × N days; `level` 0–4 (−1 = future/empty) |
-| `totalCompleted(s)` | `number` | Total check-offs + benchmarked days at 100% |
-| `perfectDays(s)` | `number` | Days where all scheduled habits hit 100% |
-| `todayISO()` | `string` | Today as `YYYY-MM-DD` |
-| `daysAgoISO(n)` | `string` | N days ago as `YYYY-MM-DD` |
+### Key Exports
+- `useHabits()` — React hook (useSyncExternalStore)
+- `setStoreUser(uid | null)` — bind store to user's localStorage bucket
+- `toggleHabit(dateISO, habitId)` — boolean habits only; +10 XP when done
+- `setHabitValue(dateISO, habitId, value)` — numeric habits
+- `addHabit(input)` — sets `createdAt: todayISO()`
+- `isScheduledOn(h, iso)` — schedule + createdAt check
+- `habitsFor(s, iso)` — scheduled habits for a date (respects createdAt)
+- `filterHabitsByScope(habits, scope)` — scope="cat" returns only category==="CAT Prep"
+- `completionsForDate(s, dateISO)` → `{ done, total, pct }`
 
 ---
 
-## 7. Scope System (Habit vs CAT Prep Toggle)
+## 8. Scope System
 
-### URL param
-`/dashboard?scope=habit` (default) or `/dashboard?scope=cat`
-
-### How it flows
-1. **`DashboardPage`** reads `scope` from `Route.useSearch()`.
-2. It wraps all views in `<ScopeProvider scope={scope}>` which is just `<ScopeCtx.Provider value={scope}>`.
-3. Components call `useScope()` to get `"habit" | "cat"`.
-4. They pass the scope to `filterHabitsByScope(habits, scope)`:
-   - `"habit"` → returns all habits unchanged.
-   - `"cat"` → filters to `category === "CAT Prep"` only.
-
-### Where filtering is applied
-- `DailyTracker` — `filterHabitsByScope(habitsFor(s, date), scope)`
-- `HabitManager` — `filterHabitsByScope(s.habits, scope)` (also defaults new habit to "CAT Prep" category in cat scope)
-- Any component that lists habits should call `filterHabitsByScope`
-
-### Toggle UI (in `DashboardPage`)
-Two buttons at top of main content area:
-- **"Habits"** → `nav({ to: "/dashboard", search: { scope: "habit" } })`
-- **"CAT Prep"** → `nav({ to: "/dashboard", search: { scope: "cat" } })`
-Active button gets `bg-primary text-primary-foreground shadow`; inactive is muted. Icons: `LayoutGrid` and `GraduationCap`.
-
----
-
-## 8. Habit Toggle & Completion Logic (Detailed)
-
-### Boolean habits (no benchmarks)
-- `HabitRow` renders a clickable row with `Circle` or `CheckCircle2` icon.
-- Click calls `toggleHabit(dateISO, habitId)`.
-- `toggleHabit` flips `state.completions[dateISO][habitId]`.
-- If flipping to `true`, adds `+10` XP.
-- `habitPct()` returns 0 or 100.
-
-### Benchmarked habits (has `benchmarks` array + `unit`)
-- `HabitRow` renders benchmark pills + a freeform number input + reset button.
-- Clicking a pill calls `setHabitValue(dateISO, habitId, benchmarkValue)`.
-- The input on blur calls `setHabitValue(dateISO, habitId, parsedFloat)`.
-- `setHabitValue` stores the value in `state.values[dateISO][habitId]`.
-- Value of 0 or NaN deletes the entry.
-- `habitPct()` computes:
-  - **build**: `(value / maxBenchmark) * 100`, clamped 0–100
-  - **break**: `100 − (value / maxBenchmark) * 100`, clamped 0–100
-
-### Completion threshold
-Throughout aggregation functions, **≥ 60% = counts as "done"** for streak calculations. Individual habit display uses 100% as "complete".
-
----
-
-## 9. Category Tagging (How Categories Work)
-
-Categories are purely a property of the `Habit` object — a string enum:
 ```ts
-type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
-```
+// src/lib/scope.ts
+export type Scope = "habit" | "cat";
+export const ScopeCtx = createContext<Scope>("habit");
+export function useScope() { return useContext(ScopeCtx); }
 
-- **Set** in `DraftForm` via a `<select>` rendered from the `CATEGORIES` constant.
-- **Stored** as `habit.category` in localStorage.
-- **Filtered** by `filterHabitsByScope` when scope is `"cat"`.
-- **Aggregated** by `categoryBreakdown()` which groups habits by category and computes 30-day average per group.
-- **Displayed** as a pill badge in `HabitRow` and `HabitManager` list items.
-- In CAT scope, `HabitManager` auto-sets new habit draft's category to `"CAT Prep"`.
-
----
-
-## 10. Auth Architecture
-
-### Sign-up / Sign-in (Email+Password)
-- `auth.tsx` has two modes: `"signin"` | `"signup"`.
-- Sign-up: `supabase.auth.signUp({ email, password, options: { emailRedirectTo: origin + "/dashboard" } })`.
-- Sign-in: `supabase.auth.signInWithPassword({ email, password })`.
-- On auth state change (`onAuthStateChange`), navigates to `/dashboard`.
-
-### Google OAuth
-- Calls `lovable.auth.signInWithOAuth("google", { redirect_uri: origin })` from `@lovable.dev/cloud-auth-js`.
-- This is a Lovable platform SDK wrapper, not bare Supabase OAuth.
-
-### Route Guards
-1. **`/` (index)**: `beforeLoad` checks `supabase.auth.getSession()`. If session → redirect `/dashboard`. Else → redirect `/auth`.
-2. **`/auth`**: `beforeLoad` checks `supabase.auth.getSession()`. If session → redirect `/dashboard`.
-3. **`/_authenticated` (layout guard)**: `beforeLoad` calls `supabase.auth.getUser()`. If error or no user → redirect `/auth`. Returns `{ user }` into route context.
-4. All three guards have `ssr: false` to prevent server-side auth checks.
-
-### Session Persistence
-- Supabase client is configured with `storage: localStorage, persistSession: true, autoRefreshToken: true`.
-- Token is stored in Supabase's default localStorage key (under `sb-{project-ref}-auth-token`).
-
-### Dashboard integration
-In `DashboardPage`:
-```ts
-useEffect(() => {
-  supabase.auth.getUser().then(({ data }) => {
-    setStoreUser(data.user?.id ?? null);
-  });
-  const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-    setStoreUser(session?.user?.id ?? null);
-  });
-  return () => sub.subscription.unsubscribe();
-}, []);
-```
-This binds the habits store to the user's ID, switching the localStorage bucket.
-
-### Sign-out
-```ts
-async function signOut() {
-  await supabase.auth.signOut();
-  setStoreUser(null);
-  nav({ to: "/auth", replace: true });
+export function filterHabitsByScope<T extends Habit>(habits: T[], scope: Scope): T[] {
+  if (scope === "cat") return habits.filter((h) => h.category === "CAT Prep");
+  return habits;  // "habit" scope shows all habits
 }
 ```
 
-### Server-side auth (middleware)
-`src/integrations/supabase/auth-middleware.ts` exports `requireSupabaseAuth` — a TanStack Start server middleware that:
-1. Reads `Authorization: Bearer <jwt>` from request header.
-2. Calls `supabase.auth.getClaims(token)`.
-3. If valid, passes `{ supabase, userId, claims }` into server function context.
-This is infrastructure-ready but no server functions currently use it in this codebase.
+**CAT Prep habits are visible in BOTH dashboards:**
+- In Habit dashboard (scope=habit): all habits shown including CAT Prep
+- In CAT dashboard (scope=cat): only CAT Prep habits in the habit tracker
+- In CAT Overview: "Today's CAT Prep" widget shows CAT Prep habits with toggle
 
 ---
 
-## 11. Supabase Database Schema (Migrations)
+## 9. Auth System
 
-> **Important**: These tables exist in Supabase and have RLS, but the app currently reads/writes **localStorage only**. No component calls Supabase DB queries. The tables are future infrastructure.
+### Working: Magic Link (Email OTP)
+```
+User enters email → supabase.auth.signInWithOtp({ email }) → Magic link sent to inbox
+→ User clicks link → Redirected to habithabitat.vercel.app → Logged in
+```
 
-### Table: `public.items`
-| Column | Type | Notes |
+### Not Working: Email+Password signup (disabled — future work)
+
+### Route Guards
+1. `/` → checks session → redirect to `/dashboard` or `/auth`
+2. `/auth` → if session → redirect `/dashboard`
+3. `/_authenticated` → `getUser()` or redirect `/auth`; all have `ssr: false`
+
+### Profile System
+- Table: `public.profiles` (created by `20260723_profiles_extended.sql`)
+- Columns: `id` (uuid FK auth.users), `display_name`, `bio`, `target_college`, `target_percentile`, `city`, `phone`, `avatar_url`, `created_at`, `updated_at`
+- Auto-created on signup via DB trigger
+- UI: `ProfileModal.tsx` — avatar dropdown in both dashboards' headers; view/edit mode; sign-out button
+
+---
+
+## 10. Supabase Database Tables
+
+All migrations are in `supabase/migrations/`. Run in Supabase SQL Editor for project `umjrxaczrmcstwajtumh`.
+
+| Table | Migration file | Purpose |
 |---|---|---|
-| `id` | `uuid` PK | `gen_random_uuid()` |
-| `user_id` | `uuid` FK → `auth.users.id` | ON DELETE CASCADE |
-| `name` | `text NOT NULL` | |
-| `category` | `text` DEFAULT `'general'` | |
-| `kind` | `text` DEFAULT `'habit'` | CHECK: `habit`, `task`, `study` |
-| `direction` | `text` DEFAULT `'build'` | CHECK: `build`, `break` |
-| `unit` | `text` nullable | |
-| `benchmarks` | `numeric[]` DEFAULT `'{}'` | |
-| `schedule` | `jsonb` DEFAULT `'{"type":"daily"}'` | Same shape as `Schedule` TS interface |
-| `priority` | `int` DEFAULT `0` | |
-| `icon` | `text` nullable | |
-| `color` | `text` nullable | |
-| `one_off_date` | `date` nullable | |
-| `archived` | `boolean` DEFAULT `false` | |
-| `created_at` | `timestamptz` | |
-| `updated_at` | `timestamptz` | auto-updated via trigger |
+| `items` | `20260722_unified_habit_tables.sql` | Habit definitions (future server sync) |
+| `completions` | same | Habit completions (future server sync) |
+| `daily_metrics` | same | Mood/sleep/water/weight (future server sync) |
+| `journal_entries` | same | Journal notes (future server sync) |
+| `user_settings` | same | monthly_goal, xp per user |
+| `topic_tracker` | CAT-specific | CAT study topics with progress |
+| `error_log` | CAT-specific | CAT mistake/error log entries |
+| `profiles` | `20260723_profiles_extended.sql` | User profile info |
 
-RLS: full CRUD for `authenticated` role, own rows only (`auth.uid() = user_id`).
-Index: `(user_id, category) WHERE archived = false`.
+> **Current state**: Only `topic_tracker`, `error_log`, and `profiles` are actively read/written by components. All other tables have RLS but no app code writes to them yet. Data lives in localStorage.
 
-### Table: `public.completions`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `user_id` | `uuid` FK → `auth.users.id` | |
-| `item_id` | `uuid` FK → `items.id` | ON DELETE CASCADE |
-| `date` | `date NOT NULL` | |
-| `done` | `boolean` DEFAULT `false` | |
-| `value` | `numeric` nullable | for benchmarked habits |
-| `note` | `text` nullable | |
-| `created_at` | `timestamptz` | |
-| `updated_at` | `timestamptz` | |
-| UNIQUE | `(user_id, item_id, date)` | |
+### Supabase Types Caveat
+`src/integrations/supabase/types.ts` is auto-generated and does NOT include the `profiles` table yet. Use `(supabase as any).from('profiles')` as a workaround until types are regenerated.
 
-RLS: own rows only.
-Indexes: `(user_id, date)`, `(item_id, date)`.
+---
 
-### Table: `public.daily_metrics`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `user_id` | `uuid` FK | |
-| `date` | `date NOT NULL` | |
-| `mood` | `numeric` nullable | 1–5 |
-| `sleep` | `numeric` nullable | hours |
-| `water` | `numeric` nullable | glasses |
-| `weight` | `numeric` nullable | kg |
-| `created_at` | `timestamptz` | |
-| `updated_at` | `timestamptz` | |
-| UNIQUE | `(user_id, date)` | |
+## 11. Deployment
 
-RLS: full access to own rows.
+### Vercel
+- Project: `habithabitat` in `vijitagarwal123-4578's...` Hobby team
+- Build command: `npm run build`
+- Environment variables set in Vercel:
+  - `NITRO_PRESET=vercel` ← **critical**, tells Nitro to output `.vercel/output` instead of Cloudflare Workers
+  - `VITE_SUPABASE_URL`
+  - `VITE_SUPABASE_ANON_KEY`
+  - `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-### Table: `public.journal_entries`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `user_id` | `uuid` FK | |
-| `date` | `date NOT NULL` | |
-| `note` | `text` DEFAULT `''` | |
-| `created_at` | `timestamptz` | |
-| `updated_at` | `timestamptz` | |
-| UNIQUE | `(user_id, date)` | |
+### Supabase Auth URLs
+In Supabase → Auth → URL Configuration:
+- Site URL: `https://habithabitat.vercel.app`
+- Redirect URLs include: `https://habithabitat.vercel.app/**`
 
-RLS: full access to own rows.
-
-### Table: `public.user_settings`
-| Column | Type | Notes |
-|---|---|---|
-| `user_id` | `uuid` PK FK | |
-| `monthly_goal` | `int` DEFAULT `80` | |
-| `xp` | `int` DEFAULT `0` | |
-| `created_at` | `timestamptz` | |
-| `updated_at` | `timestamptz` | |
-
-RLS: full access to own row.
-Trigger: `on_auth_user_created` — auto-inserts row when a new Supabase user is created.
+### Local dev
+```powershell
+cd "e:\Desktop\operating system\all-in-one\bright-habit-view"
+npm run dev   # starts on http://localhost:8081
+```
 
 ---
 
 ## 12. localStorage Keys Summary
 
-| Key | Content | Set by |
+| Key | Content |
+|---|---|
+| `habit-tracker-v2` | Full HabitState (unauthenticated/demo) |
+| `habit-tracker-v2::<uuid>` | Full HabitState (per signed-in user) |
+| `theme` | `"dark"` or `"light"` |
+| `checklist_v2` | `ChecklistItem[]` — CAT checklist with categories |
+| `checklist_categories` | `string[]` — user-added custom categories |
+| `tech_ladder` | `TechItem[]` — CAT tech ladder entries |
+| `weekly_board` | Board cards for CAT weekly board |
+| `breath_log` | `{ streak, total, lastDate }` |
+| `meditate_log` | `{ streak, total, totalMinutes, lastDate }` |
+| `sb-umjrxaczrmcstwajtumh-auth-token` | Supabase JWT (managed by SDK) |
+
+All `useKV` keys are namespaced per user via the bridge.
+
+---
+
+## 13. Recent Changes (2026-07-22 to 2026-07-23)
+
+### Layout & CSS
+- Fixed independent scroll: sidebar vs main content use `h-screen overflow-hidden` with `overflow-y-auto` on content
+- Scoped `cat-styles.css` inside `CatDashboardShell` to prevent style leakage
+- CAT sidebar: collapsible with icon-only mode matching Habit sidebar
+
+### Data & State
+- Merged legacy CAT tables into unified schema (`20260722_unified_habit_tables.sql`)
+- `TopicTracker.tsx`: auto-seeds `DEFAULT_TOPICS` for new users
+- **BUGFIX** `isScheduledOn()`: added `createdAt` guard — habits now never appear on dates before they were created. Fixes break/limit habits showing as "completed" retroactively.
+
+### CAT Overview
+- Added "Today's CAT Prep Habits" widget: shows habits with `category === "CAT Prep"` from the habits-store, with toggle checkboxes and progress bar
+
+### Checklist (full rewrite)
+- KV key changed: `checklist` → `checklist_v2`
+- Items now grouped by **category** (Pre-Launch, Study, Health, Admin, Tech, Other + custom)
+- Every item is **editable** (text + category change) and **deletable**
+- Can add new **categories** (stored in `checklist_categories` KV)
+- Per-category "Add Item" buttons
+
+### Tech Ladder (full rewrite)
+- Now stored in `tech_ladder` KV (was static `TECH_LADDER` array in `data/static.ts`)
+- Full CRUD: add, edit, delete entries
+- Sorted **chronologically** by `startDate` field (ISO date)
+- Current/Past status still auto-detected from today's date vs entry date range
+
+### Profile System
+- New `profiles` table in Supabase (`20260723_profiles_extended.sql`)
+- `ProfileModal.tsx`: dropdown avatar menu in both dashboard headers
+- Fields: display_name, bio, target_college, target_percentile, city, phone
+- Sign-out button moved into the Profile dropdown
+
+---
+
+## 14. Known Issues & Future Work
+
+| Issue | Priority | Notes |
 |---|---|---|
-| `habit-tracker-v2` | `HabitState` JSON (for unauthenticated/demo user) | `habits-store.ts` (persist) |
-| `habit-tracker-v2::<uuid>` | `HabitState` JSON (per signed-in user) | `habits-store.ts` (persist) |
-| `theme` | `"dark"` or `"light"` | `Header.tsx` (useTheme hook) |
-| `sb-<project-ref>-auth-token` | Supabase JWT session (managed by Supabase SDK) | `@supabase/supabase-js` |
+| Email+password signup not working | Medium | Magic link works fine. Email OTP is the primary auth path |
+| Supabase types.ts missing `profiles` table | Low | Use `(supabase as any)` workaround |
+| No Supabase data sync for habits | Future | localStorage is the single source of truth. Tables exist for future sync |
+| Achievements are static | Low | 4 hardcoded badges, not computed from real data |
+| Seed habits have old `createdAt` (60 days ago) | Info | Demo users see full 60-day history. Real users start from today |
 
 ---
 
-## 13. Sidebar Navigation (`NAV` constant)
+## 15. Key Code Patterns
 
+### 1. Adding a new habit — always sets `createdAt: todayISO()`
 ```ts
-// From Sidebar.tsx — this is the source of truth for all navigable views
-export const NAV = [
-  { key: "dashboard",    label: "Dashboard",     icon: LayoutDashboard },
-  { key: "daily",        label: "Daily Tracker",  icon: CalendarCheck2 },
-  { key: "calendar",     label: "Calendar View",  icon: CalendarDays },
-  { key: "analytics",    label: "Analytics",      icon: BarChart3 },
-  { key: "heatmap",      label: "Heatmap",        icon: Grid3x3 },
-  { key: "goals",        label: "Goals",          icon: Target },
-  { key: "achievements", label: "Achievements",   icon: Trophy },
-  { key: "journal",      label: "Journal",        icon: NotebookPen },
-  { key: "mood",         label: "Mood Tracker",   icon: Smile },
-  { key: "sleep",        label: "Sleep Tracker",  icon: Moon },
-  { key: "water",        label: "Water Tracker",  icon: Droplets },
-  { key: "weight",       label: "Weight Tracker", icon: Scale },
-  { key: "settings",     label: "Settings",       icon: Settings },
-] as const;
+export function addHabit(input: Omit<Habit, "id" | "createdAt">) {
+  const h: Habit = { ...input, id: generateId(), createdAt: todayISO() };
+  ...
+}
 ```
 
-Navigation is **not URL-based** — it's `useState<string>("dashboard")` in `DashboardPage`. Clicking a nav item calls `setActive(key)` and `renderView(key)` switches the mounted component.
-
----
-
-## 14. MetricTracker Configs
-
+### 2. Reading habits for a date — always go through `habitsFor` (respects schedule + createdAt)
 ```ts
-MOOD_CFG   = { key: "mood",   label: "Mood",   unit: "1-5",    min: 1,  max: 5,   step: 1,   color: "oklch(0.68 0.22 350)", emoji: "😊" }
-SLEEP_CFG  = { key: "sleep",  label: "Sleep",  unit: "hours",  min: 0,  max: 12,  step: 0.5, color: "oklch(0.68 0.19 275)", emoji: "🌙" }
-WATER_CFG  = { key: "water",  label: "Water",  unit: "glasses",min: 0,  max: 20,  step: 1,   color: "oklch(0.72 0.18 235)", emoji: "💧" }
-WEIGHT_CFG = { key: "weight", label: "Weight", unit: "kg",     min: 30, max: 200, step: 0.1, color: "oklch(0.72 0.18 155)", emoji: "⚖️" }
+const scheduled = habitsFor(s, dateISO);  // NOT s.habits.filter(...)
+```
+
+### 3. CAT vs Habit scope filtering
+```ts
+const habits = filterHabitsByScope(habitsFor(s, today), 'cat');  // only CAT Prep
+const habits = filterHabitsByScope(habitsFor(s, today), 'habit'); // all habits
+```
+
+### 4. useKV — always object destructure (NOT array)
+```ts
+const { value: items, setValue: setItems } = useKV<MyType[]>('my_key', []);
+// NOT: const [items, setItems] = useKV(...)  ← WRONG
+```
+
+### 5. Toggle habit (boolean only)
+```ts
+// Never call toggleHabit on a benchmarked habit
+if (!h.benchmarks?.length) toggleHabit(dateISO, h.id);
+```
+
+### 6. Supabase profiles workaround
+```ts
+// types.ts doesn't know about profiles yet
+const { data } = await (supabase as any).from('profiles').select('*').eq('id', user.id);
 ```
 
 ---
 
-## 15. Seed Data (10 Demo Habits)
+## 16. Git History (latest commits)
 
-| ID | Name | Category | Color | Direction | Unit | Benchmarks |
-|---|---|---|---|---|---|---|
-| `meditation` | Morning Meditation | Mind | brand | — | — | boolean |
-| `exercise` | Exercise | Health | success | — | — | boolean |
-| `read` | Read 20 Pages | Learning | info | — | — | boolean |
-| `journal` | Daily Journal | Mind | brand-2 | — | — | boolean |
-| `code` | Code for 1 Hour | Productivity | warning | — | — | boolean |
-| `water` | Drink Water | Health | info | build | L | [1, 2, 3] |
-| `nosugar` | Limit Sugar | Health | danger | break | g | [5, 10, 20] |
-| `sleep` | Sleep by 11 PM | Lifestyle | brand | — | — | boolean |
-| `learn` | Learn Something New | Learning | warning | — | — | boolean |
-| `walk` | Walk 10K Steps | Health | success | — | — | boolean |
+```
+ca5c6da  chore: add vercel.json for Vercel deployment
+bfba8dd  feat: profile modal + extended profiles migration
+9ba83d9  feat: TopicTracker auto-seed DEFAULT_TOPICS
+c77c69e  feat: unified CAT + Habit dashboard (57 files)
+```
 
-Seed completions are generated via a deterministic pseudo-random function for 60 days back. XP starts at 2450, level at 18 for demo.
+Push command: `git push origin main` from `e:\Desktop\operating system\all-in-one\bright-habit-view`
 
 ---
 
-## 16. Key Patterns to Port
+## 17. Contacts & External Services
 
-1. **No server sync yet** — all CRUD is localStorage. The Supabase tables are schema-ready for future sync. Port target should decide: keep localStorage + add sync, or rewrite to server-first.
-
-2. **Store pattern** — `habits-store.ts` uses a module-level singleton with `useSyncExternalStore`. No context needed for data. Components just call `useHabits()`.
-
-3. **User isolation** — call `setStoreUser(user.id)` after login; call `setStoreUser(null)` on logout. The store auto-switches localStorage bucket.
-
-4. **Scope pattern** — a single React context (`ScopeCtx`) controls whether the entire app shows all habits or CAT Prep only. Every list-rendering component should call `filterHabitsByScope()`.
-
-5. **Habit type duality** — always check `h.benchmarks?.length > 0` to branch between boolean (toggle) and numeric (value) habit behaviour. Never call `toggleHabit` on a benchmarked habit.
-
-6. **Schedule-aware queries** — never filter `s.habits` directly for stats. Always go through `habitsFor(s, iso)` + `habitPct(s, h, iso)` to respect scheduling.
-
-7. **Category colours** (OKLCH tokens used in `categoryBreakdown()`):
-   - Health: `oklch(0.72 0.18 155)` (green)
-   - Mind: `oklch(0.68 0.22 350)` (pink)
-   - Productivity: `oklch(0.75 0.18 55)` (yellow)
-   - Learning: `oklch(0.72 0.18 235)` (blue)
-   - Lifestyle: `oklch(0.65 0.22 320)` (purple)
-   - CAT Prep: `oklch(0.7 0.22 25)` (orange)
-
-8. **Theme** — the app renders with `className="dark"` on the root div. The `Header` `useTheme` hook toggles `document.documentElement.classList` between `dark`/`light` and persists to `localStorage["theme"]`.
-
-9. **Achievements are static** — the 4 badge items in `Achievements.tsx` are hardcoded objects, not computed from state. If you need real achievement logic, you'll need to implement it from scratch.
+| Service | Detail |
+|---|---|
+| Supabase project | `umjrxaczrmcstwajtumh` — project "mission_control" |
+| Supabase anon key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtanJ4YWN6cm1jc3R3YWp0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNjQ2ODQsImV4cCI6MjA5ODg0MDY4NH0.Qt5_GmJXtSoeXjeJJFRS8Aefy1F6aZZlc5N1-Vns4c4` |
+| Vercel team | `vijitagarwal123-4578's... (Hobby)` |
+| GitHub | `vijitagarwal/habithabitat` |
