@@ -71,7 +71,7 @@ export function StatCards() {
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Current Streak</div>
-          <div className="mt-0.5 text-2xl font-bold">
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">
             {streak} <span className="text-sm font-normal text-muted-foreground">days</span>
           </div>
           <div className="mt-0.5 text-xs font-medium text-orange-400">Keep it up! 🔥</div>
@@ -84,7 +84,7 @@ export function StatCards() {
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Longest Streak</div>
-          <div className="mt-0.5 text-2xl font-bold">
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">
             {longest.days} <span className="text-sm font-normal text-muted-foreground">days</span>
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground">{longest.from} – {longest.to}</div>
@@ -106,7 +106,7 @@ export function StatCards() {
           <div className="text-xs text-muted-foreground">
             {isCat ? "CAT Tasks Today" : "Completion Today"}
           </div>
-          <div className="mt-0.5 text-2xl font-bold">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
           <div className="mt-0.5 text-xs font-medium text-success">{todayStats.pct}% completed</div>
         </div>
       </Card>
@@ -117,7 +117,7 @@ export function StatCards() {
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Monthly Goal</div>
-          <div className="mt-0.5 text-2xl font-bold">{monthlyGoal}%</div>
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">{monthlyGoal}%</div>
           <div className={`mt-0.5 flex items-center gap-1 text-xs font-medium ${overall >= monthlyGoal ? "text-success" : "text-warning"}`}>
             {overall >= monthlyGoal ? "On Track" : "Behind target"}
             <span className={`h-1.5 w-1.5 rounded-full ${overall >= monthlyGoal ? "bg-success" : "bg-warning"}`} />
