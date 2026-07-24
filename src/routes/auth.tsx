@@ -149,7 +149,7 @@ function AuthPage() {
 
               <button
                 type="submit" disabled={busy}
-                className="flex w-full items-center justify-center gap-2 rounded-xl gradient-brand py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl gradient-amber-teal py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:shadow-xl hover:shadow-primary/50 hover:brightness-110 disabled:opacity-60"
               >
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 {modeLabel}
