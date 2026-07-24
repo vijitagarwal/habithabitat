@@ -444,6 +444,22 @@ All pure visual changes — TypeScript clean (0 errors):
 - Correct Supabase project (`umjrxaczrmcstwajtumh`) restored in local `.env`
 - Vercel env vars (set in Vercel dashboard) were unaffected throughout
 
+### In-Progress States & Duration Stopwatch Habits (2026-07-25, commit 2cbf099)
+- **`habitStatus()` in `habits-store.ts`**: Introduced explicit `HabitStatus = "completed" | "in_progress" | "not_started" | "failed"`.
+- **Break / Limit Habits (e.g. Limit Sugar)**:
+  - Future dates (`iso > today`): Marked as `not_started` (Scheduled 0%).
+  - Current date (`iso === today`): Marked as `in_progress` (On Track · Amber tone) until the day finishes at midnight.
+  - Past dates (`iso < today`): Automatically locks into `completed` (100% Green) if within limit, or `failed` (0% Red) if limit exceeded.
+- **Partial Completion / In-Progress Badges**:
+  - Benchmarked habits with `0 < pct < 100` show an explicit Amber **IN PROGRESS** badge and warning border tone (`border-warning/40 bg-warning/5`).
+- **Duration / Stopwatch Habits**:
+  - `Habit` interface extended with `isTimer?: boolean`.
+  - Added live built-in stopwatch timer (`startTimer`, `pauseTimer`, `resumeTimer`, `stopAndSaveTimer`, `cancelTimer`, `getActiveTimer`).
+  - `HabitRow.tsx`: Render interactive stopwatch controls (`⏱️ Start Timer`, `Pause`, `Resume`, `Save Time`).
+  - Active running timer displays live ticking time (`00:14:20`) with glowing pulsing Amber styling (`pulse-glow`).
+  - Saving the timer automatically logs minutes/hours to the habit value and transitions status to `completed` if target benchmark is hit.
+  - `HabitManager.tsx`: Added `⏱ Stopwatch / Duration Habit` toggle checkbox in habit creation/edit draft form.
+
 ---
 
 ## 14. Known Issues & Future Work
