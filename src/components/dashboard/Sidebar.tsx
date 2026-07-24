@@ -134,13 +134,16 @@ function SidebarContent({
         <div className="shrink-0 space-y-2 border-t border-sidebar-border px-3 py-3">
           <div className="rounded-xl border border-sidebar-border bg-card/60 px-3 py-2.5">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-sidebar-foreground">Level {s.level}</span>
+              <div className="flex items-center gap-2">
+                <span className="grid h-6 w-6 place-items-center rounded-full gradient-amber-teal text-[11px] font-bold text-white shadow-md shadow-primary/30">{s.level}</span>
+                <span className="font-semibold text-sidebar-foreground">Level {s.level}</span>
+              </div>
               <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
                 Explorer
               </span>
             </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full gradient-brand" style={{ width: `${pct}%` }} />
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full gradient-amber-teal transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
             <div className="mt-1.5 text-xs text-muted-foreground">{s.xp.toLocaleString()} / {xpMax.toLocaleString()} XP</div>
           </div>
