@@ -418,6 +418,32 @@ All `useKV` keys are namespaced per user via the bridge.
 - `Header.tsx`: Added `DatePicker` import + `onDateChange?: (iso: string) => void` prop; removed old date state/effect.
 - `dashboard.tsx`: Added `headerDate` state, wired `onDateChange={(iso) => { setHeaderDate(iso); setActive("daily"); }}`, passes `headerDate` as `initialDate` to `DailyTracker`.
 
+### Lovable UI Polish — Session 1 (2026-07-24, commits b45fb29)
+
+Changes made by lovable.dev — all pure UI, zero logic impact:
+- **`Sidebar.tsx`**: Grouped nav into **Overview / Insights / Wellness / System** sections with eyebrow labels. Active item now has a 3px amber gradient left accent bar + gradient-to-right background highlight. Collapsed mode shows horizontal dividers between groups.
+- **`dashboard.tsx`** (topbar): Scope toggle now correctly highlights the active button (was hardcoded to Habits). Added "Signed in" indicator with animated green pulse dot. Topbar has increased blur + transparency.
+- **`StatCards.tsx`**: Increased `min-h` to 104px, added hover lift (`-translate-y-0.5`).
+- **`styles.css`**: Added `radial-gradient` ambient background on `<body>` (fixed, brand-colored orbs). Improved `card-glass` — more transparency, deeper shadow, inner highlight edge. Added `section-eyebrow` utility. Added `scrollbar-thin` utility.
+- **`.env`** (⚠️ reverted): Lovable switched Supabase project to a different empty project. **Fixed and removed from git tracking** — `.env` is now in `.gitignore`.
+
+### Lovable UI Polish — Session 2 (2026-07-24, commit c21b51f)
+
+All pure visual changes — TypeScript clean (0 errors):
+- **`StatCards.tsx`**: Each card now has a per-card colored gradient top-border line (`accent` prop). Numbers increased to `text-3xl font-bold tracking-tight`. Cards taller (`min-h-[120px]`, `p-6`).
+- **`WeeklyProgress.tsx`**: Today's bar in the weekly chart has an amber glow (`drop-shadow`).
+- **`CalendarView.tsx`**: Cells rounder (`rounded-xl`), today's cell gets amber glow ring (`shadow-[0_0_12px_...]`), selected cell scales up. Legend items styled as pill badges.
+- **`DailyTracker.tsx`**: Progress bar thicker (`h-2.5`), uses new `gradient-amber-teal`, pulses when at 100% (`pulse-glow` class). Stats text uses `tabular-nums`.
+- **`Heatmap.tsx`**: Cells slightly larger (20×20 → was 18×18), more rounded (r=6), hover scale + shadow.
+- **`auth.tsx`**: Three-orb animated aurora background (`aurora-orb` class with `aurora-shift` keyframes). Auth card now uses `card-glass`. Submit button uses `gradient-amber-teal` with hover glow and brightness.
+- **`styles.css`**: Added `scroll-behavior: smooth` globally. All `button` elements get `transition: all 0.15s ease` by default. New utilities: `gradient-amber-teal`, `aurora-orb`, `pulse-glow`, `skeleton` (shimmer animation).
+
+### Security Fix (2026-07-24, commit ada05e5)
+- `.env` removed from git tracking (`git rm --cached .env`)
+- `.env` and `.env.*` added to `.gitignore` — credentials can never be committed again
+- Correct Supabase project (`umjrxaczrmcstwajtumh`) restored in local `.env`
+- Vercel env vars (set in Vercel dashboard) were unaffected throughout
+
 ---
 
 ## 14. Known Issues & Future Work
@@ -476,13 +502,16 @@ const { data } = await (supabase as any).from('profiles').select('*').eq('id', u
 ## 16. Git History (latest commits)
 
 ```
+c21b51f  [Lovable] Applied UI polish and fixed build (StatCards accent borders, WeeklyProgress today-glow, CalendarView pills+glow, DailyTracker bar polish, Heatmap hover, auth aurora, styles utilities)
+ada05e5  fix: restore correct Supabase project, remove .env from git tracking
+b45fb29  [Lovable] Refined shell polish (Sidebar groups, dashboard topbar, ambient background, card-glass)
+cd18901  chore: add .lovable to gitignore
+24a2fff  chore: remove Lovable artifacts, clean up project structure
+655ebba  docs: add AGENT_PROMPT_PHASE2.md
+f346205  docs: update PROJECT_SUMMARY with branding + calendar/overflow bug fix notes
 7119097  fix: calendar date off-by-one, HabitRow overflow, header date picker
-49e12e5  brand: replace Lovable favicon with HabitHabitat icon, update page title and meta
-ea1660d  feat: CAT overview habits widget, checklist categories+edit, tech ladder CRUD, habit createdAt fix, updated project summary
-ca5c6da  chore: add vercel.json for Vercel deployment
-bfba8dd  feat: profile modal + extended profiles migration
-9ba83d9  feat: TopicTracker auto-seed DEFAULT_TOPICS
-c77c69e  feat: unified CAT + Habit dashboard (57 files)
+49e12e5  brand: replace Lovable favicon with HabitHabitat icon
+ea1660d  feat: CAT overview habits widget, checklist categories+edit, tech ladder CRUD
 ```
 
 Push command: `git push origin main` from `e:\Desktop\operating system\all-in-one\bright-habit-view`
@@ -494,6 +523,7 @@ Push command: `git push origin main` from `e:\Desktop\operating system\all-in-on
 | Service | Detail |
 |---|---|
 | Supabase project | `umjrxaczrmcstwajtumh` — project "mission_control" |
-| Supabase anon key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtanJ4YWN6cm1jc3R3YWp0dW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNjQ2ODQsImV4cCI6MjA5ODg0MDY4NH0.Qt5_GmJXtSoeXjeJJFRS8Aefy1F6aZZlc5N1-Vns4c4` |
+| Supabase anon key | in local `.env` only — never in git |
 | Vercel team | `vijitagarwal123-4578's... (Hobby)` |
 | GitHub | `vijitagarwal/habithabitat` |
+| Live URL | `https://habithabitat.vercel.app` |
