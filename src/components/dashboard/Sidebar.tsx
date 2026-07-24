@@ -105,14 +105,14 @@ function SidebarContent({
                       key={item.key}
                       onClick={() => onSelect(item.key)}
                       title={collapsed ? item.label : undefined}
-                      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2.5 text-sm font-medium transition-colors ${
+                      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2.5 text-sm font-medium transition-all duration-150 hover:translate-x-0.5 ${
                         isActive
                           ? "bg-gradient-to-r from-primary/25 via-primary/10 to-transparent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground/75 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
                       }`}
                     >
                       {isActive && (
-                        <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full gradient-brand" />
+                        <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full gradient-amber-teal" />
                       )}
                       <Icon
                         className={`shrink-0 ${isActive ? "text-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"}`}
