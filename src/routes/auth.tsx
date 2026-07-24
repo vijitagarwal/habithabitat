@@ -97,7 +97,7 @@ function AuthPage() {
             <p className="mt-1 text-sm text-muted-foreground">Your holistic daily operating system</p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card/60 p-8 shadow-2xl backdrop-blur">
+          <div className="card-glass rounded-2xl p-8 shadow-2xl">
             {/* Mode tabs */}
             <div className="mb-6 flex rounded-xl border border-border bg-background p-1 text-sm">
               {(["signin", "signup", "magic"] as AuthMode[]).map((m) => (
