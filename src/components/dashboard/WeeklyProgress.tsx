@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const DAY_ABBR = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+export function WeeklyProgress() {
   const { weeklyData, isCat } = useScopedStats();
   const [range, setRange] = useState("This Week");
 
