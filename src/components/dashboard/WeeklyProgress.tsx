@@ -54,7 +54,10 @@ export function WeeklyProgress() {
               labelStyle={{ color: "oklch(0.75 0.02 260)", fontWeight: 600 }}
             />
             <Bar dataKey="pct" radius={[8, 8, 0, 0]} maxBarSize={44}>
-              {weeklyData.map((_, i) => <Cell key={i} fill="url(#bar-grad)" />)}
+              {weeklyData.map((d: any, i: number) => {
+                const isToday = d?.day === DAY_ABBR[new Date().getDay()];
+                return <Cell key={i} fill="url(#bar-grad)" style={isToday ? { filter: "drop-shadow(0 0 8px oklch(0.75 0.18 55 / 0.6))" } : undefined} />;
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
