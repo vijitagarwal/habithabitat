@@ -49,7 +49,7 @@ export function StatCards() {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 [&>*]:min-w-0">
-      <Card>
+      <Card accent="var(--brand)">
         <div className="relative grid place-items-center">
           <CircularProgress value={overall} />
           <div className="absolute text-sm font-bold">{overall}%</div>
@@ -65,7 +65,7 @@ export function StatCards() {
         </div>
       </Card>
 
-      <Card>
+      <Card accent="oklch(0.75 0.18 55)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20">
           <Flame className="h-8 w-8 text-orange-400" />
         </div>
@@ -78,7 +78,7 @@ export function StatCards() {
         </div>
       </Card>
 
-      <Card>
+      <Card accent="oklch(0.8 0.17 75)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
           <Trophy className="h-8 w-8 text-yellow-400" />
         </div>
@@ -91,7 +91,7 @@ export function StatCards() {
         </div>
       </Card>
 
-      <Card>
+      <Card accent="var(--success)">
         <div className="relative grid place-items-center">
           <svg width={60} height={60} className="-rotate-90">
             <circle cx={30} cy={30} r={25} stroke="oklch(0.3 0.03 265)" strokeWidth={6} fill="none" />
@@ -111,7 +111,7 @@ export function StatCards() {
         </div>
       </Card>
 
-      <Card>
+      <Card accent="var(--danger)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-red-500/20">
           <Target className="h-8 w-8 text-pink-400" />
         </div>
