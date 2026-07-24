@@ -38,6 +38,16 @@ export interface Habit {
   /** Sorted ascending. Empty/undefined = simple boolean habit. */
   benchmarks?: number[];
   schedule?: Schedule;
+  /** True for duration/stopwatch habits (e.g. study hours, coding time). */
+  isTimer?: boolean;
+}
+
+export interface ActiveTimer {
+  habitId: string;
+  dateISO: string;
+  startTime: number;
+  accumulatedSec: number;
+  isRunning: boolean;
 }
 
 export interface DailyMetrics {
@@ -249,17 +259,56 @@ export function habitsFor(s: HabitState, iso: string): Habit[] {
 
 // ---------- Values & completion ----------
 
+export type HabitStatus = "completed" | "in_progress" | "not_started" | "failed";
+
+export function habitStatus(s: HabitState, h: Habit, iso: string): HabitStatus {
+  const today = todayISO();
+  const hasBenchmarks = !!(h.benchmarks && h.benchmarks.length);
+  const isBreak = h.direction === "break";
+
+  // Check if an active timer is running for this habit today
+  if (activeTimer && activeTimer.habitId === h.id && activeTimer.dateISO === iso) {
+    return "in_progress";
+  }
+
+  if (isBreak && hasBenchmarks) {
+    const t = habitTarget(h);
+    const v = s.values?.[iso]?.[h.id] ?? 0;
+    if (iso > today) return "not_started"; // Future dates are pending
+    if (v > t) return "failed"; // Exceeded limit -> Failed
+    if (iso === today) return "in_progress"; // Today: On track (in progress until day ends)
+    return "completed"; // Past day kept within limit -> Completed
+  }
+
+  if (hasBenchmarks) {
+    const t = habitTarget(h);
+    const v = s.values?.[iso]?.[h.id] ?? 0;
+    if (t > 0 && v >= t) return "completed";
+    if (v > 0) return "in_progress";
+    return "not_started";
+  }
+
+  return s.completions[iso]?.[h.id] ? "completed" : "not_started";
+}
+
 export function habitTarget(h: Habit): number {
   return h.benchmarks && h.benchmarks.length ? Math.max(...h.benchmarks) : 0;
 }
 
 export function habitPct(s: HabitState, h: Habit, iso: string): number {
+  const today = todayISO();
   if (h.benchmarks && h.benchmarks.length) {
     const t = habitTarget(h);
     const v = s.values?.[iso]?.[h.id] ?? 0;
     if (t <= 0) return 0;
-    if (h.direction === "break") return Math.max(0, Math.min(100, 100 - (v / t) * 100));
-    return Math.max(0, Math.min(100, (v / t) * 100));
+    if (h.direction === "break") {
+      if (iso > today) return 0; // Future days show 0% (pending)
+      if (v > t) return 0; // Exceeded limit -> 0%
+      if (iso < today) return 100; // Past day kept within limit -> 100%
+      // Today: calculate on-track capacity percentage
+      return Math.max(0, Math.min(100, Math.round(((t - v) / t) * 100)));
+    }
+    return Math.max(0, Math.min(100, Math.round((v / t) * 100)));
   }
   return s.completions[iso]?.[h.id] ? 100 : 0;
 }
@@ -351,6 +400,75 @@ export function clearHistory() {
   persist();
 }
 
+// ---------- Active Timer Store ----------
+
+let activeTimer: ActiveTimer | null = null;
+
+export function getActiveTimer(): ActiveTimer | null {
+  return activeTimer;
+}
+
+export function startTimer(habitId: string, dateISO: string) {
+  activeTimer = {
+    habitId,
+    dateISO,
+    startTime: Date.now(),
+    accumulatedSec: 0,
+    isRunning: true,
+  };
+  listeners.forEach((l) => l());
+}
+
+export function pauseTimer() {
+  if (!activeTimer || !activeTimer.isRunning) return;
+  const elapsed = Math.floor((Date.now() - activeTimer.startTime) / 1000);
+  activeTimer = {
+    ...activeTimer,
+    accumulatedSec: activeTimer.accumulatedSec + elapsed,
+    isRunning: false,
+  };
+  listeners.forEach((l) => l());
+}
+
+export function resumeTimer() {
+  if (!activeTimer || activeTimer.isRunning) return;
+  activeTimer = {
+    ...activeTimer,
+    startTime: Date.now(),
+    isRunning: true,
+  };
+  listeners.forEach((l) => l());
+}
+
+export function stopAndSaveTimer(unit?: string) {
+  if (!activeTimer) return 0;
+  let totalSec = activeTimer.accumulatedSec;
+  if (activeTimer.isRunning) {
+    totalSec += Math.floor((Date.now() - activeTimer.startTime) / 1000);
+  }
+  
+  const isHours = unit === "hrs" || unit === "hr" || unit === "hours" || unit === "hour";
+  const val = isHours
+    ? Math.round((totalSec / 3600) * 100) / 100
+    : Math.round((totalSec / 60) * 10) / 10;
+
+  const { habitId, dateISO } = activeTimer;
+  activeTimer = null;
+
+  if (val > 0) {
+    const existing = state.values[dateISO]?.[habitId] ?? 0;
+    setHabitValue(dateISO, habitId, existing + val);
+  } else {
+    listeners.forEach((l) => l());
+  }
+  return val;
+}
+
+export function cancelTimer() {
+  activeTimer = null;
+  listeners.forEach((l) => l());
+}
+
 // ---------- Aggregate stats (all scheduling-aware) ----------
 
 export function completionsForDate(s: HabitState, dateISO: string) {
@@ -359,8 +477,9 @@ export function completionsForDate(s: HabitState, dateISO: string) {
   let sum = 0, done = 0;
   for (const h of scheduled) {
     const p = habitPct(s, h, dateISO);
+    const status = habitStatus(s, h, dateISO);
     sum += p;
-    if (p >= 100) done++;
+    if (status === "completed") done++;
   }
   return { done, total: scheduled.length, pct: Math.round(sum / scheduled.length) };
 }
@@ -503,8 +622,7 @@ export function totalCompleted(s: HabitState): number {
     for (const h of s.habits) {
       if (!h.benchmarks || !h.benchmarks.length) continue;
       if (!(h.id in day)) continue;
-      const p = habitPct(s, h, iso);
-      if (p >= 100) n++;
+      if (habitStatus(s, h, iso) === "completed") n++;
     }
   }
   return n;

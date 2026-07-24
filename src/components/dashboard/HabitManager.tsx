@@ -18,12 +18,14 @@ type Draft = {
   unit: string;
   benchmarks: number[];
   schedule: Schedule;
+  isTimer: boolean;
 };
 
 const emptyDraft: Draft = {
   name: "", icon: "Sparkles", category: "Health", color: "brand",
   direction: "build", unit: "", benchmarks: [],
   schedule: { type: "daily" },
+  isTimer: false,
 };
 
 function IconPreview({ name, color }: { name: string; color: string }) {
@@ -123,11 +125,30 @@ function DraftForm({ initial, onSubmit, onCancel, submitLabel }: {
           </div>
         </div>
 
+        <div className="text-xs sm:col-span-2">
+          <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background/50 p-2.5 hover:border-primary/40">
+            <input
+              type="checkbox"
+              checked={d.isTimer}
+              onChange={(e) => setD({ ...d, isTimer: e.target.checked })}
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <div>
+              <div className="text-xs font-semibold flex items-center gap-1.5">
+                <span>⏱ Stopwatch / Duration Habit</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                Enable live built-in stopwatch to track time spent (e.g. Study, Coding, Meditation)
+              </div>
+            </div>
+          </label>
+        </div>
+
         <label className="text-xs">
           <div className="mb-1 text-muted-foreground">Unit (optional)</div>
           <input
             value={d.unit} onChange={(e) => setD({ ...d, unit: e.target.value })}
-            placeholder="L, g, hrs, pages…"
+            placeholder="L, g, hrs, mins, pages…"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
           />
         </label>
@@ -194,6 +215,7 @@ function toDraft(h: Habit): Draft {
     unit: h.unit ?? "",
     benchmarks: h.benchmarks ?? [],
     schedule: h.schedule ?? { type: "daily" },
+    isTimer: !!h.isTimer,
   };
 }
 
@@ -202,6 +224,7 @@ function fromDraft(d: Draft): Omit<Habit, "id" | "createdAt"> {
   return {
     name: d.name.trim(), icon: d.icon, category: d.category, color: d.color,
     schedule: d.schedule,
+    isTimer: d.isTimer,
     ...(hasBenchmarks ? { direction: d.direction, unit: d.unit.trim(), benchmarks: [...d.benchmarks].sort((a, b) => a - b) } : {}),
   };
 }
