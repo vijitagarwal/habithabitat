@@ -2,9 +2,16 @@ import { Flame, Trophy, Target, CheckCircle2 } from "lucide-react";
 import { useScopedStats } from "@/lib/scope-aware-stats";
 import { todayISO } from "@/lib/habits-store";
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, accent = "var(--brand)" }: { children: React.ReactNode; accent?: string }) {
   return (
-    <div className="card-glass flex items-center gap-4 rounded-2xl p-5 min-h-[104px] transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5">
+    <div
+      className="card-glass relative flex items-center gap-4 rounded-2xl p-6 min-h-[120px] overflow-hidden transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-90"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+      />
       {children}
     </div>
   );
