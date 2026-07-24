@@ -78,10 +78,11 @@ function AuthPage() {
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
-      {/* Background gradient orbs */}
+      {/* Aurora background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-[oklch(0.7_0.22_25)]/10 blur-3xl" />
+        <div className="aurora-orb absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-3xl" />
+        <div className="aurora-orb absolute top-1/3 -right-40 h-[26rem] w-[26rem] rounded-full bg-[oklch(0.72_0.18_55)]/15 blur-3xl" style={{ animationDelay: "-4s" }} />
+        <div className="aurora-orb absolute -bottom-40 left-1/4 h-[24rem] w-[24rem] rounded-full bg-[oklch(0.62_0.2_155)]/15 blur-3xl" style={{ animationDelay: "-8s" }} />
       </div>
 
       <div className="relative flex min-h-screen items-center justify-center px-4">
