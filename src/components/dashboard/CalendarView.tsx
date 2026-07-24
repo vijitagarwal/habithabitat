@@ -65,10 +65,10 @@ export function CalendarView() {
             );
           })}
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.62 0.2 155)" }} /> 80%+</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.72 0.18 55)" }} /> 50-79%</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.55 0.18 25)" }} /> Under 50%</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.62 0.2 155)" }} /> 80%+</span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.72 0.18 55)" }} /> 50-79%</span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.55 0.18 25)" }} /> Under 50%</span>
         </div>
       </div>
       <DailyTracker initialDate={selected} />
