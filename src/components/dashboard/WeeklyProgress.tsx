@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export function WeeklyProgress() {
+const DAY_ABBR = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const { weeklyData, isCat } = useScopedStats();
   const [range, setRange] = useState("This Week");
 
