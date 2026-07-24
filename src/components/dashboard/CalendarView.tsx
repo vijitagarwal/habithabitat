@@ -55,7 +55,7 @@ export function CalendarView() {
             return (
               <button
                 key={i} onClick={() => setSelected(iso)}
-                className={`aspect-square rounded-lg border p-1 text-left transition hover:border-primary ${isSelected ? "border-primary ring-2 ring-primary/40" : "border-border"}`}
+                className={`aspect-square rounded-xl border p-1.5 text-left transition-all duration-150 hover:shadow-md hover:shadow-primary/10 hover:-translate-y-0.5 ${isSelected ? "border-primary ring-2 ring-primary/40 scale-[1.04]" : "border-border"} ${isToday && !isSelected ? "ring-2 ring-amber-400/50 shadow-[0_0_12px_oklch(0.75_0.18_55_/_0.35)]" : ""}`}
                 style={{ backgroundColor: `color-mix(in oklab, ${bg} ${pct > 0 ? 35 : 60}%, transparent)` }}
                 title={`${done}/${total} completed`}
               >
