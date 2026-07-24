@@ -55,7 +55,7 @@ export function CalendarView() {
             return (
               <button
                 key={i} onClick={() => setSelected(iso)}
-                className={`aspect-square rounded-lg border p-1 text-left transition hover:border-primary ${isSelected ? "border-primary ring-2 ring-primary/40" : "border-border"}`}
+                className={`aspect-square rounded-xl border p-1.5 text-left transition-all duration-150 hover:shadow-md hover:shadow-primary/10 hover:-translate-y-0.5 ${isSelected ? "border-primary ring-2 ring-primary/40 scale-[1.04]" : "border-border"} ${isToday && !isSelected ? "ring-2 ring-amber-400/50 shadow-[0_0_12px_oklch(0.75_0.18_55_/_0.35)]" : ""}`}
                 style={{ backgroundColor: `color-mix(in oklab, ${bg} ${pct > 0 ? 35 : 60}%, transparent)` }}
                 title={`${done}/${total} completed`}
               >
@@ -65,10 +65,10 @@ export function CalendarView() {
             );
           })}
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.62 0.2 155)" }} /> 80%+</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.72 0.18 55)" }} /> 50-79%</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ backgroundColor: "oklch(0.55 0.18 25)" }} /> Under 50%</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.62 0.2 155)" }} /> 80%+</span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.72 0.18 55)" }} /> 50-79%</span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.55 0.18 25)" }} /> Under 50%</span>
         </div>
       </div>
       <DailyTracker initialDate={selected} />

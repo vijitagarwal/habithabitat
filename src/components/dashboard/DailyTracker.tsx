@@ -50,10 +50,10 @@ export function DailyTracker({ initialDate }: Props) {
       </div>
 
       <div className="mb-4 flex items-center gap-3">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full gradient-brand transition-all" style={{ width: `${stats.pct}%` }} />
+        <div className={`h-2.5 w-full overflow-hidden rounded-full bg-muted ${stats.pct === 100 ? "pulse-glow" : ""}`}>
+          <div className="h-full gradient-amber-teal transition-all duration-500" style={{ width: `${stats.pct}%` }} />
         </div>
-        <span className="shrink-0 text-sm font-semibold">{stats.done}/{stats.total} · {stats.pct}%</span>
+        <span className="shrink-0 text-sm font-semibold tabular-nums">{stats.done}/{stats.total} · {stats.pct}%</span>
       </div>
 
       {scheduled.length === 0 ? (

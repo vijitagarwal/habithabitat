@@ -2,9 +2,16 @@ import { Flame, Trophy, Target, CheckCircle2 } from "lucide-react";
 import { useScopedStats } from "@/lib/scope-aware-stats";
 import { todayISO } from "@/lib/habits-store";
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, accent = "var(--brand)" }: { children: React.ReactNode; accent?: string }) {
   return (
-    <div className="card-glass flex items-center gap-4 rounded-2xl p-5 min-h-[104px] transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5">
+    <div
+      className="card-glass relative flex items-center gap-4 rounded-2xl p-6 min-h-[120px] overflow-hidden transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-90"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+      />
       {children}
     </div>
   );
@@ -42,7 +49,7 @@ export function StatCards() {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 [&>*]:min-w-0">
-      <Card>
+      <Card accent="var(--brand)">
         <div className="relative grid place-items-center">
           <CircularProgress value={overall} />
           <div className="absolute text-sm font-bold">{overall}%</div>
@@ -58,33 +65,33 @@ export function StatCards() {
         </div>
       </Card>
 
-      <Card>
+      <Card accent="oklch(0.75 0.18 55)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20">
           <Flame className="h-8 w-8 text-orange-400" />
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Current Streak</div>
-          <div className="mt-0.5 text-2xl font-bold">
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">
             {streak} <span className="text-sm font-normal text-muted-foreground">days</span>
           </div>
           <div className="mt-0.5 text-xs font-medium text-orange-400">Keep it up! 🔥</div>
         </div>
       </Card>
 
-      <Card>
+      <Card accent="oklch(0.8 0.17 75)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
           <Trophy className="h-8 w-8 text-yellow-400" />
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Longest Streak</div>
-          <div className="mt-0.5 text-2xl font-bold">
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">
             {longest.days} <span className="text-sm font-normal text-muted-foreground">days</span>
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground">{longest.from} – {longest.to}</div>
         </div>
       </Card>
 
-      <Card>
+      <Card accent="var(--success)">
         <div className="relative grid place-items-center">
           <svg width={60} height={60} className="-rotate-90">
             <circle cx={30} cy={30} r={25} stroke="oklch(0.3 0.03 265)" strokeWidth={6} fill="none" />
@@ -99,18 +106,18 @@ export function StatCards() {
           <div className="text-xs text-muted-foreground">
             {isCat ? "CAT Tasks Today" : "Completion Today"}
           </div>
-          <div className="mt-0.5 text-2xl font-bold">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
           <div className="mt-0.5 text-xs font-medium text-success">{todayStats.pct}% completed</div>
         </div>
       </Card>
 
-      <Card>
+      <Card accent="var(--danger)">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-red-500/20">
           <Target className="h-8 w-8 text-pink-400" />
         </div>
         <div>
           <div className="text-xs text-muted-foreground">Monthly Goal</div>
-          <div className="mt-0.5 text-2xl font-bold">{monthlyGoal}%</div>
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">{monthlyGoal}%</div>
           <div className={`mt-0.5 flex items-center gap-1 text-xs font-medium ${overall >= monthlyGoal ? "text-success" : "text-warning"}`}>
             {overall >= monthlyGoal ? "On Track" : "Behind target"}
             <span className={`h-1.5 w-1.5 rounded-full ${overall >= monthlyGoal ? "bg-success" : "bg-warning"}`} />

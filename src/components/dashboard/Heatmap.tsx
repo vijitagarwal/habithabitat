@@ -74,10 +74,12 @@ export function Heatmap() {
                 <div
                   key={ci}
                   style={{
-                    width: 18, height: 18, borderRadius: 4,
+                    width: 20, height: 20, borderRadius: 6,
                     backgroundColor: cell && cell.hasData ? levelColors[cell.level] : "oklch(0.25 0.02 265)",
                     opacity: cell ? 1 : 0.3,
+                    transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   }}
+                  className="hover:scale-110 hover:shadow-md hover:shadow-primary/20"
                   title={cell ? `Day ${cell.day}` : ""}
                 />
               ))}
