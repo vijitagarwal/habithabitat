@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
 
@@ -186,16 +187,40 @@ let state: HabitState = defaultState();
 let hydrated = false;
 const listeners = new Set<() => void>();
 
+let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+function syncToSupabase(uid: string, currentState: HabitState) {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(async () => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const db = supabase as any;
+      await db.from("kv_store").upsert(
+        { user_id: uid, key: "habit_state_v2", value: currentState, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,key" }
+      );
+    } catch (err) {
+      console.warn("[habits-store] Supabase cloud sync failed:", err);
+    }
+  }, 300);
+}
+
 function persist() {
   if (typeof window !== "undefined") localStorage.setItem(KEY(), JSON.stringify(state));
   listeners.forEach((l) => l());
+  if (userKey) {
+    syncToSupabase(userKey, state);
+  }
 }
+
 function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
 const serverState: HabitState = emptyState();
 function getSnapshot() { return state; }
 function getServerSnapshot(): HabitState { return serverState; }
 
-/** Bind the store to a specific user; reloads from that user's localStorage bucket. */
+let activeRealtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+
+/** Bind the store to a specific user; reloads from localStorage and syncs with Supabase. */
 export function setStoreUser(uid: string | null) {
   const nextKey = uid ?? null;
   if (nextKey === userKey && hydrated) return;
@@ -203,6 +228,87 @@ export function setStoreUser(uid: string | null) {
   hydrated = true;
   state = load();
   listeners.forEach((l) => l());
+
+  if (activeRealtimeChannel) {
+    supabase.removeChannel(activeRealtimeChannel);
+    activeRealtimeChannel = null;
+  }
+
+  if (userKey) {
+    const currentUid = userKey;
+    // Fetch remote state from Supabase kv_store
+    const fetchRemoteState = async () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = supabase as any;
+        const { data } = await db
+          .from("kv_store")
+          .select("value")
+          .eq("user_id", currentUid)
+          .eq("key", "habit_state_v2")
+          .maybeSingle();
+
+        if (data?.value) {
+          const remoteState = data.value as HabitState;
+          state = {
+            ...emptyState(),
+            ...remoteState,
+            values: remoteState.values ?? {},
+            notes: remoteState.notes ?? {},
+            metrics: remoteState.metrics ?? {},
+            monthlyGoal: remoteState.monthlyGoal ?? 90,
+          };
+          if (typeof window !== "undefined") {
+            localStorage.setItem(KEY(), JSON.stringify(state));
+          }
+          listeners.forEach((l) => l());
+        } else {
+          // If remote is empty but local has habits, push local to cloud!
+          if (state.habits && state.habits.length > 0) {
+            syncToSupabase(currentUid, state);
+          }
+        }
+      } catch (err) {
+        console.warn("[habits-store] Failed to fetch remote state, using local cache:", err);
+      }
+    };
+
+    fetchRemoteState();
+
+    // Subscribe to realtime changes so checking off habits on mobile updates desktop in real-time
+    activeRealtimeChannel = supabase
+      .channel(`habit_sync_${userKey}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "kv_store",
+          filter: `user_id=eq.${userKey}`,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          if (payload.new && payload.new.key === "habit_state_v2") {
+            const remoteState = payload.new.value as HabitState;
+            if (remoteState) {
+              state = {
+                ...emptyState(),
+                ...remoteState,
+                values: remoteState.values ?? {},
+                notes: remoteState.notes ?? {},
+                metrics: remoteState.metrics ?? {},
+                monthlyGoal: remoteState.monthlyGoal ?? 90,
+              };
+              if (typeof window !== "undefined") {
+                localStorage.setItem(KEY(), JSON.stringify(state));
+              }
+              listeners.forEach((l) => l());
+            }
+          }
+        }
+      )
+      .subscribe();
+  }
 }
 
 export function useHabits() {

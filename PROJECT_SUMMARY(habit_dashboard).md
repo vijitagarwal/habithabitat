@@ -460,6 +460,13 @@ All pure visual changes — TypeScript clean (0 errors):
   - Saving the timer automatically logs minutes/hours to the habit value and transitions status to `completed` if target benchmark is hit.
   - `HabitManager.tsx`: Added `⏱ Stopwatch / Duration Habit` toggle checkbox in habit creation/edit draft form.
 
+### Cross-Device Supabase Cloud Sync (2026-07-25)
+- **`habits-store.ts`**: Connected store to Supabase `kv_store` database table (`key = "habit_state_v2"`).
+- **Multi-Device Data Mobility**: Logging in on mobile/other devices using magic link email automatically fetches the user's habits, completions, values, notes, metrics, and timers from Supabase.
+- **Instant Local + Async Cloud Sync**: Local modifications (`persist()`) update `localStorage` instantly for zero UI latency, then debounced-upserts to Supabase in the background.
+- **Realtime Sync Channel**: Subscribed to Supabase `postgres_changes` on `kv_store`. Checking off a habit on mobile updates desktop in real-time.
+- **Auto-Upload Initial Data**: If a user has existing local habits on desktop and signs in on mobile for the first time, local habits are automatically uploaded to Supabase so they immediately appear on mobile.
+
 ---
 
 ## 14. Known Issues & Future Work
