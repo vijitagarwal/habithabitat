@@ -148,31 +148,34 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           <div className="flex items-center gap-1.5 font-mono text-sm font-bold text-amber-400">
             <Timer className="h-4 w-4 animate-spin text-amber-400" />
             {formatTimerSec(elapsedSec)}
-          </div>
-          <div className="ml-auto flex items-center gap-1.5">
+          </div>          <div className="ml-auto flex items-center gap-1.5">
             {activeTimer.isRunning ? (
               <button
-                onClick={() => pauseTimer()}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); pauseTimer(); }}
                 className="flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/20 px-2 py-1 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/30"
               >
                 <Pause className="h-3 w-3" /> Pause
               </button>
             ) : (
               <button
-                onClick={() => resumeTimer()}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); resumeTimer(); }}
                 className="flex items-center gap-1 rounded-md border border-success/40 bg-success/20 px-2 py-1 text-[11px] font-semibold text-success hover:bg-success/30"
               >
                 <Play className="h-3 w-3" /> Resume
               </button>
             )}
             <button
-              onClick={() => stopAndSaveTimer(unit)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); stopAndSaveTimer(unit); }}
               className="flex items-center gap-1 rounded-md gradient-brand px-2.5 py-1 text-[11px] font-semibold text-white shadow"
             >
               <Square className="h-3 w-3 fill-current" /> Save Time
             </button>
             <button
-              onClick={() => cancelTimer()}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); cancelTimer(); }}
               title="Cancel Timer"
               className="rounded-md border border-border bg-background p-1 text-muted-foreground hover:text-foreground"
             >
@@ -184,7 +187,8 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {isBreak && (
             <button
-              onClick={() => setHabitValue(dateISO, h.id, 0)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, 0); }}
               className={`rounded-full border px-2 py-1 text-[11px] font-medium transition ${value === 0 ? "border-success bg-success/15 text-success" : "border-border bg-background hover:border-success/40"}`}
             >
               0{unit}
@@ -196,7 +200,8 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             return (
               <button
                 key={b}
-                onClick={() => setHabitValue(dateISO, h.id, b)}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, b); }}
                 className={`rounded-full border px-2 py-1 text-[11px] font-medium transition ${
                   active
                     ? good
@@ -212,7 +217,8 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
 
           {(isTimeHabit || hasBenchmarks) && !isMyTimer && (
             <button
-              onClick={() => startTimer(h.id, dateISO)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); startTimer(h.id, dateISO); }}
               title="Start Timer Stopwatch"
               className="flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400 hover:bg-amber-500/20"
             >
@@ -235,7 +241,8 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             />
             {unit && <span className="text-[11px] text-muted-foreground">{unit}</span>}
             <button
-              onClick={() => setHabitValue(dateISO, h.id, 0)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, 0); }}
               title="Reset"
               className="rounded-lg border border-border bg-background p-1 text-muted-foreground hover:border-primary/40 hover:text-foreground"
             >

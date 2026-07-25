@@ -569,7 +569,8 @@ export function startTimer(habitId: string, dateISO: string) {
     accumulatedSec: 0,
     isRunning: true,
   };
-  listeners.forEach((l) => l());
+  state = { ...state };
+  persist();
 }
 
 export function pauseTimer() {
@@ -580,7 +581,8 @@ export function pauseTimer() {
     accumulatedSec: activeTimer.accumulatedSec + elapsed,
     isRunning: false,
   };
-  listeners.forEach((l) => l());
+  state = { ...state };
+  persist();
 }
 
 export function resumeTimer() {
@@ -590,7 +592,8 @@ export function resumeTimer() {
     startTime: Date.now(),
     isRunning: true,
   };
-  listeners.forEach((l) => l());
+  state = { ...state };
+  persist();
 }
 
 export function stopAndSaveTimer(unit?: string) {
@@ -612,14 +615,16 @@ export function stopAndSaveTimer(unit?: string) {
     const existing = state.values[dateISO]?.[habitId] ?? 0;
     setHabitValue(dateISO, habitId, existing + val);
   } else {
-    listeners.forEach((l) => l());
+    state = { ...state };
+    persist();
   }
   return val;
 }
 
 export function cancelTimer() {
   activeTimer = null;
-  listeners.forEach((l) => l());
+  state = { ...state };
+  persist();
 }
 
 // ---------- Aggregate stats (all scheduling-aware) ----------
