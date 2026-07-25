@@ -164,23 +164,31 @@ function emptyState(): HabitState {
 function load(): HabitState {
   if (typeof window === "undefined") return defaultState();
   try {
-    const raw = localStorage.getItem(KEY());
+    // 1. Try user-specific local key
+    let raw = userKey ? localStorage.getItem(`habit-tracker-v2::${userKey}`) : null;
+    
+    // 2. Fallback to unauthenticated key if user-specific key is empty
+    if (!raw) {
+      raw = localStorage.getItem("habit-tracker-v2");
+    }
+
     if (raw) {
       const parsed = JSON.parse(raw);
-      return {
-        ...defaultState(),
-        ...parsed,
-        values: parsed.values ?? {},
-        notes: parsed.notes ?? {},
-        metrics: parsed.metrics ?? {},
-        monthlyGoal: parsed.monthlyGoal ?? 90,
-      };
+      if (parsed && Array.isArray(parsed.habits) && parsed.habits.length > 0) {
+        return {
+          ...defaultState(),
+          ...parsed,
+          values: parsed.values ?? {},
+          notes: parsed.notes ?? {},
+          metrics: parsed.metrics ?? {},
+          monthlyGoal: parsed.monthlyGoal ?? 90,
+        };
+      }
     }
   } catch {}
-  // For a signed-in user with no data yet, start empty (no demo seed).
-  const state = userKey ? emptyState() : defaultState();
-  localStorage.setItem(KEY(), JSON.stringify(state));
-  return state;
+
+  // 3. Default fallback (seed habits)
+  return defaultState();
 }
 
 let state: HabitState = defaultState();
@@ -203,6 +211,45 @@ function syncToSupabase(uid: string, currentState: HabitState) {
       console.warn("[habits-store] Supabase cloud sync failed:", err);
     }
   }, 300);
+}
+
+/** Force immediate manual sync with Supabase cloud */
+export async function syncNow(): Promise<void> {
+  if (!userKey) return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+    // Push current local state to cloud first
+    await db.from("kv_store").upsert(
+      { user_id: userKey, key: "habit_state_v2", value: state, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,key" }
+    );
+    // Fetch remote to verify & update
+    const { data } = await db
+      .from("kv_store")
+      .select("value")
+      .eq("user_id", userKey)
+      .eq("key", "habit_state_v2")
+      .maybeSingle();
+
+    if (data?.value && Array.isArray(data.value.habits) && data.value.habits.length > 0) {
+      const remoteState = data.value as HabitState;
+      state = {
+        ...defaultState(),
+        ...remoteState,
+        values: remoteState.values ?? {},
+        notes: remoteState.notes ?? {},
+        metrics: remoteState.metrics ?? {},
+        monthlyGoal: remoteState.monthlyGoal ?? 90,
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEY(), JSON.stringify(state));
+      }
+      listeners.forEach((l) => l());
+    }
+  } catch (err) {
+    console.warn("[habits-store] Manual sync error:", err);
+  }
 }
 
 function persist() {
@@ -248,10 +295,10 @@ export function setStoreUser(uid: string | null) {
           .eq("key", "habit_state_v2")
           .maybeSingle();
 
-        if (data?.value) {
+        if (data?.value && Array.isArray(data.value.habits) && data.value.habits.length > 0) {
           const remoteState = data.value as HabitState;
           state = {
-            ...emptyState(),
+            ...defaultState(),
             ...remoteState,
             values: remoteState.values ?? {},
             notes: remoteState.notes ?? {},
@@ -263,7 +310,7 @@ export function setStoreUser(uid: string | null) {
           }
           listeners.forEach((l) => l());
         } else {
-          // If remote is empty but local has habits, push local to cloud!
+          // If remote is empty, push our local state (containing user's desktop habits) to Supabase cloud!
           if (state.habits && state.habits.length > 0) {
             syncToSupabase(currentUid, state);
           }
@@ -290,9 +337,9 @@ export function setStoreUser(uid: string | null) {
         (payload: any) => {
           if (payload.new && payload.new.key === "habit_state_v2") {
             const remoteState = payload.new.value as HabitState;
-            if (remoteState) {
+            if (remoteState && Array.isArray(remoteState.habits) && remoteState.habits.length > 0) {
               state = {
-                ...emptyState(),
+                ...defaultState(),
                 ...remoteState,
                 values: remoteState.values ?? {},
                 notes: remoteState.notes ?? {},
