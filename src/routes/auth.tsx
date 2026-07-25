@@ -54,7 +54,13 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (e: any) {
-      setErr(e?.message ?? "Something went wrong");
+      let msg = e?.message ?? "Something went wrong";
+      if (msg.includes("Email not confirmed")) {
+        msg = "Your email is not confirmed yet. Check your inbox for the confirmation link, or use Magic Link to sign in immediately.";
+      } else if (msg.includes("Invalid login credentials")) {
+        msg = "Invalid email or password. If you haven't set a password yet, use Magic Link or click Create Account.";
+      }
+      setErr(msg);
     } finally {
       setBusy(false);
     }
@@ -69,7 +75,11 @@ function AuthPage() {
       });
       if (error) throw error;
     } catch (e: any) {
-      setErr(e?.message ?? "Google sign-in failed");
+      let msg = e?.message ?? "Google sign-in failed";
+      if (msg.toLowerCase().includes("provider") || msg.toLowerCase().includes("unsupported")) {
+        msg = "Google sign-in is not enabled in Supabase provider settings. Please use Magic Link or Email.";
+      }
+      setErr(msg);
       setBusy(false);
     }
   }
