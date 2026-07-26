@@ -13,8 +13,20 @@ export function CategoryBreakdown() {
         <div className="relative h-48 w-48 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={categories.filter(d => d.pct > 0)} dataKey="pct" nameKey="cat" innerRadius={60} outerRadius={90} paddingAngle={2} stroke="none">
-                {categories.filter(d => d.pct > 0).map((d, i) => <Cell key={i} fill={d.color} />)}
+              <Pie
+                data={categories.filter((d) => d.pct > 0)}
+                dataKey="pct"
+                nameKey="cat"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={2}
+                stroke="none"
+              >
+                {categories
+                  .filter((d) => d.pct > 0)
+                  .map((d, i) => (
+                    <Cell key={i} fill={d.color} />
+                  ))}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
@@ -34,14 +46,19 @@ export function CategoryBreakdown() {
               </span>
               <div className="flex items-center gap-2">
                 <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full" style={{ width: `${d.pct}%`, backgroundColor: d.color }} />
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${d.pct}%`, backgroundColor: d.color }}
+                  />
                 </div>
                 <span className="font-semibold tabular-nums">{d.pct}%</span>
               </div>
             </li>
           ))}
-          {categories.every(d => d.pct === 0) && (
-            <li className="text-muted-foreground text-sm">No data yet — start completing habits!</li>
+          {categories.every((d) => d.pct === 0) && (
+            <li className="text-muted-foreground text-sm">
+              No data yet — start completing habits!
+            </li>
           )}
         </ul>
       </div>

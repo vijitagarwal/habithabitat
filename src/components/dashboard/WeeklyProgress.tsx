@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const DAY_ABBR = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function WeeklyProgress() {
   const { weeklyData, isCat } = useScopedStats();
@@ -17,7 +17,8 @@ export function WeeklyProgress() {
         </h3>
         <div className="relative">
           <select
-            value={range} onChange={(e) => setRange(e.target.value)}
+            value={range}
+            onChange={(e) => setRange(e.target.value)}
             className="appearance-none rounded-lg border border-border bg-background/50 pr-8 pl-3 py-1.5 text-xs font-medium hover:border-primary/50"
           >
             <option>This Week</option>
@@ -31,14 +32,28 @@ export function WeeklyProgress() {
           <BarChart data={weeklyData} margin={{ top: 32, right: 12, left: -18, bottom: 0 }}>
             <defs>
               <linearGradient id="bar-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={isCat ? "oklch(0.7 0.22 25)" : "oklch(0.72 0.18 235)"} />
-                <stop offset="100%" stopColor={isCat ? "oklch(0.75 0.18 55)" : "oklch(0.65 0.24 300)"} />
+                <stop
+                  offset="0%"
+                  stopColor={isCat ? "oklch(0.7 0.22 25)" : "oklch(0.72 0.18 235)"}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={isCat ? "oklch(0.75 0.18 55)" : "oklch(0.65 0.24 300)"}
+                />
               </linearGradient>
             </defs>
-            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "oklch(0.7 0.02 260)", fontSize: 12 }} />
+            <XAxis
+              dataKey="day"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "oklch(0.7 0.02 260)", fontSize: 12 }}
+            />
             <YAxis
-              domain={[0, 100]} ticks={[0, 25, 50, 75, 100]}
-              tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false}
+              domain={[0, 100]}
+              ticks={[0, 25, 50, 75, 100]}
+              tickFormatter={(v) => `${v}%`}
+              axisLine={false}
+              tickLine={false}
               tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 11 }}
             />
             <Tooltip
@@ -56,7 +71,17 @@ export function WeeklyProgress() {
             <Bar dataKey="pct" radius={[8, 8, 0, 0]} maxBarSize={44}>
               {weeklyData.map((d: any, i: number) => {
                 const isToday = d?.day === DAY_ABBR[new Date().getDay()];
-                return <Cell key={i} fill="url(#bar-grad)" style={isToday ? { filter: "drop-shadow(0 0 8px oklch(0.75 0.18 55 / 0.6))" } : undefined} />;
+                return (
+                  <Cell
+                    key={i}
+                    fill="url(#bar-grad)"
+                    style={
+                      isToday
+                        ? { filter: "drop-shadow(0 0 8px oklch(0.75 0.18 55 / 0.6))" }
+                        : undefined
+                    }
+                  />
+                );
               })}
             </Bar>
           </BarChart>

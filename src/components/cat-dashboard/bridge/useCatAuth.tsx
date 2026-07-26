@@ -8,11 +8,9 @@
  * generated Database type.
  */
 
-import {
-  createContext, useContext, useEffect, useState, useCallback, type ReactNode,
-} from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 // Bypass typed client for CAT-specific tables
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,14 +36,10 @@ interface CatAuthContextType {
 const CatAuthContext = createContext<CatAuthContextType>(null!);
 
 async function seedIfNeeded(userId: string) {
-  const { data: existing } = await db
-    .from('profiles')
-    .select('id')
-    .eq('id', userId)
-    .maybeSingle();
+  const { data: existing } = await db.from("profiles").select("id").eq("id", userId).maybeSingle();
 
   if (!existing) {
-    await db.from('profiles').insert({ id: userId, exam_date: '2026-11-29' });
+    await db.from("profiles").insert({ id: userId, exam_date: "2026-11-29" });
   }
 }
 
@@ -56,11 +50,7 @@ export function CatAuthProvider({ children }: { children: ReactNode }) {
 
   const loadProfile = useCallback(async (userId: string) => {
     await seedIfNeeded(userId);
-    const { data } = await db
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    const { data } = await db.from("profiles").select("*").eq("id", userId).maybeSingle();
     setProfile(data as Profile | null);
   }, []);
 
@@ -71,9 +61,13 @@ export function CatAuthProvider({ children }: { children: ReactNode }) {
       else setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === 'SIGNED_OUT') {
-        setSession(null); setProfile(null); setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setProfile(null);
+        setLoading(false);
       } else if (s?.user) {
         setSession(s);
         loadProfile(s.user.id).catch(console.error);
@@ -96,9 +90,16 @@ export function CatAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <CatAuthContext.Provider value={{
-      session, user: session?.user ?? null, profile, loading, signIn, signOut,
-    }}>
+    <CatAuthContext.Provider
+      value={{
+        session,
+        user: session?.user ?? null,
+        profile,
+        loading,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </CatAuthContext.Provider>
   );

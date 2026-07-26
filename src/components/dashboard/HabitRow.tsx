@@ -1,17 +1,41 @@
 import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  CheckCircle2, Circle, RotateCcw, Play, Pause, Square, AlertCircle, Clock, Timer, X
+  CheckCircle2,
+  Circle,
+  RotateCcw,
+  Play,
+  Pause,
+  Square,
+  AlertCircle,
+  Clock,
+  Timer,
+  X,
 } from "lucide-react";
 import {
-  type Habit, type HabitStatus,
-  habitPct, habitValue, habitTarget, habitStatus, scheduleLabel,
-  setHabitValue, toggleHabit, useHabits,
-  getActiveTimer, startTimer, pauseTimer, resumeTimer, stopAndSaveTimer, cancelTimer
+  type Habit,
+  type HabitStatus,
+  habitPct,
+  habitValue,
+  habitTarget,
+  habitStatus,
+  scheduleLabel,
+  setHabitValue,
+  toggleHabit,
+  useHabits,
+  getActiveTimer,
+  startTimer,
+  pauseTimer,
+  resumeTimer,
+  stopAndSaveTimer,
+  cancelTimer,
 } from "@/lib/habits-store";
 
 function IconOf(name: string) {
-  return (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Icons.CheckCircle2;
+  return (
+    (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name] ??
+    Icons.CheckCircle2
+  );
 }
 
 function formatTimerSec(sec: number): string {
@@ -39,10 +63,13 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
   const target = habitTarget(h);
   const unit = h.unit ?? "";
   const isBreak = h.direction === "break";
-  const isTimeHabit = h.isTimer || ["mins", "hrs", "min", "hr", "minutes", "hours"].includes(unit.toLowerCase());
+  const isTimeHabit =
+    h.isTimer || ["mins", "hrs", "min", "hr", "minutes", "hours"].includes(unit.toLowerCase());
 
   const [draft, setDraft] = useState<string>(value ? String(value) : "");
-  useEffect(() => { setDraft(value ? String(value) : ""); }, [value, dateISO, h.id]);
+  useEffect(() => {
+    setDraft(value ? String(value) : "");
+  }, [value, dateISO, h.id]);
 
   const activeTimer = getActiveTimer();
   const isMyTimer = activeTimer?.habitId === h.id && activeTimer?.dateISO === dateISO;
@@ -83,16 +110,22 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           : "border-border bg-background/30 hover:border-primary/40";
 
   return (
-    <div className={`rounded-xl border ${rowTone} px-3 py-2.5 transition-all min-w-0 overflow-hidden`}>
+    <div
+      className={`rounded-xl border ${rowTone} px-3 py-2.5 transition-all min-w-0 overflow-hidden`}
+    >
       <div className="flex items-center justify-between gap-2 min-w-0">
         <button
-          onClick={() => { if (!hasBenchmarks) toggleHabit(dateISO, h.id); }}
+          onClick={() => {
+            if (!hasBenchmarks) toggleHabit(dateISO, h.id);
+          }}
           className="flex flex-1 items-center gap-3 text-left min-w-0"
           disabled={hasBenchmarks}
         >
           <span
             className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
-            style={{ backgroundColor: `color-mix(in oklab, var(--color-${h.color}) 20%, transparent)` }}
+            style={{
+              backgroundColor: `color-mix(in oklab, var(--color-${h.color}) 20%, transparent)`,
+            }}
           >
             <Icon className="h-4 w-4" />
           </span>
@@ -112,10 +145,13 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             </div>
             {!compact && (
               <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="rounded-full border border-border px-1.5 py-0.5">{scheduleLabel(h)}</span>
+                <span className="rounded-full border border-border px-1.5 py-0.5">
+                  {scheduleLabel(h)}
+                </span>
                 {hasBenchmarks && (
                   <span className="rounded-full border border-border px-1.5 py-0.5">
-                    {isBreak ? "Limit" : "Goal"} {target}{unit}
+                    {isBreak ? "Limit" : "Goal"} {target}
+                    {unit}
                   </span>
                 )}
               </span>
@@ -126,9 +162,17 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
         <div className="flex shrink-0 items-center gap-2">
           {hasBenchmarks ? (
             <div className="text-right">
-              <span className={`text-xs font-semibold truncate max-w-[140px] block ${
-                status === "completed" ? "text-success" : status === "in_progress" ? "text-warning" : status === "failed" ? "text-danger" : "text-muted-foreground"
-              }`}>
+              <span
+                className={`text-xs font-semibold truncate max-w-[140px] block ${
+                  status === "completed"
+                    ? "text-success"
+                    : status === "in_progress"
+                      ? "text-warning"
+                      : status === "failed"
+                        ? "text-danger"
+                        : "text-muted-foreground"
+                }`}
+              >
                 {isBreak
                   ? `${value || 0}${unit} / max ${target}${unit}`
                   : `${value || 0}${unit} · ${Math.round(pct)}%`}
@@ -148,11 +192,16 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           <div className="flex items-center gap-1.5 font-mono text-sm font-bold text-amber-400">
             <Timer className="h-4 w-4 animate-spin text-amber-400" />
             {formatTimerSec(elapsedSec)}
-          </div>          <div className="ml-auto flex items-center gap-1.5">
+          </div>{" "}
+          <div className="ml-auto flex items-center gap-1.5">
             {activeTimer.isRunning ? (
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); pauseTimer(); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  pauseTimer();
+                }}
                 className="flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/20 px-2 py-1 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/30"
               >
                 <Pause className="h-3 w-3" /> Pause
@@ -160,7 +209,11 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             ) : (
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); resumeTimer(); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  resumeTimer();
+                }}
                 className="flex items-center gap-1 rounded-md border border-success/40 bg-success/20 px-2 py-1 text-[11px] font-semibold text-success hover:bg-success/30"
               >
                 <Play className="h-3 w-3" /> Resume
@@ -168,14 +221,22 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             )}
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); stopAndSaveTimer(unit); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopAndSaveTimer(unit);
+              }}
               className="flex items-center gap-1 rounded-md gradient-brand px-2.5 py-1 text-[11px] font-semibold text-white shadow"
             >
               <Square className="h-3 w-3 fill-current" /> Save Time
             </button>
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); cancelTimer(); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelTimer();
+              }}
               title="Cancel Timer"
               className="rounded-md border border-border bg-background p-1 text-muted-foreground hover:text-foreground"
             >
@@ -188,7 +249,11 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           {isBreak && (
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, 0); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setHabitValue(dateISO, h.id, 0);
+              }}
               className={`rounded-full border px-2 py-1 text-[11px] font-medium transition ${value === 0 ? "border-success bg-success/15 text-success" : "border-border bg-background hover:border-success/40"}`}
             >
               0{unit}
@@ -201,7 +266,11 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
               <button
                 key={b}
                 type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, b); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setHabitValue(dateISO, h.id, b);
+                }}
                 className={`rounded-full border px-2 py-1 text-[11px] font-medium transition ${
                   active
                     ? good
@@ -210,7 +279,8 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
                     : "border-border bg-background hover:border-primary/40"
                 }`}
               >
-                {b}{unit}
+                {b}
+                {unit}
               </button>
             );
           })}
@@ -218,7 +288,11 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           {(isTimeHabit || hasBenchmarks) && !isMyTimer && (
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); startTimer(h.id, dateISO); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                startTimer(h.id, dateISO);
+              }}
               title="Start Timer Stopwatch"
               className="flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400 hover:bg-amber-500/20"
             >
@@ -235,14 +309,20 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onBlur={(e) => commitNumber(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+              }}
               placeholder="0"
               className="w-16 rounded-lg border border-border bg-background px-2 py-1 text-right text-xs outline-none focus:border-primary"
             />
             {unit && <span className="text-[11px] text-muted-foreground">{unit}</span>}
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setHabitValue(dateISO, h.id, 0); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setHabitValue(dateISO, h.id, 0);
+              }}
               title="Reset"
               className="rounded-lg border border-border bg-background p-1 text-muted-foreground hover:border-primary/40 hover:text-foreground"
             >
@@ -256,10 +336,27 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
 }
 
 // Convenience wrapper: given full state, render row
-export function HabitRowConnected({ habit, dateISO, compact }: { habit: Habit; dateISO: string; compact?: boolean }) {
+export function HabitRowConnected({
+  habit,
+  dateISO,
+  compact,
+}: {
+  habit: Habit;
+  dateISO: string;
+  compact?: boolean;
+}) {
   const s = useHabits();
   const pct = habitPct(s, habit, dateISO);
   const value = habitValue(s, habit, dateISO);
   const status = habitStatus(s, habit, dateISO);
-  return <HabitRow habit={habit} dateISO={dateISO} status={status} pct={pct} value={value} compact={compact} />;
+  return (
+    <HabitRow
+      habit={habit}
+      dateISO={dateISO}
+      status={status}
+      pct={pct}
+      value={value}
+      compact={compact}
+    />
+  );
 }

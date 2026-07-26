@@ -14,18 +14,22 @@ export interface DateConfig {
 }
 
 export interface ScheduleBlock {
-  s: string;             // start "HH:MM"
-  e: string;             // end   "HH:MM"
-  t?: string;            // title
-  d?: string;            // description
-  c: 'cat' | 'tech' | 'health' | 'admin' | 'opt';
-  dyn?: 'tech' | 'mock' | 'college';
-  tool?: 'breath' | 'meditate';
+  s: string; // start "HH:MM"
+  e: string; // end   "HH:MM"
+  t?: string; // title
+  d?: string; // description
+  c: "cat" | "tech" | "health" | "admin" | "opt";
+  dyn?: "tech" | "mock" | "college";
+  tool?: "breath" | "meditate";
 }
 
 export type ScheduleKey =
-  | 'era1_weekday' | 'era1_saturday' | 'era1_sunday'
-  | 'era2_weekday' | 'era2_saturday' | 'era2_sunday';
+  | "era1_weekday"
+  | "era1_saturday"
+  | "era1_sunday"
+  | "era2_weekday"
+  | "era2_saturday"
+  | "era2_sunday";
 
 export type ScheduleMap = Record<ScheduleKey, ScheduleBlock[]>;
 
@@ -75,10 +79,10 @@ export interface ErrorEntry {
   user_id?: string;
   date: string;
   question: string;
-  type: 'Missed' | 'Guessed Right';
-  cause: 'Concept Gap' | 'Silly Mistake' | 'Timing';
+  type: "Missed" | "Guessed Right";
+  cause: "Concept Gap" | "Silly Mistake" | "Timing";
   fix: string;
-  section: 'VARC' | 'DILR' | 'QA' | 'General';
+  section: "VARC" | "DILR" | "QA" | "General";
   topic?: string;
   mock_number?: number | null;
   created_at?: string;
@@ -89,8 +93,8 @@ export interface MockResult {
   user_id?: string;
   date: string;
   mock_number?: number;
-  mock_type: 'DashCAT' | 'Sectional' | 'PYP' | 'Other';
-  section: 'VARC' | 'DILR' | 'QA' | 'Overall';
+  mock_type: "DashCAT" | "Sectional" | "PYP" | "Other";
+  section: "VARC" | "DILR" | "QA" | "Overall";
   score?: number;
   total_marks?: number;
   attempted?: number;
@@ -103,14 +107,20 @@ export interface MockResult {
   created_at?: string;
 }
 
+export interface TopicHistory {
+  date: string; // YYYY-MM-DD
+  confidence: number;
+}
+
 export interface TopicProgress {
   id?: string;
   user_id?: string;
-  section: 'VARC' | 'DILR' | 'QA';
+  section: "VARC" | "DILR" | "QA";
   topic_name: string;
-  status: 'Not Started' | 'In Progress' | 'Concept Done' | 'Practice Done' | 'Mastered';
+  status: "Not Started" | "In Progress" | "Concept Done" | "Practice Done" | "Mastered";
   confidence?: number;
   updated_at?: string;
+  history?: TopicHistory[]; // 7-day confidence history
 }
 
 export interface DailyActivity {
@@ -125,7 +135,7 @@ export interface BoardCard {
   user_id?: string;
   title: string;
   description?: string;
-  column_id: 'focus_now' | 'today' | 'this_week' | 'backlog' | 'done';
+  column_id: "focus_now" | "today" | "this_week" | "backlog" | "done";
   tags?: string[];
   impact: number;
   urgency: number;
@@ -203,7 +213,7 @@ export interface BoardSeedCard {
   id: string;
   title: string;
   desc: string;
-  column: 'focus' | 'today' | 'week' | 'backlog' | 'done';
+  column: "focus" | "today" | "week" | "backlog" | "done";
   impact: number;
   urgency: number;
   effort: number;
@@ -219,5 +229,5 @@ export interface BreathPattern {
 export interface Toast {
   id: string;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: "success" | "error" | "info";
 }

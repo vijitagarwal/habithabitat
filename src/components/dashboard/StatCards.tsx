@@ -2,11 +2,15 @@ import { Flame, Trophy, Target, CheckCircle2 } from "lucide-react";
 import { useScopedStats } from "@/lib/scope-aware-stats";
 import { todayISO } from "@/lib/habits-store";
 
-function Card({ children, accent = "var(--brand)" }: { children: React.ReactNode; accent?: string }) {
+function Card({
+  children,
+  accent = "var(--brand)",
+}: {
+  children: React.ReactNode;
+  accent?: string;
+}) {
   return (
-    <div
-      className="card-glass relative flex items-center gap-4 rounded-2xl p-6 min-h-[120px] overflow-hidden transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5"
-    >
+    <div className="card-glass relative flex items-center gap-4 rounded-2xl p-6 min-h-[120px] overflow-hidden transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-90"
@@ -17,7 +21,15 @@ function Card({ children, accent = "var(--brand)" }: { children: React.ReactNode
   );
 }
 
-function CircularProgress({ value, size = 60, stroke = 6 }: { value: number; size?: number; stroke?: number }) {
+function CircularProgress({
+  value,
+  size = 60,
+  stroke = 6,
+}: {
+  value: number;
+  size?: number;
+  stroke?: number;
+}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
@@ -33,12 +45,24 @@ function CircularProgress({ value, size = 60, stroke = 6 }: { value: number; siz
           <stop offset="100%" stopColor="oklch(0.75 0.18 55)" />
         </linearGradient>
       </defs>
-      <circle cx={size / 2} cy={size / 2} r={r} stroke="oklch(0.3 0.03 265)" strokeWidth={stroke} fill="none" />
       <circle
-        cx={size / 2} cy={size / 2} r={r}
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke="oklch(0.3 0.03 265)"
+        strokeWidth={stroke}
+        fill="none"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
         stroke="url(#ring-grad)"
-        strokeWidth={stroke} fill="none"
-        strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
+        strokeWidth={stroke}
+        fill="none"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -59,7 +83,9 @@ export function StatCards() {
             {isCat ? "CAT Prep Progress" : "Overall Progress"}
           </div>
           <div className="mt-1 text-base font-semibold">Last 30 days</div>
-          <div className={`mt-1 text-xs font-medium ${overall >= 60 ? "text-success" : "text-warning"}`}>
+          <div
+            className={`mt-1 text-xs font-medium ${overall >= 60 ? "text-success" : "text-warning"}`}
+          >
             {overall >= 80 ? "Excellent 🔥" : overall >= 60 ? "On track 👍" : "Needs focus ⚡"}
           </div>
         </div>
@@ -87,18 +113,34 @@ export function StatCards() {
           <div className="mt-0.5 text-3xl font-bold tracking-tight">
             {longest.days} <span className="text-sm font-normal text-muted-foreground">days</span>
           </div>
-          <div className="mt-0.5 text-xs text-muted-foreground">{longest.from} – {longest.to}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">
+            {longest.from} – {longest.to}
+          </div>
         </div>
       </Card>
 
       <Card accent="var(--success)">
         <div className="relative grid place-items-center">
           <svg width={60} height={60} className="-rotate-90">
-            <circle cx={30} cy={30} r={25} stroke="oklch(0.3 0.03 265)" strokeWidth={6} fill="none" />
-            <circle cx={30} cy={30} r={25} stroke="oklch(0.72 0.18 155)" strokeWidth={6} fill="none"
+            <circle
+              cx={30}
+              cy={30}
+              r={25}
+              stroke="oklch(0.3 0.03 265)"
+              strokeWidth={6}
+              fill="none"
+            />
+            <circle
+              cx={30}
+              cy={30}
+              r={25}
+              stroke="oklch(0.72 0.18 155)"
+              strokeWidth={6}
+              fill="none"
               strokeDasharray={2 * Math.PI * 25}
               strokeDashoffset={2 * Math.PI * 25 - (todayStats.pct / 100) * 2 * Math.PI * 25}
-              strokeLinecap="round" />
+              strokeLinecap="round"
+            />
           </svg>
           <CheckCircle2 className="absolute h-6 w-6 text-success" />
         </div>
@@ -106,7 +148,10 @@ export function StatCards() {
           <div className="text-xs text-muted-foreground">
             {isCat ? "CAT Tasks Today" : "Completion Today"}
           </div>
-          <div className="mt-0.5 text-3xl font-bold tracking-tight">{todayStats.done} <span className="text-sm text-muted-foreground">/ {todayStats.total}</span></div>
+          <div className="mt-0.5 text-3xl font-bold tracking-tight">
+            {todayStats.done}{" "}
+            <span className="text-sm text-muted-foreground">/ {todayStats.total}</span>
+          </div>
           <div className="mt-0.5 text-xs font-medium text-success">{todayStats.pct}% completed</div>
         </div>
       </Card>
@@ -118,9 +163,13 @@ export function StatCards() {
         <div>
           <div className="text-xs text-muted-foreground">Monthly Goal</div>
           <div className="mt-0.5 text-3xl font-bold tracking-tight">{monthlyGoal}%</div>
-          <div className={`mt-0.5 flex items-center gap-1 text-xs font-medium ${overall >= monthlyGoal ? "text-success" : "text-warning"}`}>
+          <div
+            className={`mt-0.5 flex items-center gap-1 text-xs font-medium ${overall >= monthlyGoal ? "text-success" : "text-warning"}`}
+          >
             {overall >= monthlyGoal ? "On Track" : "Behind target"}
-            <span className={`h-1.5 w-1.5 rounded-full ${overall >= monthlyGoal ? "bg-success" : "bg-warning"}`} />
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${overall >= monthlyGoal ? "bg-success" : "bg-warning"}`}
+            />
           </div>
         </div>
       </Card>

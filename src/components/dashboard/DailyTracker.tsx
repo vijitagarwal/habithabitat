@@ -14,18 +14,29 @@ function addDays(iso: string, delta: number) {
   return `${yy}-${mm}-${dd}`;
 }
 
-interface Props { initialDate?: string; }
+interface Props {
+  initialDate?: string;
+}
 
 export function DailyTracker({ initialDate }: Props) {
   const s = useHabits();
   const scope = useScope();
   const [date, setDate] = useState(initialDate ?? todayISO());
-  useEffect(() => { if (initialDate) setDate(initialDate); }, [initialDate]);
+  useEffect(() => {
+    if (initialDate) setDate(initialDate);
+  }, [initialDate]);
   const scheduled = filterHabitsByScope(habitsFor(s, date), scope);
   const stats = completionsForDate(s, date);
   const [label, setLabel] = useState("");
   useEffect(() => {
-    setLabel(new Date(date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }));
+    setLabel(
+      new Date(date + "T00:00:00").toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    );
   }, [date]);
 
   return (
@@ -33,27 +44,45 @@ export function DailyTracker({ initialDate }: Props) {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold">Daily Tracker</h3>
-          <p className="text-xs text-muted-foreground" suppressHydrationWarning>{label}</p>
+          <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+            {label}
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setDate(addDays(date, -1))} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40">
+          <button
+            onClick={() => setDate(addDays(date, -1))}
+            className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"
+          >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <DatePicker value={date} onChange={setDate} />
-          <button onClick={() => setDate(addDays(date, 1))} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40">
+          <button
+            onClick={() => setDate(addDays(date, 1))}
+            className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"
+          >
             <ChevronRight className="h-4 w-4" />
           </button>
-          <button onClick={() => setDate(todayISO())} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/40">
+          <button
+            onClick={() => setDate(todayISO())}
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/40"
+          >
             Today
           </button>
         </div>
       </div>
 
       <div className="mb-4 flex items-center gap-3">
-        <div className={`h-2.5 w-full overflow-hidden rounded-full bg-muted ${stats.pct === 100 ? "pulse-glow" : ""}`}>
-          <div className="h-full gradient-amber-teal transition-all duration-500" style={{ width: `${stats.pct}%` }} />
+        <div
+          className={`h-2.5 w-full overflow-hidden rounded-full bg-muted ${stats.pct === 100 ? "pulse-glow" : ""}`}
+        >
+          <div
+            className="h-full gradient-amber-teal transition-all duration-500"
+            style={{ width: `${stats.pct}%` }}
+          />
         </div>
-        <span className="shrink-0 text-sm font-semibold tabular-nums">{stats.done}/{stats.total} · {stats.pct}%</span>
+        <span className="shrink-0 text-sm font-semibold tabular-nums">
+          {stats.done}/{stats.total} · {stats.pct}%
+        </span>
       </div>
 
       {scheduled.length === 0 ? (

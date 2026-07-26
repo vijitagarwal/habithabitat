@@ -8,8 +8,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  User, Mail, MapPin, Target, BookOpen, Phone,
-  LogOut, Edit3, Check, X, ChevronDown, Trophy,
+  User,
+  Mail,
+  MapPin,
+  Target,
+  BookOpen,
+  Phone,
+  LogOut,
+  Edit3,
+  Check,
+  X,
+  ChevronDown,
+  Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,16 +76,15 @@ export function ProfileModal({ onSignOut, compact }: Props) {
     if (!user) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = supabase as any;
-    db
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
+    db.from("profiles")
+      .select("*")
+      .eq("id", user.id)
       .single()
       .then(async ({ data, error }: { data: Profile | null; error: unknown }) => {
         if (error || !data) {
-          const name = user.email.split('@')[0];
+          const name = user.email.split("@")[0];
           const { data: created } = await db
-            .from('profiles')
+            .from("profiles")
             .insert({ id: user.id, display_name: name, cat_year: 2026 })
             .select()
             .single();
@@ -123,7 +132,7 @@ export function ProfileModal({ onSignOut, compact }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = supabase as any;
     const { data } = await db
-      .from('profiles')
+      .from("profiles")
       .upsert({ id: user.id, ...draft })
       .select()
       .single();
@@ -145,7 +154,10 @@ export function ProfileModal({ onSignOut, compact }: Props) {
     <div ref={containerRef} className="relative">
       {/* ── Avatar trigger button ── */}
       <button
-        onClick={() => { setOpen((v) => !v); setEditing(false); }}
+        onClick={() => {
+          setOpen((v) => !v);
+          setEditing(false);
+        }}
         title="Profile & Settings"
         className={`flex items-center gap-2 rounded-full gradient-brand font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity ${
           compact ? "h-9 w-9 justify-center text-sm" : "h-10 w-10 justify-center text-sm"
@@ -158,7 +170,6 @@ export function ProfileModal({ onSignOut, compact }: Props) {
       {/* ── Dropdown panel ── */}
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-150">
-
           {/* Header strip */}
           <div className="relative bg-gradient-to-br from-primary/20 to-brand-2/20 px-5 py-4">
             <div className="flex items-center gap-3">
@@ -169,7 +180,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                 <p className="truncate text-base font-semibold text-foreground">{displayName}</p>
                 <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                 {profile?.target_college && (
-                  <p className="mt-0.5 truncate text-xs text-primary/80">🎯 {profile.target_college}</p>
+                  <p className="mt-0.5 truncate text-xs text-primary/80">
+                    🎯 {profile.target_college}
+                  </p>
                 )}
               </div>
             </div>
@@ -186,25 +199,32 @@ export function ProfileModal({ onSignOut, compact }: Props) {
 
           {/* Body */}
           <div className="divide-y divide-border">
-
             {/* ── View mode ── */}
             {!editing && (
               <div className="space-y-1 px-5 py-3">
                 {[
-                  { icon: Target, label: "Target Percentile", value: profile?.target_percentile ? `${profile.target_percentile}%ile` : null },
+                  {
+                    icon: Target,
+                    label: "Target Percentile",
+                    value: profile?.target_percentile ? `${profile.target_percentile}%ile` : null,
+                  },
                   { icon: Trophy, label: "CAT Year", value: `CAT ${profile?.cat_year ?? 2026}` },
                   { icon: MapPin, label: "City", value: profile?.city },
                   { icon: Phone, label: "Phone", value: profile?.phone },
                   { icon: BookOpen, label: "Bio", value: profile?.bio },
-                ].filter((r) => r.value).map((row) => (
-                  <div key={row.label} className="flex items-start gap-2.5 py-1">
-                    <row.icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70" />
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{row.label}</p>
-                      <p className="truncate text-sm text-foreground">{row.value}</p>
+                ]
+                  .filter((r) => r.value)
+                  .map((row) => (
+                    <div key={row.label} className="flex items-start gap-2.5 py-1">
+                      <row.icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                          {row.label}
+                        </p>
+                        <p className="truncate text-sm text-foreground">{row.value}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
                 {!profile?.target_percentile && !profile?.city && !profile?.bio && (
                   <p className="py-2 text-center text-xs text-muted-foreground">
                     Click <strong>Edit</strong> to complete your profile
@@ -218,7 +238,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
               <div className="space-y-3 px-5 py-4">
                 {/* Display name */}
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={draft.display_name ?? ""}
@@ -229,7 +251,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                 </div>
                 {/* Bio */}
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Bio / Goal</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Bio / Goal
+                  </label>
                   <textarea
                     value={draft.bio ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, bio: e.target.value }))}
@@ -241,7 +265,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                 {/* Target college + percentile row */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Target IIM</label>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Target IIM
+                    </label>
                     <input
                       type="text"
                       value={draft.target_college ?? ""}
@@ -251,14 +277,21 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Target %ile</label>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Target %ile
+                    </label>
                     <input
                       type="number"
                       min={0}
                       max={100}
                       step={0.5}
                       value={draft.target_percentile ?? ""}
-                      onChange={(e) => setDraft((d) => ({ ...d, target_percentile: parseFloat(e.target.value) || undefined }))}
+                      onChange={(e) =>
+                        setDraft((d) => ({
+                          ...d,
+                          target_percentile: parseFloat(e.target.value) || undefined,
+                        }))
+                      }
                       placeholder="99.5"
                       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
@@ -267,7 +300,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                 {/* City + Phone row */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">City</label>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      City
+                    </label>
                     <input
                       type="text"
                       value={draft.city ?? ""}
@@ -277,7 +312,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phone</label>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Phone
+                    </label>
                     <input
                       type="tel"
                       value={draft.phone ?? ""}
@@ -321,7 +358,6 @@ export function ProfileModal({ onSignOut, compact }: Props) {
                 Sign out
               </button>
             </div>
-
           </div>
         </div>
       )}

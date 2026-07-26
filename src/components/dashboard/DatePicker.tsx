@@ -16,7 +16,15 @@ interface Props {
   placeholder?: string;
 }
 
-export function DatePicker({ value, onChange, className, size = "sm", align = "start", disabled, placeholder = "Pick a date" }: Props) {
+export function DatePicker({
+  value,
+  onChange,
+  className,
+  size = "sm",
+  align = "start",
+  disabled,
+  placeholder = "Pick a date",
+}: Props) {
   const selected = value ? parseISO(value) : undefined;
   const [open, setOpen] = React.useState(false);
   return (

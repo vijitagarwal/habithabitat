@@ -33,13 +33,14 @@ export function QuickStats() {
 
   return (
     <div className="card-glass rounded-2xl p-5">
-      <h3 className="mb-3 text-base font-semibold">
-        {isCat ? "CAT Quick Stats" : "Quick Stats"}
-      </h3>
+      <h3 className="mb-3 text-base font-semibold">{isCat ? "CAT Quick Stats" : "Quick Stats"}</h3>
       <div className="grid grid-cols-2 gap-3">
         {items.map((i) => (
           <div key={i.label} className="rounded-xl border border-border bg-background/30 p-3">
-            <div className="mb-2 grid h-8 w-8 place-items-center rounded-lg" style={{ backgroundColor: `color-mix(in oklab, ${i.tint} 20%, transparent)` }}>
+            <div
+              className="mb-2 grid h-8 w-8 place-items-center rounded-lg"
+              style={{ backgroundColor: `color-mix(in oklab, ${i.tint} 20%, transparent)` }}
+            >
               <i.icon className="h-4 w-4" style={{ color: i.tint }} />
             </div>
             <div className="text-xs text-muted-foreground">{i.label}</div>

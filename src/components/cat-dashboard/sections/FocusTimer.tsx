@@ -1,32 +1,32 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { bell, resumeCtx } from '../audio/audio';
-import { useKV } from '../bridge';
-import { useActivity } from '../bridge';
-import { useToast } from '../bridge';
-import { todayKey } from '../engine/schedule';
-import type { FocusLog } from '../types';
-import confetti from 'canvas-confetti';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { bell, resumeCtx } from "../audio/audio";
+import { useKV } from "../bridge";
+import { useActivity } from "../bridge";
+import { useToast } from "../bridge";
+import { todayKey } from "../engine/schedule";
+import type { FocusLog } from "../types";
+import confetti from "canvas-confetti";
 
-const SUBJECTS = ['CAT - VARC', 'CAT - DILR', 'CAT - QA', 'FlyRank', 'DSA', 'Free'];
+const SUBJECTS = ["CAT - VARC", "CAT - DILR", "CAT - QA", "FlyRank", "DSA", "Free"];
 const MODES = [
-  { label: 'Focus Sprint', mins: 25, icon: '⚡' },
-  { label: 'Deep Work',    mins: 50, icon: '🔥' },
-  { label: 'Custom',       mins: -1, icon: '✏️' },
+  { label: "Focus Sprint", mins: 25, icon: "⚡" },
+  { label: "Deep Work", mins: 50, icon: "🔥" },
+  { label: "Custom", mins: -1, icon: "✏️" },
 ];
 
 export default function FocusTimer() {
-  const { value: focusLog, setValue: setFocusLog } = useKV<FocusLog>('focus_log', { sessions: [] });
+  const { value: focusLog, setValue: setFocusLog } = useKV<FocusLog>("focus_log", { sessions: [] });
   const { markActivity } = useActivity();
-  const { addToast }     = useToast();
+  const { addToast } = useToast();
 
-  const [modeIdx,   setModeIdx]   = useState(0);
-  const [subject,   setSubject]   = useState(SUBJECTS[0]);
-  const [custom,    setCustom]    = useState(30);
-  const [running,   setRunning]   = useState(false);
-  const [secsLeft,  setSecsLeft]  = useState(0);
-  const [fullscreen,setFullscreen]= useState(false);
-  const [done,      setDone]      = useState(false);
+  const [modeIdx, setModeIdx] = useState(0);
+  const [subject, setSubject] = useState(SUBJECTS[0]);
+  const [custom, setCustom] = useState(30);
+  const [running, setRunning] = useState(false);
+  const [secsLeft, setSecsLeft] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [done, setDone] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -57,9 +57,14 @@ export default function FocusTimer() {
           setDone(true);
           bell();
           // Confetti!
-          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#E8A23D', '#3FAFA8', '#9C90C4'] });
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ["#E8A23D", "#3FAFA8", "#9C90C4"],
+          });
           const today = todayKey();
-          const dur   = getDurationMins();
+          const dur = getDurationMins();
           const newLog: FocusLog = {
             sessions: [...(focusLog.sessions || []), { date: today, subject, durationMins: dur }],
           };
@@ -71,16 +76,18 @@ export default function FocusTimer() {
         return prev - 1;
       });
     }, 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [running, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast]);
 
   const minsLeft = Math.floor(secsLeft / 60);
-  const secsDisp = String(secsLeft % 60).padStart(2, '0');
+  const secsDisp = String(secsLeft % 60).padStart(2, "0");
   const pct = running ? ((getDurationMins() * 60 - secsLeft) / (getDurationMins() * 60)) * 100 : 0;
 
   const today = todayKey();
   const todaySessions = (focusLog.sessions || []).filter((s) => s.date === today);
-  const weekSessions  = (focusLog.sessions || []).filter((s) => {
+  const weekSessions = (focusLog.sessions || []).filter((s) => {
     const d = new Date(s.date);
     const now = new Date();
     const diff = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
@@ -99,17 +106,59 @@ export default function FocusTimer() {
           exit={{ opacity: 0 }}
           className="focus-mode"
         >
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 24,
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.85rem",
+                color: "var(--text-muted)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+              }}
+            >
               {subject}
             </div>
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '4rem', fontWeight: 700, color: 'var(--amber)' }}>
+            <div
+              style={{
+                fontFamily: "JetBrains Mono",
+                fontSize: "4rem",
+                fontWeight: 700,
+                color: "var(--amber)",
+              }}
+            >
               {minsLeft}:{secsDisp}
             </div>
-            <div style={{ width: 240, height: 4, background: 'var(--bg-raised)', borderRadius: 99, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--amber)', borderRadius: 99, transition: 'width 1s linear' }} />
+            <div
+              style={{
+                width: 240,
+                height: 4,
+                background: "var(--bg-raised)",
+                borderRadius: 99,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${pct}%`,
+                  background: "var(--amber)",
+                  borderRadius: 99,
+                  transition: "width 1s linear",
+                }}
+              />
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => setFullscreen(false)} style={{ color: 'var(--text-muted)' }}>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setFullscreen(false)}
+              style={{ color: "var(--text-muted)" }}
+            >
               Exit focus mode
             </button>
           </div>
@@ -127,47 +176,70 @@ export default function FocusTimer() {
 
       {focusModeEl}
 
-      <div className="card" style={{ padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-
+      <div
+        className="card"
+        style={{
+          padding: 28,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 20,
+        }}
+      >
         {/* Mode selection */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           {MODES.map((mode, i) => (
             <button
               key={mode.label}
-              className={`btn ${modeIdx === i ? 'btn-amber' : 'btn-ghost'} btn-sm`}
-              onClick={() => { if (!running) setModeIdx(i); }}
+              className={`btn ${modeIdx === i ? "btn-amber" : "btn-ghost"} btn-sm`}
+              onClick={() => {
+                if (!running) setModeIdx(i);
+              }}
               disabled={running}
             >
-              {mode.icon} {mode.label} {mode.mins > 0 ? `(${mode.mins}m)` : ''}
+              {mode.icon} {mode.label} {mode.mins > 0 ? `(${mode.mins}m)` : ""}
             </button>
           ))}
         </div>
 
         {/* Custom duration input */}
         {modeIdx === 2 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <label htmlFor="custom-dur" style={{ margin: 0, textTransform: 'none', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Duration:</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <label
+              htmlFor="custom-dur"
+              style={{
+                margin: 0,
+                textTransform: "none",
+                fontSize: "0.85rem",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Duration:
+            </label>
             <input
               id="custom-dur"
               type="number"
               className="input"
               style={{ width: 80 }}
               value={custom}
-              min={1} max={120}
+              min={1}
+              max={120}
               onChange={(e) => setCustom(Math.min(120, Math.max(1, Number(e.target.value))))}
               disabled={running}
             />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>minutes</span>
+            <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>minutes</span>
           </div>
         )}
 
         {/* Subject tag */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           {SUBJECTS.map((s) => (
             <button
               key={s}
-              className={`btn ${subject === s ? 'btn-amber' : 'btn-ghost'} btn-sm`}
-              onClick={() => { if (!running) setSubject(s); }}
+              className={`btn ${subject === s ? "btn-amber" : "btn-ghost"} btn-sm`}
+              onClick={() => {
+                if (!running) setSubject(s);
+              }}
               disabled={running}
             >
               {s}
@@ -176,20 +248,44 @@ export default function FocusTimer() {
         </div>
 
         {/* Timer display */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '3rem', fontWeight: 700, color: 'var(--amber)' }}>
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              fontFamily: "JetBrains Mono",
+              fontSize: "3rem",
+              fontWeight: 700,
+              color: "var(--amber)",
+            }}
+          >
             {running ? `${minsLeft}:${secsDisp}` : `${getDurationMins()}:00`}
           </div>
           {running && (
-            <div style={{ width: 200, height: 4, background: 'var(--bg-raised)', borderRadius: 99, overflow: 'hidden', margin: '8px auto 0' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--amber)', borderRadius: 99, transition: 'width 1s linear' }} />
+            <div
+              style={{
+                width: 200,
+                height: 4,
+                background: "var(--bg-raised)",
+                borderRadius: 99,
+                overflow: "hidden",
+                margin: "8px auto 0",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${pct}%`,
+                  background: "var(--amber)",
+                  borderRadius: 99,
+                  transition: "width 1s linear",
+                }}
+              />
             </div>
           )}
           {done && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              style={{ color: 'var(--teal)', fontWeight: 600, marginTop: 8 }}
+              style={{ color: "var(--teal)", fontWeight: 600, marginTop: 8 }}
             >
               Session complete! 🎉
             </motion.div>
@@ -197,14 +293,21 @@ export default function FocusTimer() {
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: "flex", gap: 10 }}>
           {!running ? (
-            <button id="focus-start" className="btn btn-amber" onClick={start} style={{ minWidth: 140 }}>
-              {done ? 'Start again' : '▶ Start'}
+            <button
+              id="focus-start"
+              className="btn btn-amber"
+              onClick={start}
+              style={{ minWidth: 140 }}
+            >
+              {done ? "Start again" : "▶ Start"}
             </button>
           ) : (
             <>
-              <button className="btn btn-ghost" onClick={stop}>Stop</button>
+              <button className="btn btn-ghost" onClick={stop}>
+                Stop
+              </button>
               <button className="btn btn-ghost" onClick={() => setFullscreen(true)}>
                 ⛶ Focus mode
               </button>
@@ -213,7 +316,7 @@ export default function FocusTimer() {
         </div>
 
         {/* Session stats */}
-        <div style={{ display: 'flex', gap: 20, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: "flex", gap: 20, fontSize: "0.8rem", color: "var(--text-muted)" }}>
           <span>Today: {todaySessions.length} sessions</span>
           <span>This week: {weekHours.toFixed(1)}h</span>
         </div>

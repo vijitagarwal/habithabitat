@@ -1,14 +1,46 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import React from "react";
 
-export type HabitCategory = "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
+export type HabitCategory =
+  "Health" | "Mind" | "Productivity" | "Learning" | "Lifestyle" | "CAT Prep";
 
-export const CATEGORIES: HabitCategory[] = ["Health", "Mind", "Productivity", "Learning", "Lifestyle", "CAT Prep"];
+export const CATEGORIES: HabitCategory[] = [
+  "Health",
+  "Mind",
+  "Productivity",
+  "Learning",
+  "Lifestyle",
+  "CAT Prep",
+];
 export const ICON_CHOICES = [
-  "Sparkles", "Dumbbell", "BookOpen", "NotebookPen", "Code2", "Droplets", "Ban",
-  "Moon", "GraduationCap", "Footprints", "Heart", "Apple", "Bike", "Music",
-  "Palette", "Sun", "Coffee", "Leaf", "Brain", "Star", "Target", "CheckCircle2",
-  "Calculator", "PenTool", "Timer", "Trophy", "Flame",
+  "Sparkles",
+  "Dumbbell",
+  "BookOpen",
+  "NotebookPen",
+  "Code2",
+  "Droplets",
+  "Ban",
+  "Moon",
+  "GraduationCap",
+  "Footprints",
+  "Heart",
+  "Apple",
+  "Bike",
+  "Music",
+  "Palette",
+  "Sun",
+  "Coffee",
+  "Leaf",
+  "Brain",
+  "Star",
+  "Target",
+  "CheckCircle2",
+  "Calculator",
+  "PenTool",
+  "Timer",
+  "Trophy",
+  "Flame",
 ];
 export const COLOR_CHOICES = ["brand", "brand-2", "success", "warning", "danger", "info"];
 
@@ -72,7 +104,9 @@ export interface HabitState {
 
 const BASE_KEY = "habit-tracker-v2";
 let userKey: string | null = null;
-function KEY() { return userKey ? `${BASE_KEY}::${userKey}` : BASE_KEY; }
+function KEY() {
+  return userKey ? `${BASE_KEY}::${userKey}` : BASE_KEY;
+}
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const daysAgoISO = (n: number) => {
@@ -84,24 +118,117 @@ const daysAgoISO = (n: number) => {
 const dailySchedule: Schedule = { type: "daily" };
 
 const seedHabits: Habit[] = [
-  { id: "meditation", name: "Morning Meditation", icon: "Sparkles", category: "Mind", color: "brand", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "exercise", name: "Exercise", icon: "Dumbbell", category: "Health", color: "success", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "read", name: "Read 20 Pages", icon: "BookOpen", category: "Learning", color: "info", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "journal", name: "Daily Journal", icon: "NotebookPen", category: "Mind", color: "brand-2", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "code", name: "Code for 1 Hour", icon: "Code2", category: "Productivity", color: "warning", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "water", name: "Drink Water", icon: "Droplets", category: "Health", color: "info", createdAt: daysAgoISO(60), schedule: dailySchedule, direction: "build", unit: "L", benchmarks: [1, 2, 3] },
-  { id: "nosugar", name: "Limit Sugar", icon: "Ban", category: "Health", color: "danger", createdAt: daysAgoISO(60), schedule: dailySchedule, direction: "break", unit: "g", benchmarks: [5, 10, 20] },
-  { id: "sleep", name: "Sleep by 11 PM", icon: "Moon", category: "Lifestyle", color: "brand", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "learn", name: "Learn Something New", icon: "GraduationCap", category: "Learning", color: "warning", createdAt: daysAgoISO(60), schedule: dailySchedule },
-  { id: "walk", name: "Walk 10K Steps", icon: "Footprints", category: "Health", color: "success", createdAt: daysAgoISO(60), schedule: dailySchedule },
+  {
+    id: "meditation",
+    name: "Morning Meditation",
+    icon: "Sparkles",
+    category: "Mind",
+    color: "brand",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "exercise",
+    name: "Exercise",
+    icon: "Dumbbell",
+    category: "Health",
+    color: "success",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "read",
+    name: "Read 20 Pages",
+    icon: "BookOpen",
+    category: "Learning",
+    color: "info",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "journal",
+    name: "Daily Journal",
+    icon: "NotebookPen",
+    category: "Mind",
+    color: "brand-2",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "code",
+    name: "Code for 1 Hour",
+    icon: "Code2",
+    category: "Productivity",
+    color: "warning",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "water",
+    name: "Drink Water",
+    icon: "Droplets",
+    category: "Health",
+    color: "info",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+    direction: "build",
+    unit: "L",
+    benchmarks: [1, 2, 3],
+  },
+  {
+    id: "nosugar",
+    name: "Limit Sugar",
+    icon: "Ban",
+    category: "Health",
+    color: "danger",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+    direction: "break",
+    unit: "g",
+    benchmarks: [5, 10, 20],
+  },
+  {
+    id: "sleep",
+    name: "Sleep by 11 PM",
+    icon: "Moon",
+    category: "Lifestyle",
+    color: "brand",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "learn",
+    name: "Learn Something New",
+    icon: "GraduationCap",
+    category: "Learning",
+    color: "warning",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
+  {
+    id: "walk",
+    name: "Walk 10K Steps",
+    icon: "Footprints",
+    category: "Health",
+    color: "success",
+    createdAt: daysAgoISO(60),
+    schedule: dailySchedule,
+  },
 ];
 
 function seedCompletions(habits: Habit[]): Record<string, Record<string, boolean>> {
   const out: Record<string, Record<string, boolean>> = {};
   const rates: Record<string, number> = {
-    meditation: 0.9, exercise: 0.95, read: 0.9, journal: 0.88,
-    code: 0.85, water: 0.6, nosugar: 0.55, sleep: 0.8,
-    learn: 0.75, walk: 0.55,
+    meditation: 0.9,
+    exercise: 0.95,
+    read: 0.9,
+    journal: 0.88,
+    code: 0.85,
+    water: 0.6,
+    nosugar: 0.55,
+    sleep: 0.8,
+    learn: 0.75,
+    walk: 0.55,
   };
   for (let i = 60; i >= 0; i--) {
     const day = daysAgoISO(i);
@@ -133,9 +260,10 @@ function seedValues(habits: Habit[]): Record<string, Record<string, number>> {
       const target = Math.max(...h.benchmarks);
       const hcode = h.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
       const mix = Math.abs(Math.sin((i + 1) * 7919 + hcode * 31337) * 100000) % 1;
-      const v = h.direction === "break"
-        ? Math.round(mix * target * 0.6 * 10) / 10
-        : Math.round(mix * target * 10) / 10;
+      const v =
+        h.direction === "break"
+          ? Math.round(mix * target * 0.6 * 10) / 10
+          : Math.round(mix * target * 10) / 10;
       out[day] = out[day] ?? {};
       out[day][h.id] = v;
     }
@@ -158,7 +286,16 @@ function defaultState(): HabitState {
 }
 
 function emptyState(): HabitState {
-  return { habits: [], completions: {}, values: {}, notes: {}, metrics: {}, monthlyGoal: 80, level: 1, xp: 0 };
+  return {
+    habits: [],
+    completions: {},
+    values: {},
+    notes: {},
+    metrics: {},
+    monthlyGoal: 80,
+    level: 1,
+    xp: 0,
+  };
 }
 
 function load(): HabitState {
@@ -166,7 +303,7 @@ function load(): HabitState {
   try {
     // 1. Try user-specific local key
     let raw = userKey ? localStorage.getItem(`habit-tracker-v2::${userKey}`) : null;
-    
+
     // 2. Fallback to unauthenticated key if user-specific key is empty
     if (!raw) {
       raw = localStorage.getItem("habit-tracker-v2");
@@ -203,10 +340,17 @@ function syncToSupabase(uid: string, currentState: HabitState) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
-      await db.from("kv_store").upsert(
-        { user_id: uid, key: "habit_state_v2", value: currentState, updated_at: new Date().toISOString() },
-        { onConflict: "user_id,key" }
-      );
+      await db
+        .from("kv_store")
+        .upsert(
+          {
+            user_id: uid,
+            key: "habit_state_v2",
+            value: currentState,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,key" },
+        );
     } catch (err) {
       console.warn("[habits-store] Supabase cloud sync failed:", err);
     }
@@ -220,10 +364,17 @@ export async function syncNow(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = supabase as any;
     // Push current local state to cloud first
-    await db.from("kv_store").upsert(
-      { user_id: userKey, key: "habit_state_v2", value: state, updated_at: new Date().toISOString() },
-      { onConflict: "user_id,key" }
-    );
+    await db
+      .from("kv_store")
+      .upsert(
+        {
+          user_id: userKey,
+          key: "habit_state_v2",
+          value: state,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,key" },
+      );
     // Fetch remote to verify & update
     const { data } = await db
       .from("kv_store")
@@ -260,10 +411,17 @@ function persist() {
   }
 }
 
-function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
+function subscribe(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
 const serverState: HabitState = emptyState();
-function getSnapshot() { return state; }
-function getServerSnapshot(): HabitState { return serverState; }
+function getSnapshot() {
+  return state;
+}
+function getServerSnapshot(): HabitState {
+  return serverState;
+}
 
 let activeRealtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
@@ -352,7 +510,7 @@ export function setStoreUser(uid: string | null) {
               listeners.forEach((l) => l());
             }
           }
-        }
+        },
       )
       .subscribe();
   }
@@ -382,27 +540,37 @@ export function isScheduledOn(h: Habit, iso: string): boolean {
   const d = new Date(iso + "T00:00:00");
   const dow = d.getDay();
   switch (sch.type) {
-    case "daily": return true;
-    case "weekdays": return (sch.weekdays ?? []).includes(dow);
-    case "weekly": return (sch.weekdays?.[0] ?? 0) === dow;
+    case "daily":
+      return true;
+    case "weekdays":
+      return (sch.weekdays ?? []).includes(dow);
+    case "weekly":
+      return (sch.weekdays?.[0] ?? 0) === dow;
     case "monthly": {
       const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
       if (sch.monthDay === "last") return d.getDate() === last;
       return d.getDate() === (typeof sch.monthDay === "number" ? sch.monthDay : 1);
     }
-    case "oneoff": return sch.date === iso;
-    default: return true;
+    case "oneoff":
+      return sch.date === iso;
+    default:
+      return true;
   }
 }
 
 export function scheduleLabel(h: Habit): string {
   const sch = h.schedule ?? { type: "daily" };
   switch (sch.type) {
-    case "daily": return "Daily";
-    case "weekdays": return (sch.weekdays ?? []).map((d) => WEEKDAY_LABELS[d]).join(", ") || "Weekdays";
-    case "weekly": return `Every ${WEEKDAY_LABELS[sch.weekdays?.[0] ?? 0]}`;
-    case "monthly": return sch.monthDay === "last" ? "Last of month" : `Day ${sch.monthDay ?? 1}`;
-    case "oneoff": return sch.date ? `On ${sch.date}` : "One-off";
+    case "daily":
+      return "Daily";
+    case "weekdays":
+      return (sch.weekdays ?? []).map((d) => WEEKDAY_LABELS[d]).join(", ") || "Weekdays";
+    case "weekly":
+      return `Every ${WEEKDAY_LABELS[sch.weekdays?.[0] ?? 0]}`;
+    case "monthly":
+      return sch.monthDay === "last" ? "Last of month" : `Day ${sch.monthDay ?? 1}`;
+    case "oneoff":
+      return sch.date ? `On ${sch.date}` : "One-off";
   }
 }
 
@@ -493,7 +661,13 @@ export function toggleHabit(dateISO: string, habitId: string) {
 // ---------- CRUD ----------
 
 export function addHabit(input: Omit<Habit, "id" | "createdAt">) {
-  const id = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+  const id =
+    input.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") +
+    "-" +
+    Math.random().toString(36).slice(2, 6);
   const h: Habit = { schedule: { type: "daily" }, ...input, id, createdAt: todayISO() };
   state = { ...state, habits: [...state.habits, h] };
   persist();
@@ -527,7 +701,11 @@ export function setNote(dateISO: string, text: string) {
   persist();
 }
 
-export function setMetric<K extends keyof DailyMetrics>(dateISO: string, key: K, value: DailyMetrics[K] | undefined) {
+export function setMetric<K extends keyof DailyMetrics>(
+  dateISO: string,
+  key: K,
+  value: DailyMetrics[K] | undefined,
+) {
   const existing = state.metrics[dateISO] ?? {};
   const next: DailyMetrics = { ...existing };
   if (value === undefined || value === null || Number.isNaN(value)) delete next[key];
@@ -602,7 +780,7 @@ export function stopAndSaveTimer(unit?: string) {
   if (activeTimer.isRunning) {
     totalSec += Math.floor((Date.now() - activeTimer.startTime) / 1000);
   }
-  
+
   const isHours = unit === "hrs" || unit === "hr" || unit === "hours" || unit === "hour";
   const val = isHours
     ? Math.round((totalSec / 3600) * 100) / 100
@@ -632,7 +810,8 @@ export function cancelTimer() {
 export function completionsForDate(s: HabitState, dateISO: string) {
   const scheduled = habitsFor(s, dateISO);
   if (scheduled.length === 0) return { done: 0, total: 0, pct: 0 };
-  let sum = 0, done = 0;
+  let sum = 0,
+    done = 0;
   for (const h of scheduled) {
     const p = habitPct(s, h, dateISO);
     const status = habitStatus(s, h, dateISO);
@@ -657,7 +836,9 @@ export function currentStreak(s: HabitState): number {
 }
 
 export function longestStreak(s: HabitState): { days: number; from: string; to: string } {
-  let best = 0, cur = 0, bestEnd = "";
+  let best = 0,
+    cur = 0,
+    bestEnd = "";
   const daysBack = 200;
   for (let i = daysBack; i >= 0; i--) {
     const day = daysAgoISO(i);
@@ -666,11 +847,15 @@ export function longestStreak(s: HabitState): { days: number; from: string; to: 
     const { pct } = completionsForDate(s, day);
     if (pct >= 60) {
       cur++;
-      if (cur > best) { best = cur; bestEnd = day; }
+      if (cur > best) {
+        best = cur;
+        bestEnd = day;
+      }
     } else cur = 0;
   }
   const end = new Date(bestEnd || todayISO());
-  const start = new Date(end); start.setDate(end.getDate() - best + 1);
+  const start = new Date(end);
+  start.setDate(end.getDate() - best + 1);
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return { days: best, from: best ? fmt(start) : "—", to: best ? fmt(end) : "—" };
 }
@@ -679,9 +864,11 @@ export function weeklyProgress(s: HabitState) {
   const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const now = new Date();
   const dow = (now.getDay() + 6) % 7;
-  const monday = new Date(now); monday.setDate(now.getDate() - dow);
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dow);
   return labels.map((label, i) => {
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     const iso = d.toISOString().slice(0, 10);
     const { pct } = completionsForDate(s, iso);
     return { day: label, pct, date: iso };
@@ -700,7 +887,8 @@ export function categoryBreakdown(s: HabitState) {
   return CATEGORIES.map((cat) => {
     const catHabits = s.habits.filter((h) => h.category === cat);
     if (catHabits.length === 0) return { cat, pct: 0, color: colors[cat] };
-    let sum = 0, n = 0;
+    let sum = 0,
+      n = 0;
     for (let i = 0; i < 30; i++) {
       const iso = daysAgoISO(i);
       for (const h of catHabits) {
@@ -715,7 +903,8 @@ export function categoryBreakdown(s: HabitState) {
 
 export function overallProgress(s: HabitState): number {
   if (s.habits.length === 0) return 0;
-  let sum = 0, n = 0;
+  let sum = 0,
+    n = 0;
   for (let i = 0; i < 30; i++) {
     const iso = daysAgoISO(i);
     for (const h of s.habits) {
@@ -728,16 +917,20 @@ export function overallProgress(s: HabitState): number {
 }
 
 export function topHabits(s: HabitState) {
-  return s.habits.map((h) => {
-    let sum = 0, n = 0;
-    for (let i = 0; i < 30; i++) {
-      const iso = daysAgoISO(i);
-      if (!isScheduledOn(h, iso)) continue;
-      sum += habitPct(s, h, iso);
-      n++;
-    }
-    return { habit: h, pct: n ? Math.round(sum / n) : 0 };
-  }).sort((a, b) => b.pct - a.pct).slice(0, 5);
+  return s.habits
+    .map((h) => {
+      let sum = 0,
+        n = 0;
+      for (let i = 0; i < 30; i++) {
+        const iso = daysAgoISO(i);
+        if (!isScheduledOn(h, iso)) continue;
+        sum += habitPct(s, h, iso);
+        n++;
+      }
+      return { habit: h, pct: n ? Math.round(sum / n) : 0 };
+    })
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 5);
 }
 
 export function monthlyHeatmap(s: HabitState, year?: number, month?: number) {
@@ -757,7 +950,10 @@ export function monthlyHeatmap(s: HabitState, year?: number, month?: number) {
       const iso = date.toISOString().slice(0, 10);
       const isFuture = isCurrentMonth && d > todayD;
       const rowHs = rowHabits[r].filter((h) => isScheduledOn(h, iso));
-      if (isFuture || rowHs.length === 0) { cells.push({ day: d, row: r, level: -1, hasData: false }); continue; }
+      if (isFuture || rowHs.length === 0) {
+        cells.push({ day: d, row: r, level: -1, hasData: false });
+        continue;
+      }
       let sum = 0;
       for (const h of rowHs) sum += habitPct(s, h, iso);
       const pct = sum / rowHs.length;
@@ -794,6 +990,139 @@ export function perfectDays(s: HabitState): number {
     if (total > 0 && pct === 100) n++;
   }
   return n;
+}
+
+export type Achievement = {
+  id: string;
+  icon: string;
+  label: string;
+  sub: string;
+  from: string;
+  to: string;
+  unlocked: boolean;
+};
+
+/** Returns all possible achievements and their unlocked status */
+export function getAchievements(s: HabitState): Achievement[] {
+  const currentStreakDays = currentStreak(s);
+  const totalCompletions = totalCompleted(s);
+  const perfectDaysCount = perfectDays(s);
+
+  // CAT-specific helpers
+  const catHabits = s.habits.filter((h) => h.category === "CAT Prep");
+  const catCompletions = catHabits.flatMap((h) => {
+    return Object.entries(s.completions).filter(([iso, day]) => day[h.id] && isScheduledOn(h, iso));
+  }).length;
+
+  // Check if all CAT topics are mastered (simplified - assumes topics are stored in KV)
+  // In a real implementation, this would check the topic_progress table
+  const catTopicsMastered = false; // Placeholder - would check actual topic data
+
+  // Check if all CAT checklist items are done
+  const catChecklistDone = false; // Placeholder - would check actual checklist data
+
+  // Check if first CAT topic is finished
+  const firstCatTopicFinished = false; // Placeholder - would check actual topic data
+
+  return [
+    // Streak achievements
+    {
+      id: "streak-7",
+      icon: "Flame",
+      label: "Early Bird",
+      sub: "7 Days",
+      from: "oklch(0.7 0.18 235)",
+      to: "oklch(0.55 0.2 260)",
+      unlocked: currentStreakDays >= 7,
+    },
+    {
+      id: "streak-25",
+      icon: "Flame",
+      label: "Streak Master",
+      sub: "25 Days",
+      from: "oklch(0.75 0.2 55)",
+      to: "oklch(0.65 0.22 25)",
+      unlocked: currentStreakDays >= 25,
+    },
+    {
+      id: "streak-50",
+      icon: "ShieldCheck",
+      label: "Consistent",
+      sub: "50 Days",
+      from: "oklch(0.72 0.18 155)",
+      to: "oklch(0.55 0.2 175)",
+      unlocked: currentStreakDays >= 50,
+    },
+
+    // Completion achievements
+    {
+      id: "completions-100",
+      icon: "CheckCircle2",
+      label: "Centurion",
+      sub: "100 Completions",
+      from: "oklch(0.65 0.2 320)",
+      to: "oklch(0.5 0.22 300)",
+      unlocked: totalCompletions >= 100,
+    },
+    {
+      id: "completions-500",
+      icon: "Award",
+      label: "Gold Achiever",
+      sub: "500 Completions",
+      from: "oklch(0.8 0.17 75)",
+      to: "oklch(0.65 0.2 45)",
+      unlocked: totalCompletions >= 500,
+    },
+
+    // Perfect day achievements
+    {
+      id: "perfect-5",
+      icon: "Star",
+      label: "Flawless Week",
+      sub: "5 Perfect Days",
+      from: "oklch(0.75 0.2 85)",
+      to: "oklch(0.6 0.22 65)",
+      unlocked: perfectDaysCount >= 5,
+    },
+
+    // CAT-specific achievements
+    {
+      id: "cat-first-topic",
+      icon: "GraduationCap",
+      label: "First Topic",
+      sub: "Finished a CAT topic",
+      from: "oklch(0.7 0.22 25)",
+      to: "oklch(0.55 0.2 45)",
+      unlocked: firstCatTopicFinished,
+    },
+    {
+      id: "cat-all-topics",
+      icon: "Trophy",
+      label: "CAT Master",
+      sub: "All topics mastered",
+      from: "oklch(0.75 0.2 55)",
+      to: "oklch(0.6 0.22 35)",
+      unlocked: catTopicsMastered,
+    },
+    {
+      id: "cat-checklist",
+      icon: "ListCheck",
+      label: "CAT Ready",
+      sub: "All checklist items done",
+      from: "oklch(0.68 0.22 350)",
+      to: "oklch(0.5 0.2 330)",
+      unlocked: catChecklistDone,
+    },
+    {
+      id: "cat-50-completions",
+      icon: "Calculator",
+      label: "CAT Grinder",
+      sub: "50 CAT completions",
+      from: "oklch(0.7 0.22 25)",
+      to: "oklch(0.55 0.2 45)",
+      unlocked: catCompletions >= 50,
+    },
+  ];
 }
 
 export { todayISO, daysAgoISO };

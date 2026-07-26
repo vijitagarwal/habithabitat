@@ -15,18 +15,26 @@ export function GoalsView() {
           </div>
           <div>
             <h3 className="text-lg font-semibold">Monthly Goal</h3>
-            <p className="text-xs text-muted-foreground">Set the completion rate you want to hit each month.</p>
+            <p className="text-xs text-muted-foreground">
+              Set the completion rate you want to hit each month.
+            </p>
           </div>
         </div>
 
         <div className="mb-3 flex items-end justify-between">
           <span className="text-4xl font-bold">{s.monthlyGoal}%</span>
-          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${onTrack ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${onTrack ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}
+          >
             {onTrack ? "On Track" : "Behind"}
           </span>
         </div>
         <input
-          type="range" min={10} max={100} step={5} value={s.monthlyGoal}
+          type="range"
+          min={10}
+          max={100}
+          step={5}
+          value={s.monthlyGoal}
           onChange={(e) => setMonthlyGoal(Number(e.target.value))}
           className="w-full accent-primary"
         />
@@ -35,7 +43,9 @@ export function GoalsView() {
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div className="h-full gradient-brand" style={{ width: `${overall}%` }} />
           </div>
-          <div className="mt-2 text-xs">{overall}% of {s.monthlyGoal}% goal</div>
+          <div className="mt-2 text-xs">
+            {overall}% of {s.monthlyGoal}% goal
+          </div>
         </div>
       </div>
 
@@ -48,7 +58,8 @@ export function GoalsView() {
             {s.habits.map((h) => {
               let sum = 0;
               for (let i = 0; i < 30; i++) {
-                const d = new Date(); d.setDate(d.getDate() - i);
+                const d = new Date();
+                d.setDate(d.getDate() - i);
                 const iso = d.toISOString().slice(0, 10);
                 if (s.completions[iso]?.[h.id]) sum++;
               }
@@ -60,7 +71,10 @@ export function GoalsView() {
                     <span className="text-muted-foreground">{pct}%</span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                    <div className="h-full" style={{ width: `${pct}%`, backgroundColor: `var(--color-${h.color})` }} />
+                    <div
+                      className="h-full"
+                      style={{ width: `${pct}%`, backgroundColor: `var(--color-${h.color})` }}
+                    />
                   </div>
                 </li>
               );

@@ -1,29 +1,44 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { DATE_CFG } from '../data/dates';
-import { getStatus, getCampaignProgress, pad2 } from '../engine/schedule';
-import { useKV } from '../bridge';
-import { useAuth } from '../bridge';
-import { supabase } from '../bridge';
-import { SegmentedBar } from '../ui/ProgressBar';
-import type { BreathLog, MeditateLog } from '../types';
-import { CHECKLIST } from '../data/static';
-import { useHabits, habitsFor, todayISO, completionsForDate, toggleHabit } from '@/lib/habits-store';
-import { filterHabitsByScope } from '@/lib/scope';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { DATE_CFG } from "../data/dates";
+import { getStatus, getCampaignProgress, pad2 } from "../engine/schedule";
+import { useKV } from "../bridge";
+import { useAuth } from "../bridge";
+import { supabase } from "../bridge";
+import { SegmentedBar } from "../ui/ProgressBar";
+import type { BreathLog, MeditateLog } from "../types";
+import { CHECKLIST } from "../data/static";
+import {
+  useHabits,
+  habitsFor,
+  todayISO,
+  completionsForDate,
+  toggleHabit,
+} from "@/lib/habits-store";
+import { filterHabitsByScope } from "@/lib/scope";
 
 export default function Overview() {
   const { user } = useAuth();
   const habitState = useHabits();
   const today = todayISO();
   const [diff, setDiff] = useState(0);
-  const [pct, setPct]   = useState(0);
+  const [pct, setPct] = useState(0);
   const [dayNum, setDayNum] = useState(0);
-  const [phase, setPhase]   = useState('');
+  const [phase, setPhase] = useState("");
   const [errorCount, setErrorCount] = useState(0);
 
-  const { value: breathLog }  = useKV<BreathLog>('breath_log', { streak: 0, total: 0, lastDate: '' });
-  const { value: medLog }     = useKV<MeditateLog>('meditate_log', { streak: 0, total: 0, totalMinutes: 0, lastDate: '' });
-  const { value: checklist }  = useKV<Record<string, boolean>>('checklist', {});
+  const { value: breathLog } = useKV<BreathLog>("breath_log", {
+    streak: 0,
+    total: 0,
+    lastDate: "",
+  });
+  const { value: medLog } = useKV<MeditateLog>("meditate_log", {
+    streak: 0,
+    total: 0,
+    totalMinutes: 0,
+    lastDate: "",
+  });
+  const { value: checklist } = useKV<Record<string, boolean>>("checklist", {});
 
   // Countdown
   useEffect(() => {
@@ -44,7 +59,10 @@ export default function Overview() {
   // Error count
   useEffect(() => {
     if (!user) return;
-    supabase.from('error_log').select('id', { count: 'exact' }).eq('user_id', user.id)
+    supabase
+      .from("error_log")
+      .select("id", { count: "exact" })
+      .eq("user_id", user.id)
       .then(({ count }: { count: number | null }) => setErrorCount(count || 0));
   }, [user]);
 
@@ -53,35 +71,39 @@ export default function Overview() {
   const m = pad2(Math.floor((diff % 3600000) / 60000));
   const s = pad2(Math.floor((diff % 60000) / 1000));
 
-  const checkDone  = CHECKLIST.filter((c) => checklist[c.id]).length;
+  const checkDone = CHECKLIST.filter((c) => checklist[c.id]).length;
   const checkTotal = CHECKLIST.length;
 
   // Campaign segments
   const totalDays = 154;
-  const p1End = Math.round((new Date(2026, 7, 14).getTime() - DATE_CFG.CAMPAIGN_START.getTime()) / 86400000);
-  const p2End = Math.round((new Date(2026, 9, 1).getTime()  - DATE_CFG.CAMPAIGN_START.getTime()) / 86400000);
+  const p1End = Math.round(
+    (new Date(2026, 7, 14).getTime() - DATE_CFG.CAMPAIGN_START.getTime()) / 86400000,
+  );
+  const p2End = Math.round(
+    (new Date(2026, 9, 1).getTime() - DATE_CFG.CAMPAIGN_START.getTime()) / 86400000,
+  );
   const segments = [
-    { pct: (p1End / totalDays) * 100,                   color: 'var(--coral)', label: 'Phase 1' },
-    { pct: ((p2End - p1End) / totalDays) * 100,          color: 'var(--teal)',  label: 'Phase 2' },
-    { pct: ((totalDays - p2End) / totalDays) * 100,      color: 'var(--amber)', label: 'Phase 3' },
+    { pct: (p1End / totalDays) * 100, color: "var(--coral)", label: "Phase 1" },
+    { pct: ((p2End - p1End) / totalDays) * 100, color: "var(--teal)", label: "Phase 2" },
+    { pct: ((totalDays - p2End) / totalDays) * 100, color: "var(--amber)", label: "Phase 3" },
   ];
 
-  const catHabits = filterHabitsByScope(habitsFor(habitState, today), 'cat');
-  const catDone   = catHabits.filter((h) => !!habitState.completions[today]?.[h.id]).length;
-  const catTotal  = catHabits.length;
-  const catPct    = catTotal > 0 ? Math.round((catDone / catTotal) * 100) : 0;
+  const catHabits = filterHabitsByScope(habitsFor(habitState, today), "cat");
+  const catDone = catHabits.filter((h) => !!habitState.completions[today]?.[h.id]).length;
+  const catTotal = catHabits.length;
+  const catPct = catTotal > 0 ? Math.round((catDone / catTotal) * 100) : 0;
 
   const metrics = [
-    { label: 'Breath Streak', value: `${breathLog.streak}d`,                icon: '🌬️', color: 'var(--lav)' },
-    { label: 'Med Minutes',   value: `${medLog.totalMinutes}m`,              icon: '🧘', color: 'var(--teal)' },
-    { label: 'Checklist',     value: `${checkDone}/${checkTotal}`,           icon: '✅', color: 'var(--amber)' },
-    { label: 'Errors Logged', value: String(errorCount),                     icon: '🔍', color: 'var(--coral)' },
+    { label: "Breath Streak", value: `${breathLog.streak}d`, icon: "🌬️", color: "var(--lav)" },
+    { label: "Med Minutes", value: `${medLog.totalMinutes}m`, icon: "🧘", color: "var(--teal)" },
+    { label: "Checklist", value: `${checkDone}/${checkTotal}`, icon: "✅", color: "var(--amber)" },
+    { label: "Errors Logged", value: String(errorCount), icon: "🔍", color: "var(--coral)" },
   ];
 
   // Circular ring around days
   const ringPct = pct;
-  const radius  = 52;
-  const circ    = 2 * Math.PI * radius;
+  const radius = 52;
+  const circ = 2 * Math.PI * radius;
   const dashOffset = circ * (1 - ringPct / 100);
 
   return (
@@ -92,62 +114,143 @@ export default function Overview() {
       </div>
 
       {/* Countdown + progress row */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', marginBottom: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 24,
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
         {/* Circular ring + days */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-          style={{ position: 'relative', width: 130, height: 130, flexShrink: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          style={{ position: "relative", width: 130, height: 130, flexShrink: 0 }}
         >
-          <svg width="130" height="130" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="65" cy="65" r={radius} fill="none" stroke="var(--bg-raised)" strokeWidth="5" />
+          <svg width="130" height="130" style={{ transform: "rotate(-90deg)" }}>
             <circle
-              cx="65" cy="65" r={radius} fill="none"
-              stroke="var(--amber)" strokeWidth="5"
+              cx="65"
+              cy="65"
+              r={radius}
+              fill="none"
+              stroke="var(--bg-raised)"
+              strokeWidth="5"
+            />
+            <circle
+              cx="65"
+              cy="65"
+              r={radius}
+              fill="none"
+              stroke="var(--amber)"
+              strokeWidth="5"
               strokeDasharray={circ}
               strokeDashoffset={dashOffset}
               strokeLinecap="round"
-              style={{ transition: 'stroke-dashoffset 1s ease' }}
+              style={{ transition: "stroke-dashoffset 1s ease" }}
             />
           </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontFamily: 'Space Grotesk', fontSize: '2rem', fontWeight: 700, color: 'var(--amber)', lineHeight: 1 }}>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "Space Grotesk",
+                fontSize: "2rem",
+                fontWeight: 700,
+                color: "var(--amber)",
+                lineHeight: 1,
+              }}
+            >
               {d}
             </span>
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>days</span>
+            <span
+              style={{
+                fontSize: "0.65rem",
+                color: "var(--text-muted)",
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              days
+            </span>
           </div>
         </motion.div>
 
         {/* Right side: HH:MM:SS + progress bar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-            {[{ v: h, l: 'hrs' }, { v: m, l: 'min' }, { v: s, l: 'sec' }].map(({ v, l }) => (
-              <div key={l} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>{v}</div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{l}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            {[
+              { v: h, l: "hrs" },
+              { v: m, l: "min" },
+              { v: s, l: "sec" },
+            ].map(({ v, l }) => (
+              <div key={l} style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    fontFamily: "JetBrains Mono",
+                    fontSize: "1.8rem",
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {v}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.65rem",
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  {l}
+                </div>
               </div>
             ))}
             <div style={{ marginLeft: 8 }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>until CAT 2026</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--amber)', fontWeight: 500 }}>Day {dayNum} • {phase}</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                until CAT 2026
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "var(--amber)", fontWeight: 500 }}>
+                Day {dayNum} • {phase}
+              </div>
             </div>
           </div>
 
           {/* Campaign progress bar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <SegmentedBar segments={segments} todayPct={pct} height={8} />
-            <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              <span style={{ color: 'var(--coral)' }}>● Phase 1</span>
-              <span style={{ color: 'var(--teal)' }}>● Phase 2</span>
-              <span style={{ color: 'var(--amber)' }}>● Phase 3</span>
+            <div
+              style={{ display: "flex", gap: 12, fontSize: "0.72rem", color: "var(--text-muted)" }}
+            >
+              <span style={{ color: "var(--coral)" }}>● Phase 1</span>
+              <span style={{ color: "var(--teal)" }}>● Phase 2</span>
+              <span style={{ color: "var(--amber)" }}>● Phase 3</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Analytics cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+          gap: 12,
+        }}
+      >
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
@@ -155,15 +258,31 @@ export default function Overview() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
             className="card"
-            style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 8 }}
+            style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 8 }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: '1rem' }}>{m.icon}</span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: "1rem" }}>{m.icon}</span>
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  fontWeight: 600,
+                }}
+              >
                 {m.label}
               </span>
             </div>
-            <div style={{ fontFamily: 'Space Grotesk', fontSize: '1.8rem', fontWeight: 700, color: m.color, lineHeight: 1 }}>
+            <div
+              style={{
+                fontFamily: "Space Grotesk",
+                fontSize: "1.8rem",
+                fontWeight: 700,
+                color: m.color,
+                lineHeight: 1,
+              }}
+            >
               {m.value}
             </div>
           </motion.div>
@@ -171,28 +290,73 @@ export default function Overview() {
       </div>
 
       {/* ── Today's CAT Prep Habits ── */}
-      <div style={{ marginTop: 28, borderTop: '1px solid var(--border)', paddingTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+      <div style={{ marginTop: 28, borderTop: "1px solid var(--border)", paddingTop: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 10,
+          }}
+        >
           <div>
-            <p className="section-eyebrow" style={{ marginBottom: 0 }}>Today's CAT Prep</p>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>{catDone}/{catTotal} habits done</p>
+            <p className="section-eyebrow" style={{ marginBottom: 0 }}>
+              Today's CAT Prep
+            </p>
+            <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 2 }}>
+              {catDone}/{catTotal} habits done
+            </p>
           </div>
           {catTotal > 0 && (
-            <span style={{ fontSize: '0.8rem', color: catPct >= 80 ? 'var(--teal)' : 'var(--amber)', fontWeight: 700 }}>{catPct}%</span>
+            <span
+              style={{
+                fontSize: "0.8rem",
+                color: catPct >= 80 ? "var(--teal)" : "var(--amber)",
+                fontWeight: 700,
+              }}
+            >
+              {catPct}%
+            </span>
           )}
         </div>
 
         {catTotal === 0 ? (
-          <div className="card" style={{ padding: '14px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.83rem' }}>
-            No CAT Prep habits yet.{' '}
-            <span style={{ color: 'var(--amber)' }}>Add habits with category "CAT Prep" in the Habit Tracker.</span>
+          <div
+            className="card"
+            style={{
+              padding: "14px 16px",
+              textAlign: "center",
+              color: "var(--text-muted)",
+              fontSize: "0.83rem",
+            }}
+          >
+            No CAT Prep habits yet.{" "}
+            <span style={{ color: "var(--amber)" }}>
+              Add habits with category "CAT Prep" in the Habit Tracker.
+            </span>
           </div>
         ) : (
           <>
-            <div style={{ height: 4, background: 'var(--bg-raised)', borderRadius: 99, overflow: 'hidden', marginBottom: 10 }}>
-              <div style={{ height: '100%', width: `${catPct}%`, background: 'var(--amber)', borderRadius: 99, transition: 'width 0.4s ease' }} />
+            <div
+              style={{
+                height: 4,
+                background: "var(--bg-raised)",
+                borderRadius: 99,
+                overflow: "hidden",
+                marginBottom: 10,
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${catPct}%`,
+                  background: "var(--amber)",
+                  borderRadius: 99,
+                  transition: "width 0.4s ease",
+                }}
+              />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {catHabits.map((h) => {
                 const done = !!habitState.completions[today]?.[h.id];
                 return (
@@ -201,26 +365,54 @@ export default function Overview() {
                     onClick={() => toggleHabit(today, h.id)}
                     whileTap={{ scale: 0.98 }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '10px 14px', borderRadius: 10, width: '100%',
-                      background: done ? 'rgba(34,197,94,0.08)' : 'var(--bg-base)',
-                      border: `1px solid ${done ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
-                      cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease',
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      width: "100%",
+                      background: done ? "rgba(34,197,94,0.08)" : "var(--bg-base)",
+                      border: `1px solid ${done ? "rgba(34,197,94,0.3)" : "var(--border)"}`,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.2s ease",
                     }}
                   >
-                    <div style={{
-                      width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                      border: `2px solid ${done ? '#22c55e' : 'var(--border-bright)'}`,
-                      background: done ? '#22c55e' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.2s ease',
-                    }}>
-                      {done && <span style={{ color: '#fff', fontSize: '0.6rem', fontWeight: 700 }}>✓</span>}
+                    <div
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 5,
+                        flexShrink: 0,
+                        border: `2px solid ${done ? "#22c55e" : "var(--border-bright)"}`,
+                        background: done ? "#22c55e" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      {done && (
+                        <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 700 }}>
+                          ✓
+                        </span>
+                      )}
                     </div>
-                    <span style={{ fontSize: '0.88rem', color: done ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: done ? 'line-through' : 'none', flex: 1 }}>
+                    <span
+                      style={{
+                        fontSize: "0.88rem",
+                        color: done ? "var(--text-muted)" : "var(--text-primary)",
+                        textDecoration: done ? "line-through" : "none",
+                        flex: 1,
+                      }}
+                    >
                       {h.name}
                     </span>
-                    {done && <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Done ✓</span>}
+                    {done && (
+                      <span style={{ fontSize: "0.7rem", color: "#22c55e", fontWeight: 600 }}>
+                        Done ✓
+                      </span>
+                    )}
                   </motion.button>
                 );
               })}

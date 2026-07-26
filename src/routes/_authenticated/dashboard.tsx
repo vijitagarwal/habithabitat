@@ -19,7 +19,13 @@ import { DailyTracker } from "@/components/dashboard/DailyTracker";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { JournalView } from "@/components/dashboard/JournalView";
 import { GoalsView } from "@/components/dashboard/GoalsView";
-import { MetricTracker, MOOD_CFG, SLEEP_CFG, WATER_CFG, WEIGHT_CFG } from "@/components/dashboard/MetricTracker";
+import {
+  MetricTracker,
+  MOOD_CFG,
+  SLEEP_CFG,
+  WATER_CFG,
+  WEIGHT_CFG,
+} from "@/components/dashboard/MetricTracker";
 import { CatDashboardShell } from "@/components/cat-dashboard/CatDashboardShell";
 import { GraduationCap, LayoutGrid } from "lucide-react";
 import { ScopeCtx } from "@/lib/scope";
@@ -91,12 +97,18 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
 
 function renderView(active: string, onNavigate: (v: string) => void, initialDate?: string) {
   switch (active) {
-    case "dashboard": return <DashboardHome onNavigate={onNavigate} />;
-    case "daily": return <DailyTracker initialDate={initialDate} />;
-    case "calendar": return <CalendarView />;
-    case "analytics": return <AnalyticsView />;
-    case "heatmap": return <Heatmap />;
-    case "goals": return <GoalsView />;
+    case "dashboard":
+      return <DashboardHome onNavigate={onNavigate} />;
+    case "daily":
+      return <DailyTracker initialDate={initialDate} />;
+    case "calendar":
+      return <CalendarView />;
+    case "analytics":
+      return <AnalyticsView />;
+    case "heatmap":
+      return <Heatmap />;
+    case "goals":
+      return <GoalsView />;
     case "achievements":
       return (
         <div className="space-y-6">
@@ -104,13 +116,20 @@ function renderView(active: string, onNavigate: (v: string) => void, initialDate
           <QuickStats />
         </div>
       );
-    case "journal": return <JournalView />;
-    case "mood": return <MetricTracker cfg={MOOD_CFG} />;
-    case "sleep": return <MetricTracker cfg={SLEEP_CFG} />;
-    case "water": return <MetricTracker cfg={WATER_CFG} />;
-    case "weight": return <MetricTracker cfg={WEIGHT_CFG} />;
-    case "settings": return <HabitManager />;
-    default: return <DashboardHome onNavigate={onNavigate} />;
+    case "journal":
+      return <JournalView />;
+    case "mood":
+      return <MetricTracker cfg={MOOD_CFG} />;
+    case "sleep":
+      return <MetricTracker cfg={SLEEP_CFG} />;
+    case "water":
+      return <MetricTracker cfg={WATER_CFG} />;
+    case "weight":
+      return <MetricTracker cfg={WEIGHT_CFG} />;
+    case "settings":
+      return <HabitManager />;
+    default:
+      return <DashboardHome onNavigate={onNavigate} />;
   }
 }
 
@@ -123,7 +142,9 @@ function DashboardPage() {
   const [headerDate, setHeaderDate] = useState<string | undefined>(undefined);
   const meta = TITLES[active] ?? TITLES.dashboard;
   const validKeys = NAV.map((n) => n.key);
-  const safeActive = validKeys.includes(active as (typeof validKeys)[number]) ? active : "dashboard";
+  const safeActive = validKeys.includes(active as (typeof validKeys)[number])
+    ? active
+    : "dashboard";
 
   const catActive = scope === "cat";
 
@@ -136,7 +157,10 @@ function DashboardPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setStoreUser(session?.user?.id ?? null);
     });
-    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   async function signOut() {
@@ -172,7 +196,9 @@ function DashboardPage() {
           {/* ── Topbar strip: scope toggle ── */}
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 bg-background/70 px-4 py-2.5 backdrop-blur-md">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="section-eyebrow hidden sm:inline text-muted-foreground/70">Workspace</span>
+              <span className="section-eyebrow hidden sm:inline text-muted-foreground/70">
+                Workspace
+              </span>
               <div className="inline-flex rounded-xl border border-border bg-card/70 p-0.5 shadow-sm">
                 <button
                   onClick={() => nav({ to: "/dashboard", search: { scope: "habit" } })}
@@ -205,7 +231,10 @@ function DashboardPage() {
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <Header
               onNavigate={setActive}
-              onDateChange={(iso) => { setHeaderDate(iso); setActive("daily"); }}
+              onDateChange={(iso) => {
+                setHeaderDate(iso);
+                setActive("daily");
+              }}
               onOpenMenu={() => setMobileOpen(true)}
               onSignOut={signOut}
               title={meta.title}

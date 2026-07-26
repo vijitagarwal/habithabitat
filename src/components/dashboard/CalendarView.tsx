@@ -24,7 +24,8 @@ export function CalendarView() {
 
   const nav = (delta: number) => {
     const d = new Date(year, month + delta, 1);
-    setYear(d.getFullYear()); setMonth(d.getMonth());
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
   };
 
   return (
@@ -33,13 +34,34 @@ export function CalendarView() {
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           <div className="flex items-center gap-1">
-            <button onClick={() => nav(-1)} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"><ChevronLeft className="h-4 w-4" /></button>
-            <button onClick={() => { setYear(now.getFullYear()); setMonth(now.getMonth()); setSelected(todayISO()); }} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/40">Today</button>
-            <button onClick={() => nav(1)} className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"><ChevronRight className="h-4 w-4" /></button>
+            <button
+              onClick={() => nav(-1)}
+              className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => {
+                setYear(now.getFullYear());
+                setMonth(now.getMonth());
+                setSelected(todayISO());
+              }}
+              className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/40"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => nav(1)}
+              className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
         <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-muted-foreground">
-          {dow.map((d) => <div key={d}>{d}</div>)}
+          {dow.map((d) => (
+            <div key={d}>{d}</div>
+          ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
           {cells.map((d, i) => {
@@ -51,12 +73,22 @@ export function CalendarView() {
             const { pct, done, total } = completionsForDate(s, iso);
             const isSelected = iso === selected;
             const isToday = iso === todayISO();
-            const bg = pct >= 80 ? "oklch(0.62 0.2 155)" : pct >= 50 ? "oklch(0.72 0.18 55)" : pct > 0 ? "oklch(0.55 0.18 25)" : "oklch(0.28 0.02 265)";
+            const bg =
+              pct >= 80
+                ? "oklch(0.62 0.2 155)"
+                : pct >= 50
+                  ? "oklch(0.72 0.18 55)"
+                  : pct > 0
+                    ? "oklch(0.55 0.18 25)"
+                    : "oklch(0.28 0.02 265)";
             return (
               <button
-                key={i} onClick={() => setSelected(iso)}
+                key={i}
+                onClick={() => setSelected(iso)}
                 className={`aspect-square rounded-xl border p-1.5 text-left transition-all duration-150 hover:shadow-md hover:shadow-primary/10 hover:-translate-y-0.5 ${isSelected ? "border-primary ring-2 ring-primary/40 scale-[1.04]" : "border-border"} ${isToday && !isSelected ? "ring-2 ring-amber-400/50 shadow-[0_0_12px_oklch(0.75_0.18_55_/_0.35)]" : ""}`}
-                style={{ backgroundColor: `color-mix(in oklab, ${bg} ${pct > 0 ? 35 : 60}%, transparent)` }}
+                style={{
+                  backgroundColor: `color-mix(in oklab, ${bg} ${pct > 0 ? 35 : 60}%, transparent)`,
+                }}
                 title={`${done}/${total} completed`}
               >
                 <div className={`text-xs font-semibold ${isToday ? "text-primary" : ""}`}>{d}</div>
@@ -66,9 +98,27 @@ export function CalendarView() {
           })}
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.62 0.2 155)" }} /> 80%+</span>
-          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.72 0.18 55)" }} /> 50-79%</span>
-          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "oklch(0.55 0.18 25)" }} /> Under 50%</span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: "oklch(0.62 0.2 155)" }}
+            />{" "}
+            80%+
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: "oklch(0.72 0.18 55)" }}
+            />{" "}
+            50-79%
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-2.5 py-1">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: "oklch(0.55 0.18 25)" }}
+            />{" "}
+            Under 50%
+          </span>
         </div>
       </div>
       <DailyTracker initialDate={selected} />

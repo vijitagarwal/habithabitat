@@ -4,17 +4,17 @@
  * with local type definition (no external import needed).
  */
 
-import { createContext, useContext, useCallback, useState, type ReactNode } from 'react';
+import { createContext, useContext, useCallback, useState, type ReactNode } from "react";
 
 interface Toast {
   id: string;
   message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: "success" | "error" | "info" | "warning";
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  addToast: (message: string, type?: Toast['type']) => void;
+  addToast: (message: string, type?: Toast["type"]) => void;
   removeToast: (id: string) => void;
 }
 
@@ -23,7 +23,7 @@ const ToastContext = createContext<ToastContextType>(null!);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
+  const addToast = useCallback((message: string, type: Toast["type"] = "success") => {
     const id = `toast-${Date.now()}-${Math.random()}`;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {

@@ -67,7 +67,7 @@ export function scopedWeeklyProgress(s: HabitState, scope: "habit" | "cat") {
 export function scopedCategoryBreakdown(s: HabitState, scope: "habit" | "cat") {
   // In CAT scope: only show CAT Prep category
   return categoryBreakdown(scopedState(s, scope)).filter(
-    (d) => scope === "habit" || d.cat === "CAT Prep"
+    (d) => scope === "habit" || d.cat === "CAT Prep",
   );
 }
 

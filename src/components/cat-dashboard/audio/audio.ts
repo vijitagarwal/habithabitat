@@ -6,7 +6,11 @@
 let _ctx: AudioContext | null = null;
 
 function getCtx(): AudioContext {
-  if (!_ctx) _ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+  if (!_ctx)
+    _ctx = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    )();
   return _ctx;
 }
 
@@ -17,7 +21,7 @@ export function tone(freq: number, dur: number, vol = 0.3): void {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.type = 'sine';
+    osc.type = "sine";
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.05);
@@ -34,11 +38,11 @@ export function bell(): void {
     const ctx = getCtx();
     const freqs = [220, 330, 440];
     freqs.forEach((freq) => {
-      const osc  = ctx.createOscillator();
+      const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.type = 'sine';
+      osc.type = "sine";
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.25, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
@@ -56,5 +60,5 @@ export function celebration(): void {
 }
 
 export function resumeCtx(): void {
-  if (_ctx?.state === 'suspended') _ctx.resume();
+  if (_ctx?.state === "suspended") _ctx.resume();
 }

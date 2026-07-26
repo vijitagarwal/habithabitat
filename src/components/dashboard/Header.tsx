@@ -7,7 +7,8 @@ import { todayISO, syncNow } from "@/lib/habits-store";
 function useTheme() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   useEffect(() => {
-    const stored = (typeof window !== "undefined" && localStorage.getItem("theme")) as "dark" | "light" | null;
+    const stored = (typeof window !== "undefined" && localStorage.getItem("theme")) as
+      "dark" | "light" | null;
     if (stored) setTheme(stored);
   }, []);
   useEffect(() => {
@@ -50,7 +51,11 @@ export function Header({
     <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
       <div className="flex items-center gap-3">
         {onOpenMenu && (
-          <button onClick={onOpenMenu} className="rounded-xl border border-border bg-card/60 p-2 lg:hidden" title="Menu">
+          <button
+            onClick={onOpenMenu}
+            className="rounded-xl border border-border bg-card/60 p-2 lg:hidden"
+            title="Menu"
+          >
             <Menu className="h-5 w-5" />
           </button>
         )}

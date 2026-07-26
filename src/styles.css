@@ -103,21 +103,42 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
-  html, body {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
   body {
     background-image:
-      radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--brand) 14%, transparent), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, color-mix(in oklab, var(--brand-2) 12%, transparent), transparent 60%);
+      radial-gradient(
+        1200px 600px at 100% -10%,
+        color-mix(in oklab, var(--brand) 14%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at -10% 110%,
+        color-mix(in oklab, var(--brand-2) 12%, transparent),
+        transparent 60%
+      );
     background-attachment: fixed;
   }
-  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
-  button { transition: all 0.15s ease; }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  button {
+    transition: all 0.15s ease;
+  }
 }
 
 @utility gradient-brand {
@@ -153,25 +174,47 @@
 }
 
 @keyframes aurora-shift {
-  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.55; }
-  50% { transform: translate3d(3%, -2%, 0) scale(1.08); opacity: 0.8; }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) scale(1.08);
+    opacity: 0.8;
+  }
 }
 @keyframes soft-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 40%, transparent); }
-  50% { box-shadow: 0 0 20px 2px color-mix(in oklab, var(--brand) 50%, transparent); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 20px 2px color-mix(in oklab, var(--brand) 50%, transparent);
+  }
 }
-.aurora-orb { animation: aurora-shift 14s ease-in-out infinite; }
-.pulse-glow { animation: soft-pulse 2.4s ease-in-out infinite; }
+.aurora-orb {
+  animation: aurora-shift 14s ease-in-out infinite;
+}
+.pulse-glow {
+  animation: soft-pulse 2.4s ease-in-out infinite;
+}
 
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }
 .skeleton {
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     color-mix(in oklab, var(--muted) 60%, transparent) 0%,
     color-mix(in oklab, var(--muted-foreground) 15%, transparent) 50%,
-    color-mix(in oklab, var(--muted) 60%, transparent) 100%);
+    color-mix(in oklab, var(--muted) 60%, transparent) 100%
+  );
   background-size: 800px 100%;
   animation: shimmer 1.6s linear infinite;
 }

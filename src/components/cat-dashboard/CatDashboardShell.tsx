@@ -10,43 +10,65 @@
  * - Proper card/section wrapper for content area
  */
 
-import { useState, useEffect, Suspense, lazy, useCallback } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import './cat-styles.css';
-import { ProfileModal } from '@/components/dashboard/ProfileModal';
+import { useState, useEffect, Suspense, lazy, useCallback } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import "./cat-styles.css";
+import { ProfileModal } from "@/components/dashboard/ProfileModal";
 import {
-  Home, Zap, Map, Wind, Brain, Timer,
-  BarChart2, BookOpen, BookMarked, AlertCircle, Flame,
-  KanbanSquare, CheckSquare2, Target, Code2, Pin, Shield,
-  Heart, Download, GraduationCap, LayoutGrid, LogOut,
-  Menu, X, PanelLeftClose, PanelLeftOpen, type LucideIcon,
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useScopedStats } from '@/lib/scope-aware-stats';
-import { CatAuthProvider, useCatAuth } from './bridge/useCatAuth';
-import { ToastProvider } from './bridge/useCatToast';
-import { useRealtime } from './bridge/useCatRealtime';
+  Home,
+  Zap,
+  Map,
+  Wind,
+  Brain,
+  Timer,
+  BarChart2,
+  BookOpen,
+  BookMarked,
+  AlertCircle,
+  Flame,
+  KanbanSquare,
+  CheckSquare2,
+  Target,
+  Code2,
+  Pin,
+  Shield,
+  Heart,
+  Download,
+  GraduationCap,
+  LayoutGrid,
+  LogOut,
+  Menu,
+  X,
+  PanelLeftClose,
+  PanelLeftOpen,
+  type LucideIcon,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useScopedStats } from "@/lib/scope-aware-stats";
+import { CatAuthProvider, useCatAuth } from "./bridge/useCatAuth";
+import { ToastProvider } from "./bridge/useCatToast";
+import { useRealtime } from "./bridge/useCatRealtime";
 
 // ── Lazy-loaded sections ───────────────────────────────────────────────
-const Overview      = lazy(() => import('./sections/Overview'));
-const RightNow      = lazy(() => import('./sections/RightNow'));
-const CampaignMap   = lazy(() => import('./sections/CampaignMap'));
-const Breathwork    = lazy(() => import('./sections/Breathwork'));
-const Meditation    = lazy(() => import('./sections/Meditation'));
-const FocusTimer    = lazy(() => import('./sections/FocusTimer'));
-const Analytics     = lazy(() => import('./sections/Analytics'));
-const MockTracker   = lazy(() => import('./sections/MockTracker'));
-const TopicTracker  = lazy(() => import('./sections/TopicTracker'));
-const ErrorLog      = lazy(() => import('./sections/ErrorLog'));
-const CatHeatmap    = lazy(() => import('./sections/Heatmap'));
-const WeeklyBoard   = lazy(() => import('./sections/WeeklyBoard'));
-const Checklist     = lazy(() => import('./sections/Checklist'));
-const CatCore       = lazy(() => import('./sections/CatCore'));
-const TechLadder    = lazy(() => import('./sections/TechLadder'));
-const StandingOrders= lazy(() => import('./sections/StandingOrders'));
-const Contingency   = lazy(() => import('./sections/Contingency'));
-const Health        = lazy(() => import('./sections/Health'));
-const DataExport    = lazy(() => import('./sections/DataExport'));
+const Overview = lazy(() => import("./sections/Overview"));
+const RightNow = lazy(() => import("./sections/RightNow"));
+const CampaignMap = lazy(() => import("./sections/CampaignMap"));
+const Breathwork = lazy(() => import("./sections/Breathwork"));
+const Meditation = lazy(() => import("./sections/Meditation"));
+const FocusTimer = lazy(() => import("./sections/FocusTimer"));
+const Analytics = lazy(() => import("./sections/Analytics"));
+const MockTracker = lazy(() => import("./sections/MockTracker"));
+const TopicTracker = lazy(() => import("./sections/TopicTracker"));
+const ErrorLog = lazy(() => import("./sections/ErrorLog"));
+const CatHeatmap = lazy(() => import("./sections/Heatmap"));
+const WeeklyBoard = lazy(() => import("./sections/WeeklyBoard"));
+const Checklist = lazy(() => import("./sections/Checklist"));
+const CatCore = lazy(() => import("./sections/CatCore"));
+const TechLadder = lazy(() => import("./sections/TechLadder"));
+const StandingOrders = lazy(() => import("./sections/StandingOrders"));
+const Contingency = lazy(() => import("./sections/Contingency"));
+const Health = lazy(() => import("./sections/Health"));
+const DataExport = lazy(() => import("./sections/DataExport"));
 
 function SectionFallback() {
   return (
@@ -71,44 +93,64 @@ interface NavGroup {
 }
 
 const CAT_NAV: NavGroup[] = [
-  { group: 'MISSION', items: [
-    { id: 'overview',    label: 'Overview',       icon: Home },
-    { id: 'rightnow',   label: 'Right Now',       icon: Zap },
-    { id: 'campaign',   label: 'Campaign Map',    icon: Map },
-  ]},
-  { group: 'TOOLS', items: [
-    { id: 'breathe',    label: 'Breathwork',      icon: Wind },
-    { id: 'meditate',   label: 'Meditation',      icon: Brain },
-    { id: 'focus',      label: 'Focus Timer',     icon: Timer },
-  ]},
-  { group: 'TRACKING', items: [
-    { id: 'analytics',  label: 'Analytics',       icon: BarChart2 },
-    { id: 'mocks',      label: 'Mock Tracker',    icon: BookOpen },
-    { id: 'syllabus',   label: 'Topic Tracker',   icon: BookMarked },
-    { id: 'errorlog',   label: 'Error Log',       icon: AlertCircle },
-    { id: 'heatmap',    label: 'Heatmap',         icon: Flame },
-  ]},
-  { group: 'PLANNING', items: [
-    { id: 'weeklyboard',label: 'Weekly Board',    icon: KanbanSquare },
-    { id: 'tasks',      label: 'Checklist',       icon: CheckSquare2 },
-  ]},
-  { group: 'STRATEGY', items: [
-    { id: 'core',       label: 'CAT Core',        icon: Target },
-    { id: 'tech',       label: 'Tech Ladder',     icon: Code2 },
-    { id: 'orders',     label: 'Standing Orders', icon: Pin },
-    { id: 'contingency',label: 'Contingency',     icon: Shield },
-  ]},
-  { group: 'HEALTH', items: [
-    { id: 'health',     label: 'Health Protocol', icon: Heart },
-    { id: 'export',     label: 'Export / Import', icon: Download },
-  ]},
+  {
+    group: "MISSION",
+    items: [
+      { id: "overview", label: "Overview", icon: Home },
+      { id: "rightnow", label: "Right Now", icon: Zap },
+      { id: "campaign", label: "Campaign Map", icon: Map },
+    ],
+  },
+  {
+    group: "TOOLS",
+    items: [
+      { id: "breathe", label: "Breathwork", icon: Wind },
+      { id: "meditate", label: "Meditation", icon: Brain },
+      { id: "focus", label: "Focus Timer", icon: Timer },
+    ],
+  },
+  {
+    group: "TRACKING",
+    items: [
+      { id: "analytics", label: "Analytics", icon: BarChart2 },
+      { id: "mocks", label: "Mock Tracker", icon: BookOpen },
+      { id: "syllabus", label: "Topic Tracker", icon: BookMarked },
+      { id: "errorlog", label: "Error Log", icon: AlertCircle },
+      { id: "heatmap", label: "Heatmap", icon: Flame },
+    ],
+  },
+  {
+    group: "PLANNING",
+    items: [
+      { id: "weeklyboard", label: "Weekly Board", icon: KanbanSquare },
+      { id: "tasks", label: "Checklist", icon: CheckSquare2 },
+    ],
+  },
+  {
+    group: "STRATEGY",
+    items: [
+      { id: "core", label: "CAT Core", icon: Target },
+      { id: "tech", label: "Tech Ladder", icon: Code2 },
+      { id: "orders", label: "Standing Orders", icon: Pin },
+      { id: "contingency", label: "Contingency", icon: Shield },
+    ],
+  },
+  {
+    group: "HEALTH",
+    items: [
+      { id: "health", label: "Health Protocol", icon: Heart },
+      { id: "export", label: "Export / Import", icon: Download },
+    ],
+  },
 ];
 
 // ── Countdown ──────────────────────────────────────────────────────────
-const EXAM_DATE = new Date('2026-11-29T00:00:00+05:30');
-function pad2(n: number) { return n.toString().padStart(2, '0'); }
+const EXAM_DATE = new Date("2026-11-29T00:00:00+05:30");
+function pad2(n: number) {
+  return n.toString().padStart(2, "0");
+}
 function useCountdown() {
-  const [cd, setCd] = useState({ d: 0, h: '00', m: '00', s: '00' });
+  const [cd, setCd] = useState({ d: 0, h: "00", m: "00", s: "00" });
   useEffect(() => {
     const tick = () => {
       const diff = Math.max(0, EXAM_DATE.getTime() - Date.now());
@@ -128,8 +170,14 @@ function useCountdown() {
 
 // ── Sidebar ────────────────────────────────────────────────────────────
 function CatSidebar({
-  open, collapsed, active,
-  onNavigate, onClose, onToggleCollapsed, onScopeSwitch, onSignOut,
+  open,
+  collapsed,
+  active,
+  onNavigate,
+  onClose,
+  onToggleCollapsed,
+  onScopeSwitch,
+  onSignOut,
 }: {
   open: boolean;
   collapsed: boolean;
@@ -146,14 +194,18 @@ function CatSidebar({
   const sidebarContent = (
     <div className="flex h-full flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
       {/* ── Header ── */}
-      <div className={`flex shrink-0 items-center border-b border-sidebar-border px-3 py-3 ${collapsed ? 'justify-center' : 'justify-between gap-2'}`}>
+      <div
+        className={`flex shrink-0 items-center border-b border-sidebar-border px-3 py-3 ${collapsed ? "justify-center" : "justify-between gap-2"}`}
+      >
         {!collapsed && (
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-amber-500/20 border border-amber-500/30">
               <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
             </div>
             <div className="leading-tight min-w-0">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">MISSION</div>
+              <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">
+                MISSION
+              </div>
               <div className="truncate text-sm font-bold text-sidebar-foreground">CAT 2026</div>
             </div>
           </div>
@@ -165,13 +217,20 @@ function CatSidebar({
         )}
         <button
           onClick={onToggleCollapsed}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors ${collapsed ? 'hidden lg:flex' : ''}`}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={`rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors ${collapsed ? "hidden lg:flex" : ""}`}
         >
-          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          {collapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
         </button>
         {!collapsed && (
-          <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground lg:hidden">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
+          >
             <X className="h-4 w-4" />
           </button>
         )}
@@ -182,7 +241,9 @@ function CatSidebar({
         <div className="mx-3 mt-3 shrink-0 rounded-xl border border-amber-500/20 bg-amber-500/8 p-3">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
-              <div className="text-sm font-bold text-amber-400">{todayStats.done}/{todayStats.total}</div>
+              <div className="text-sm font-bold text-amber-400">
+                {todayStats.done}/{todayStats.total}
+              </div>
               <div className="text-[10px] text-muted-foreground">Today</div>
             </div>
             <div>
@@ -190,7 +251,11 @@ function CatSidebar({
               <div className="text-[10px] text-muted-foreground">Streak</div>
             </div>
             <div>
-              <div className={`text-sm font-bold ${overall >= 60 ? 'text-green-400' : 'text-amber-400'}`}>{overall}%</div>
+              <div
+                className={`text-sm font-bold ${overall >= 60 ? "text-green-400" : "text-amber-400"}`}
+              >
+                {overall}%
+              </div>
               <div className="text-[10px] text-muted-foreground">30d avg</div>
             </div>
           </div>
@@ -205,7 +270,7 @@ function CatSidebar({
       {/* ── Nav (independent scroll) ── */}
       <nav className="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin">
         {CAT_NAV.map((group) => (
-          <div key={group.group} className={collapsed ? 'mt-2' : 'mt-3'}>
+          <div key={group.group} className={collapsed ? "mt-2" : "mt-3"}>
             {!collapsed && (
               <div className="px-3 pb-1 pt-1 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70">
                 {group.group}
@@ -218,12 +283,15 @@ function CatSidebar({
               return (
                 <button
                   key={item.id}
-                  onClick={() => { onNavigate(item.id); onClose(); }}
+                  onClick={() => {
+                    onNavigate(item.id);
+                    onClose();
+                  }}
                   title={collapsed ? item.label : undefined}
-                  className={`flex w-full items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} rounded-xl py-2 text-sm font-medium transition-colors ${
+                  className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-inner'
-                      : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner"
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
@@ -239,16 +307,20 @@ function CatSidebar({
       <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
         <button
           onClick={onScopeSwitch}
-          title={collapsed ? 'Switch to Habit Tracker' : undefined}
-          className={`flex w-full items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} rounded-xl py-2 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground transition-colors`}
+          title={collapsed ? "Switch to Habit Tracker" : undefined}
+          className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground transition-colors`}
         >
           <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
           {!collapsed && <span>Habit Tracker</span>}
         </button>
         {/* Profile dropdown (includes sign-out) */}
-        <div className={`flex ${collapsed ? 'justify-center' : 'items-center gap-3 px-1'} py-1`}>
+        <div className={`flex ${collapsed ? "justify-center" : "items-center gap-3 px-1"} py-1`}>
           <ProfileModal onSignOut={onSignOut} compact={collapsed} />
-          {!collapsed && <span className="text-sm font-medium text-sidebar-foreground/75">Profile &amp; Sign out</span>}
+          {!collapsed && (
+            <span className="text-sm font-medium text-sidebar-foreground/75">
+              Profile &amp; Sign out
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -257,13 +329,11 @@ function CatSidebar({
   return (
     <>
       {/* Mobile overlay */}
-      {open && (
-        <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={onClose} />
-      )}
+      {open && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={onClose} />}
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex shrink-0 flex-col h-full transition-[width] duration-200 ${collapsed ? 'w-[60px]' : 'w-[220px]'}`}
+        className={`hidden lg:flex shrink-0 flex-col h-full transition-[width] duration-200 ${collapsed ? "w-[60px]" : "w-[220px]"}`}
       >
         {sidebarContent}
       </aside>
@@ -294,7 +364,10 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
 
       <div className="flex items-center gap-2">
         <GraduationCap className="h-4 w-4 text-amber-400" />
-        <span className="hidden text-sm font-bold text-amber-400 sm:block" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+        <span
+          className="hidden text-sm font-bold text-amber-400 sm:block"
+          style={{ fontFamily: "Space Grotesk, sans-serif" }}
+        >
           Mission CAT 2026
         </span>
       </div>
@@ -307,13 +380,19 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
 
       <div className="hidden items-center gap-4 text-xs lg:flex">
         <span className="text-muted-foreground">
-          Today: <span className="font-semibold text-foreground">{todayStats.done}/{todayStats.total}</span>
+          Today:{" "}
+          <span className="font-semibold text-foreground">
+            {todayStats.done}/{todayStats.total}
+          </span>
         </span>
         <span className="text-muted-foreground">
           Streak: <span className="font-semibold text-orange-400">{streak}d 🔥</span>
         </span>
         <span className="text-muted-foreground">
-          30d: <span className={`font-semibold ${overall >= 60 ? 'text-green-400' : 'text-amber-400'}`}>{overall}%</span>
+          30d:{" "}
+          <span className={`font-semibold ${overall >= 60 ? "text-green-400" : "text-amber-400"}`}>
+            {overall}%
+          </span>
         </span>
       </div>
     </div>
@@ -324,25 +403,25 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
 function CatSection({ active }: { active: string }) {
   return (
     <Suspense fallback={<SectionFallback />}>
-      {active === 'overview'     && <Overview />}
-      {active === 'rightnow'     && <RightNow />}
-      {active === 'campaign'     && <CampaignMap />}
-      {active === 'breathe'      && <Breathwork />}
-      {active === 'meditate'     && <Meditation />}
-      {active === 'focus'        && <FocusTimer />}
-      {active === 'analytics'    && <Analytics />}
-      {active === 'mocks'        && <MockTracker />}
-      {active === 'syllabus'     && <TopicTracker />}
-      {active === 'errorlog'     && <ErrorLog />}
-      {active === 'heatmap'      && <CatHeatmap />}
-      {active === 'weeklyboard'  && <WeeklyBoard />}
-      {active === 'tasks'        && <Checklist />}
-      {active === 'core'         && <CatCore />}
-      {active === 'tech'         && <TechLadder />}
-      {active === 'orders'       && <StandingOrders />}
-      {active === 'contingency'  && <Contingency />}
-      {active === 'health'       && <Health />}
-      {active === 'export'       && <DataExport />}
+      {active === "overview" && <Overview />}
+      {active === "rightnow" && <RightNow />}
+      {active === "campaign" && <CampaignMap />}
+      {active === "breathe" && <Breathwork />}
+      {active === "meditate" && <Meditation />}
+      {active === "focus" && <FocusTimer />}
+      {active === "analytics" && <Analytics />}
+      {active === "mocks" && <MockTracker />}
+      {active === "syllabus" && <TopicTracker />}
+      {active === "errorlog" && <ErrorLog />}
+      {active === "heatmap" && <CatHeatmap />}
+      {active === "weeklyboard" && <WeeklyBoard />}
+      {active === "tasks" && <Checklist />}
+      {active === "core" && <CatCore />}
+      {active === "tech" && <TechLadder />}
+      {active === "orders" && <StandingOrders />}
+      {active === "contingency" && <Contingency />}
+      {active === "health" && <Health />}
+      {active === "export" && <DataExport />}
     </Suspense>
   );
 }
@@ -352,19 +431,19 @@ function CatShellInner() {
   const nav = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [active, setActive] = useState('overview');
+  const [active, setActive] = useState("overview");
   const bump = useCallback(() => {}, []);
 
-  useRealtime('daily_activity', bump);
-  useRealtime('board_cards', bump);
+  useRealtime("daily_activity", bump);
+  useRealtime("board_cards", bump);
 
   async function signOut() {
     await supabase.auth.signOut();
-    nav({ to: '/auth', replace: true });
+    nav({ to: "/auth", replace: true });
   }
 
   function switchToHabits() {
-    nav({ to: '/dashboard', search: { scope: 'habit' } });
+    nav({ to: "/dashboard", search: { scope: "habit" } });
   }
 
   return (
@@ -375,21 +454,21 @@ function CatShellInner() {
         active={active}
         onNavigate={setActive}
         onClose={() => setSidebarOpen(false)}
-        onToggleCollapsed={() => setCollapsed(v => !v)}
+        onToggleCollapsed={() => setCollapsed((v) => !v)}
         onScopeSwitch={switchToHabits}
         onSignOut={signOut}
       />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <CatTopbar onMenuToggle={() => setSidebarOpen(v => !v)} />
-          <main className="cat-shell relative flex-1 overflow-y-auto px-4 sm:px-6 pb-8">
-            {/* Ambient background orbs (same as original CAT app) */}
-            <div className="bg-orb bg-orb-1" />
-            <div className="bg-orb bg-orb-2" />
-            <div className="relative z-10">
-              <CatSection active={active} />
-            </div>
-          </main>
-        </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <CatTopbar onMenuToggle={() => setSidebarOpen((v) => !v)} />
+        <main className="cat-shell relative flex-1 overflow-y-auto px-4 sm:px-6 pb-8">
+          {/* Ambient background orbs (same as original CAT app) */}
+          <div className="bg-orb bg-orb-1" />
+          <div className="bg-orb bg-orb-2" />
+          <div className="relative z-10">
+            <CatSection active={active} />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

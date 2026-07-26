@@ -5,7 +5,7 @@
  * habit-tracker without any changes to the section files.
  */
 
-import { supabase as _typedSupabase } from '@/integrations/supabase/client';
+import { supabase as _typedSupabase } from "@/integrations/supabase/client";
 
 // ── Supabase: exported as `any` so sections can call .from() on CAT-specific
 // tables (kv_store, error_log, mock_results, profiles, etc.) without TS errors.
@@ -14,10 +14,10 @@ import { supabase as _typedSupabase } from '@/integrations/supabase/client';
 export const supabase = _typedSupabase as any;
 
 // ── Auth ──────────────────────────────────────────────────────────────
-export { useCatAuth as useAuth, CatAuthProvider as AuthProvider } from './useCatAuth';
+export { useCatAuth as useAuth, CatAuthProvider as AuthProvider } from "./useCatAuth";
 
 // ── Realtime, KV, Activity, Toast ─────────────────────────────────────
-export { useRealtime, useRealtimeStatus } from './useCatRealtime';
-export { useKV } from './useCatKV';
-export { useActivity } from './useCatActivity';
-export { useToast, ToastProvider } from './useCatToast';
+export { useRealtime, useRealtimeStatus } from "./useCatRealtime";
+export { useKV } from "./useCatKV";
+export { useActivity } from "./useCatActivity";
+export { useToast, ToastProvider } from "./useCatToast";

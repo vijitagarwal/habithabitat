@@ -9,14 +9,17 @@
  * This is safe because both apps share the same Supabase project.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useCatAuth } from './useCatAuth';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCatAuth } from "./useCatAuth";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
-export function useKV<T>(key: string, defaultValue: T): {
+export function useKV<T>(
+  key: string,
+  defaultValue: T,
+): {
   value: T;
   setValue: (v: T) => Promise<void>;
   loading: boolean;
@@ -27,16 +30,19 @@ export function useKV<T>(key: string, defaultValue: T): {
   const pendingRef = useRef<T | undefined>(undefined);
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
 
     const fetchValue = async () => {
       try {
         const { data } = await db
-          .from('kv_store')
-          .select('value')
-          .eq('user_id', user.id)
-          .eq('key', key)
+          .from("kv_store")
+          .select("value")
+          .eq("user_id", user.id)
+          .eq("key", key)
           .maybeSingle();
         if (cancelled) return;
         if (data?.value !== undefined && data?.value !== null) {
@@ -44,13 +50,21 @@ export function useKV<T>(key: string, defaultValue: T): {
         } else {
           const local = localStorage.getItem(`mcp_kv_${key}`);
           if (local) {
-            try { setValueState(JSON.parse(local) as T); } catch { /* ignore */ }
+            try {
+              setValueState(JSON.parse(local) as T);
+            } catch {
+              /* ignore */
+            }
           }
         }
       } catch {
         const local = localStorage.getItem(`mcp_kv_${key}`);
         if (local) {
-          try { setValueState(JSON.parse(local) as T); } catch { /* ignore */ }
+          try {
+            setValueState(JSON.parse(local) as T);
+          } catch {
+            /* ignore */
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -58,21 +72,30 @@ export function useKV<T>(key: string, defaultValue: T): {
     };
 
     fetchValue();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user, key]);
 
-  const setValue = useCallback(async (newValue: T) => {
-    setValueState(newValue);
-    localStorage.setItem(`mcp_kv_${key}`, JSON.stringify(newValue));
-    pendingRef.current = newValue;
-    if (!user) return;
-    try {
-      await db.from('kv_store').upsert(
-        { user_id: user.id, key, value: newValue, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id,key' },
-      );
-    } catch { /* queued in localStorage */ }
-  }, [user, key]);
+  const setValue = useCallback(
+    async (newValue: T) => {
+      setValueState(newValue);
+      localStorage.setItem(`mcp_kv_${key}`, JSON.stringify(newValue));
+      pendingRef.current = newValue;
+      if (!user) return;
+      try {
+        await db
+          .from("kv_store")
+          .upsert(
+            { user_id: user.id, key, value: newValue, updated_at: new Date().toISOString() },
+            { onConflict: "user_id,key" },
+          );
+      } catch {
+        /* queued in localStorage */
+      }
+    },
+    [user, key],
+  );
 
   return { value, setValue, loading };
 }
