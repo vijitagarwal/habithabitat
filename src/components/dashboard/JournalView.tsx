@@ -1,16 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useHabits, setNote, todayISO } from "@/lib/habits-store";
 import { DatePicker } from "./DatePicker";
+import { Search } from "lucide-react";
 
 export function JournalView() {
   const s = useHabits();
   const [date, setDate] = useState(todayISO());
   const [text, setText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   useEffect(() => {
     setText(s.notes[date] ?? "");
   }, [date, s.notes]);
 
-  const recent = Object.entries(s.notes)
+  const allEntries = useMemo(() => Object.entries(s.notes), [s.notes]);
+
+  const filteredEntries = useMemo(() => {
+    if (!searchQuery) return allEntries;
+    return allEntries.filter(([_, content]) =>
+      content.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [allEntries, searchQuery]);
+
+  const recent = filteredEntries
     .sort((a, b) => b[0].localeCompare(a[0]))
     .slice(0, 8);
 
@@ -21,11 +32,21 @@ export function JournalView() {
           <h3 className="text-lg font-semibold">Journal</h3>
           <DatePicker value={date} onChange={setDate} align="end" />
         </div>
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search journal entries..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-border bg-background/40 pl-9 pr-4 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="How did today go? What went well?"
-          className="min-h-[280px] w-full resize-y rounded-xl border border-border bg-background/40 p-4 text-sm outline-none focus:border-primary"
+          className="min-h-[240px] w-full resize-y rounded-xl border border-border bg-background/40 p-4 text-sm outline-none focus:border-primary"
         />
         <div className="mt-3 flex items-center justify-end gap-2">
           <button
@@ -53,13 +74,22 @@ export function JournalView() {
           <ul className="space-y-2">
             {recent.map(([d, t]) => (
               <li key={d}>
-                <button
-                  onClick={() => setDate(d)}
-                  className={`w-full rounded-lg border p-2 text-left text-xs hover:border-primary/40 ${d === date ? "border-primary bg-primary/5" : "border-border bg-background/30"}`}
-                >
-                  <div className="font-semibold">{d}</div>
-                  <div className="line-clamp-2 text-muted-foreground">{t}</div>
-                </button>
+               <button
+                 onClick={() => setDate(d)}
+                 className={`w-full rounded-lg border p-2 text-left text-xs hover:border-primary/40 ${d === date ? "border-primary bg-primary/5" : "border-border bg-background/30"}`}
+               >
+                 <div className="font-semibold">{d}</div>
+                 <div className="line-clamp-2 text-muted-foreground">
+                   {searchQuery ? (
+                     <span dangerouslySetInnerHTML={{
+                       __html: t.replace(
+                         new RegExp(searchQuery, "gi"),
+                         match => `<span class="bg-amber/20 text-amber">${match}</span>`,
+                       ),
+                     }} />
+                   ) : t}
+                 </div>
+               </button>
               </li>
             ))}
           </ul>
