@@ -7,8 +7,9 @@ import { useToast } from "../bridge";
 import { todayKey } from "../engine/schedule";
 import type { FocusLog } from "../types";
 import confetti from "canvas-confetti";
+import { useHabits, setHabitValue, todayISO } from "../../../lib/habits-store";
 
-const SUBJECTS = ["CAT - VARC", "CAT - DILR", "CAT - QA", "FlyRank", "DSA", "Free"];
+const GENERAL_SUBJECTS = ["CAT - VARC", "CAT - DILR", "CAT - QA", "FlyRank", "DSA", "Free"];
 const MODES = [
   { label: "Focus Sprint", mins: 25, icon: "⚡" },
   { label: "Deep Work", mins: 50, icon: "🔥" },
@@ -19,9 +20,12 @@ export default function FocusTimer() {
   const { value: focusLog, setValue: setFocusLog } = useKV<FocusLog>("focus_log", { sessions: [] });
   const { markActivity } = useActivity();
   const { addToast } = useToast();
+  const s = useHabits();
+
+  const timerHabits = s.habits.filter((h) => h.isTimer);
 
   const [modeIdx, setModeIdx] = useState(0);
-  const [subject, setSubject] = useState(SUBJECTS[0]);
+  const [subject, setSubject] = useState(GENERAL_SUBJECTS[0]);
   const [custom, setCustom] = useState(30);
   const [running, setRunning] = useState(false);
   const [secsLeft, setSecsLeft] = useState(0);
@@ -71,6 +75,20 @@ export default function FocusTimer() {
           setFocusLog(newLog);
           markActivity(3);
           addToast(`Focus sprint complete! ${dur}m of ${subject} 🎯`);
+
+           // Handle habit linking
+          if (timerHabits.some((h) => h.name === subject)) {
+            const habit = timerHabits.find((h) => h.name === subject);
+            if (habit) {
+              const todayISODate = todayISO();
+              const currentValue = s.values[todayISODate]?.[habit.id] || 0;
+              const isHourUnit = habit.unit?.toLowerCase().includes("hr") || 
+                                habit.unit?.toLowerCase().includes("hour");
+              const increment = isHourUnit ? dur / 60 : dur;
+              setHabitValue(todayISODate, habit.id, currentValue + increment);
+              addToast(`⏱️ Added ${dur}m to ${habit.name} (${increment} ${habit.unit || "units"})`);
+            }
+          }
           return 0;
         }
         return prev - 1;
@@ -232,19 +250,39 @@ export default function FocusTimer() {
         )}
 
         {/* Subject tag */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-          {SUBJECTS.map((s) => (
-            <button
-              key={s}
-              className={`btn ${subject === s ? "btn-amber" : "btn-ghost"} btn-sm`}
-              onClick={() => {
-                if (!running) setSubject(s);
-              }}
-              disabled={running}
-            >
-              {s}
-            </button>
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", width: "100%", textAlign: "center" }}>General Focus</span>
+            {GENERAL_SUBJECTS.map((s) => (
+              <button
+                key={s}
+                className={`btn ${subject === s ? "btn-amber" : "btn-ghost"} btn-sm`}
+                onClick={() => {
+                  if (!running) setSubject(s);
+                }}
+                disabled={running}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          {timerHabits.length > 0 && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
+              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", width: "100%", textAlign: "center" }}>My Habits</span>
+              {timerHabits.map((h) => (
+                <button
+                  key={h.id}
+                  className={`btn ${subject === h.name ? "btn-amber" : "btn-ghost"} btn-sm`}
+                  onClick={() => {
+                    if (!running) setSubject(h.name);
+                  }}
+                  disabled={running}
+                >
+                  {h.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Timer display */}
