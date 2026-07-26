@@ -11,14 +11,21 @@ import {
   ICON_CHOICES,
   COLOR_CHOICES,
   scheduleLabel,
+  setReminderSettings,
+  getReminderSettings,
+  testReminderNotification,
+  requestNotificationPermission,
   type Habit,
   type HabitCategory,
   type HabitDirection,
   type Schedule,
 } from "@/lib/habits-store";
-import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle } from "lucide-react";
 import { ScheduleEditor } from "./ScheduleEditor";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type Draft = {
   name: string;
@@ -347,6 +354,16 @@ export function HabitManager() {
   // In CAT scope, new habits default to the "CAT Prep" category.
   const initialDraft =
     scope === "cat" ? { ...emptyDraft, category: "CAT Prep" as HabitCategory } : emptyDraft;
+    
+  const reminderSettings = s.reminderSettings || {
+    enabled: false,
+    time: "20:00",
+    notificationPermission: "default",
+  };
+  
+  const handleTestNotification = () => {
+    testReminderNotification();
+  };
 
   return (
     <div className="space-y-6">
@@ -467,6 +484,67 @@ export function HabitManager() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Reminders Section */}
+      <div className="card-glass rounded-2xl p-6">
+        <h3 className="mb-1 text-lg font-semibold">Daily Reminders</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Get a notification to complete your habits each day.
+        </p>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label htmlFor="reminder-toggle" className="text-sm font-medium">
+              Enable Daily Reminder
+            </label>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={reminderSettings.enabled}
+              onClick={() => setReminderSettings({ enabled: !reminderSettings.enabled })}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${reminderSettings.enabled ? 'bg-primary' : 'bg-input'}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${reminderSettings.enabled ? 'translate-x-4' : 'translate-x-1'}`}
+              />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="reminder-time" className="mb-1 block text-xs text-muted-foreground">
+                Reminder Time
+              </label>
+              <input
+                id="reminder-time"
+                type="time"
+                value={reminderSettings.time}
+                onChange={(e) => {
+                  setReminderSettings({ time: e.target.value });
+                }}
+                disabled={!reminderSettings.enabled}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleTestNotification}
+              disabled={reminderSettings.notificationPermission === "denied"}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:border-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Bell className="h-4 w-4" /> Test Notification
+            </button>
+            {reminderSettings.notificationPermission === "denied" && (
+              <div className="flex items-center gap-2 rounded-lg border border-warning/60 bg-warning/10 px-3 py-2 text-xs font-medium text-warning">
+                <AlertTriangle className="h-4 w-4" />
+                Notifications blocked. Check browser settings.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="card-glass rounded-2xl p-6">

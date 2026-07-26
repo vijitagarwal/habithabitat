@@ -90,6 +90,12 @@ export interface DailyMetrics {
   weight?: number;
 }
 
+export interface ReminderSettings {
+  enabled: boolean;
+  time: string; // Format: "HH:MM" (24-hour)
+  notificationPermission: NotificationPermission;
+}
+
 export interface HabitState {
   habits: Habit[];
   completions: Record<string, Record<string, boolean>>;
@@ -100,6 +106,7 @@ export interface HabitState {
   monthlyGoal: number;
   level: number;
   xp: number;
+  reminderSettings: ReminderSettings;
 }
 
 const BASE_KEY = "habit-tracker-v2";
@@ -282,6 +289,11 @@ function defaultState(): HabitState {
     monthlyGoal: 90,
     level: 18,
     xp: 2450,
+    reminderSettings: {
+      enabled: false,
+      time: "20:00", // Default: 8 PM
+      notificationPermission: "default",
+    },
   };
 }
 
@@ -295,6 +307,11 @@ function emptyState(): HabitState {
     monthlyGoal: 80,
     level: 1,
     xp: 0,
+    reminderSettings: {
+      enabled: false,
+      time: "20:00", // Default: 8 PM
+      notificationPermission: "default",
+    },
   };
 }
 
@@ -325,7 +342,12 @@ function load(): HabitState {
   } catch {}
 
   // 3. Default fallback (seed habits)
-  return defaultState();
+  const loadedState = defaultState();
+  // Ensure reminderSettings exists in loaded state
+  if (!state.reminderSettings) {
+    state.reminderSettings = loadedState.reminderSettings;
+  }
+  return state;
 }
 
 let state: HabitState = defaultState();
@@ -409,6 +431,8 @@ function persist() {
   if (userKey) {
     syncToSupabase(userKey, state);
   }
+  // Re-schedule reminder when state changes
+  scheduleReminder();
 }
 
 function subscribe(l: () => void) {
@@ -719,6 +743,19 @@ export function setMetric<K extends keyof DailyMetrics>(
 export function setMonthlyGoal(pct: number) {
   state = { ...state, monthlyGoal: Math.max(0, Math.min(100, Math.round(pct))) };
   persist();
+}
+
+export function setReminderSettings(settings: Partial<ReminderSettings>) {
+  state = {
+    ...state,
+    reminderSettings: { ...state.reminderSettings, ...settings },
+  };
+  persist();
+  scheduleReminder();
+}
+
+export function getReminderSettings(): ReminderSettings {
+  return state.reminderSettings;
 }
 
 export function resetAll(mode: "seed" | "empty" = "empty") {
@@ -1123,6 +1160,101 @@ export function getAchievements(s: HabitState): Achievement[] {
       unlocked: catCompletions >= 50,
     },
   ];
+}
+
+// ---------- Reminder Scheduling ----------
+
+let reminderTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function clearReminderTimeout() {
+  if (reminderTimeout) {
+    clearTimeout(reminderTimeout);
+    reminderTimeout = null;
+  }
+}
+
+export function scheduleReminder(): void {
+  clearReminderTimeout();
+
+  const settings = state.reminderSettings;
+  if (!settings.enabled || typeof window === "undefined") return;
+
+  const [hours, minutes] = settings.time.split(":").map(Number);
+  const now = new Date();
+  const reminderTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes,
+  );
+
+  // If reminder time is in the past, schedule for tomorrow
+  if (reminderTime <= now) {
+    reminderTime.setDate(reminderTime.getDate() + 1);
+  }
+
+  const delay = reminderTime.getTime() - now.getTime();
+
+  reminderTimeout = setTimeout(() => {
+    showReminderNotification();
+    // Schedule next reminder for tomorrow
+    scheduleReminder();
+  }, delay);
+}
+
+function showReminderNotification(): void {
+  if (typeof window === "undefined") return;
+
+  const settings = state.reminderSettings;
+  if (!settings.enabled) return;
+
+  if (Notification.permission === "granted") {
+    new Notification("Daily Habit Reminder", {
+      body: "Don't forget to complete your habits for today!",
+      icon: "/icons/icon-192x192.png",
+    });
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        setReminderSettings({ notificationPermission: permission });
+        new Notification("Daily Habit Reminder", {
+          body: "Don't forget to complete your habits for today!",
+          icon: "/icons/icon-192x192.png",
+        });
+      } else {
+        setReminderSettings({ notificationPermission: permission });
+      }
+    });
+  }
+}
+
+export function requestNotificationPermission(): Promise<NotificationPermission> {
+  if (typeof window === "undefined") return Promise.resolve("default");
+  return Notification.requestPermission().then((permission) => {
+    setReminderSettings({ notificationPermission: permission });
+    return permission;
+  });
+}
+
+export function testReminderNotification(): void {
+  if (typeof window === "undefined") return;
+
+  if (Notification.permission === "granted") {
+    new Notification("Test Habit Reminder", {
+      body: "This is a test notification for your daily habits.",
+      icon: "/icons/icon-192x192.png",
+    });
+  } else if (Notification.permission !== "denied") {
+    requestNotificationPermission().then((permission) => {
+      if (permission === "granted") {
+        new Notification("Test Habit Reminder", {
+          body: "This is a test notification for your daily habits.",
+          icon: "/icons/icon-192x192.png",
+        });
+      }
+    });
+  }
 }
 
 export { todayISO, daysAgoISO };
