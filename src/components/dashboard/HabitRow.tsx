@@ -63,8 +63,7 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
   const target = habitTarget(h);
   const unit = h.unit ?? "";
   const isBreak = h.direction === "break";
-  const isTimeHabit =
-    h.isTimer || ["mins", "hrs", "min", "hr", "minutes", "hours"].includes(unit.toLowerCase());
+  const isTimeHabit = !!h.isTimer;
 
   const [draft, setDraft] = useState<string>(value ? String(value) : "");
   useEffect(() => {
