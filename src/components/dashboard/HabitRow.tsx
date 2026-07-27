@@ -29,7 +29,11 @@ import {
   resumeTimer,
   stopAndSaveTimer,
   cancelTimer,
+  useFreezeToken,
+  todayISO,
 } from "@/lib/habits-store";
+
+import { Snowflake } from "lucide-react";
 
 function IconOf(name: string) {
   return (
@@ -55,9 +59,12 @@ interface Props {
   pct: number;
   value: number;
   compact?: boolean;
+  isFrozen?: boolean;
+  isPast?: boolean;
+  onFreeze?: () => void;
 }
 
-export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Props) {
+export function HabitRow({ habit: h, dateISO, status, pct, value, compact, isFrozen, isPast, onFreeze }: Props) {
   const Icon = IconOf(h.icon);
   const hasBenchmarks = !!(h.benchmarks && h.benchmarks.length);
   const target = habitTarget(h);
@@ -131,15 +138,31 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
           <span className="min-w-0 flex-1 overflow-hidden">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="block truncate text-sm font-medium">{h.name}</span>
-              {status === "in_progress" && (
+              {isFrozen ? (
+                <span className="rounded-full bg-cyan-500/10 border border-cyan-500/40 px-1.5 py-0.2 text-[9px] font-bold text-cyan-500 shrink-0">
+                  FROZEN ❄️
+                </span>
+              ) : status === "in_progress" ? (
                 <span className="rounded-full bg-warning/20 border border-warning/40 px-1.5 py-0.2 text-[9px] font-bold text-warning shrink-0">
                   IN PROGRESS
                 </span>
-              )}
-              {status === "failed" && (
+              ) : status === "failed" ? (
                 <span className="rounded-full bg-danger/20 border border-danger/40 px-1.5 py-0.2 text-[9px] font-bold text-danger shrink-0">
                   EXCEEDED
                 </span>
+              ) : null}
+              {isPast && status === "failed" && !isFrozen && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onFreeze?.();
+                  }}
+                  className="rounded-full bg-cyan-500/10 border border-cyan-500/40 p-0.5 text-cyan-500 hover:bg-cyan-500/20 shrink-0"
+                  title="Freeze this day to protect your streak"
+                >
+                  <Snowflake className="h-3 w-3" />
+                </button>
               )}
             </div>
             {!compact && (
@@ -348,6 +371,20 @@ export function HabitRowConnected({
   const pct = habitPct(s, habit, dateISO);
   const value = habitValue(s, habit, dateISO);
   const status = habitStatus(s, habit, dateISO);
+  const isFrozen = s.freezes?.[dateISO]?.[habit.id];
+  const today = todayISO();
+  const isPast = dateISO < today;
+  
+  const handleFreeze = () => {
+    if (s.freezeTokens > 0) {
+      useFreezeToken(dateISO, habit.id);
+      alert(`Streak frozen! ❄️
+Your streak for ${habit.name} on ${new Date(dateISO).toLocaleDateString()} is now protected.`);
+    } else {
+      alert("No freeze tokens left!\nMaintain a 7-day streak to earn one.");
+    }
+  };
+  
   return (
     <HabitRow
       habit={habit}
@@ -356,6 +393,9 @@ export function HabitRowConnected({
       pct={pct}
       value={value}
       compact={compact}
+      isFrozen={isFrozen}
+      isPast={isPast}
+      onFreeze={handleFreeze}
     />
   );
 }

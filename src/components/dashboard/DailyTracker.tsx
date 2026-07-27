@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHabits, completionsForDate, todayISO, habitsFor } from "@/lib/habits-store";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
 import { DatePicker } from "./DatePicker";
 import { HabitRowConnected } from "./HabitRow";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
@@ -44,9 +44,12 @@ export function DailyTracker({ initialDate }: Props) {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold">Daily Tracker</h3>
-          <p className="text-xs text-muted-foreground" suppressHydrationWarning>
-            {label}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground" suppressHydrationWarning>
+            <span>{label}</span>
+            <span className="flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-cyan-500">
+              <Snowflake className="h-3 w-3" /> {s.freezeTokens} Freezes Available
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
