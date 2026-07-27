@@ -288,8 +288,17 @@ export function filterHabitsByScope<T extends Habit>(habits: T[], scope: Scope):
 ### Working: Magic Link (Email OTP)
 
 ```
-User enters email → supabase.auth.signInWithOtp({ email }) → Magic link sent to inbox
-→ User clicks link → Redirected to habithabitat.vercel.app → Logged in
+User enters email → supabase.auth.signInWithOtp({ email }) → Magic link sent to- ✅ HabitHabitat favicon + branding
+- ✅ Deployed on Vercel at habithabitat.vercel.app
+- ✅ **Dynamic Achievements** — milestone badges auto-unlock based on streaks/completions
+- ✅ **Smart Focus Timer Linking** — timer automatically logs minutes to habits
+- ✅ **Strict Habit Status Engine** — accurately grades End of Day statuses for Goal vs Limit habits
+- ✅ **Journal Search & Filter** — fully searchable with recent entries sidebar
+- ✅ **Dynamic Insights Panel** — real-time streaks, weekly MVP, and consistency stats
+- ✅ **Push Notifications** — customizable daily browser reminders
+- ✅ **CAT Mock Test Tracker** — dedicated UI in CAT dashboard linked to `mock_tests` Supabase table
+- ✅ **Streak Freeze Economy** — token-based system to freeze streaks for past days without penalty
+- ✅ **Robust Focus Timer** — uses absolute timestamps to prevent browser background throttling
 ```
 
 ### Not Working: Email+Password signup (disabled — future work)

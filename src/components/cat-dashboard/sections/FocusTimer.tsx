@@ -56,11 +56,27 @@ export default function FocusTimer() {
 
   useEffect(() => {
     if (!running) return;
-    intervalRef.current = setInterval(() => {
+
+    // Create an inline Web Worker to bypass background tab throttling
+    const workerCode = `
+      let interval;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          interval = setInterval(() => self.postMessage('tick'), 1000);
+        } else if (e.data === 'stop') {
+          clearInterval(interval);
+        }
+      };
+    `;
+    const blob = new Blob([workerCode], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+
+    worker.onmessage = () => {
       const remainingSecs = Math.floor((endTimeRef.current - Date.now()) / 1000);
       setSecsLeft(remainingSecs);
       
       if (remainingSecs <= 0) {
+        worker.postMessage('stop');
         stop();
         setDone(true);
         bell();
@@ -94,9 +110,13 @@ export default function FocusTimer() {
           }
         }
       }
-    }, 1000);
+    };
+
+    worker.postMessage('start');
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      worker.postMessage('stop');
+      worker.terminate();
     };
   }, [running, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast]);
 
