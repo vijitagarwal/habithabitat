@@ -31,6 +31,7 @@ export default function FocusTimer() {
   const [secsLeft, setSecsLeft] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [done, setDone] = useState(false);
+  const endTimeRef = useRef<number>(0);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -48,6 +49,7 @@ export default function FocusTimer() {
   const start = useCallback(() => {
     resumeCtx();
     setDone(false);
+    endTimeRef.current = Date.now() + getDurationMins() * 60000;
     setSecsLeft(getDurationMins() * 60);
     setRunning(true);
   }, [getDurationMins]);
@@ -55,44 +57,43 @@ export default function FocusTimer() {
   useEffect(() => {
     if (!running) return;
     intervalRef.current = setInterval(() => {
-      setSecsLeft((prev) => {
-        if (prev <= 1) {
-          stop();
-          setDone(true);
-          bell();
-          // Confetti!
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ["#E8A23D", "#3FAFA8", "#9C90C4"],
-          });
-          const today = todayKey();
-          const dur = getDurationMins();
-          const newLog: FocusLog = {
-            sessions: [...(focusLog.sessions || []), { date: today, subject, durationMins: dur }],
-          };
-          setFocusLog(newLog);
-          markActivity(3);
-          addToast(`Focus sprint complete! ${dur}m of ${subject} 🎯`);
+      const remainingSecs = Math.floor((endTimeRef.current - Date.now()) / 1000);
+      setSecsLeft(remainingSecs);
+      
+      if (remainingSecs <= 0) {
+        stop();
+        setDone(true);
+        bell();
+        // Confetti!
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#E8A23D", "#3FAFA8", "#9C90C4"],
+        });
+        const today = todayKey();
+        const dur = getDurationMins();
+        const newLog: FocusLog = {
+          sessions: [...(focusLog.sessions || []), { date: today, subject, durationMins: dur }],
+        };
+        setFocusLog(newLog);
+        markActivity(3);
+        addToast(`Focus sprint complete! ${dur}m of ${subject} 🎯`);
 
-           // Handle habit linking
-          if (timerHabits.some((h) => h.name === subject)) {
-            const habit = timerHabits.find((h) => h.name === subject);
-            if (habit) {
-              const todayISODate = todayISO();
-              const currentValue = s.values[todayISODate]?.[habit.id] || 0;
-              const isHourUnit = habit.unit?.toLowerCase().includes("hr") || 
-                                habit.unit?.toLowerCase().includes("hour");
-              const increment = isHourUnit ? dur / 60 : dur;
-              setHabitValue(todayISODate, habit.id, currentValue + increment);
-              addToast(`⏱️ Added ${dur}m to ${habit.name} (${increment} ${habit.unit || "units"})`);
-            }
+         // Handle habit linking
+        if (timerHabits.some((h) => h.name === subject)) {
+          const habit = timerHabits.find((h) => h.name === subject);
+          if (habit) {
+            const todayISODate = todayISO();
+            const currentValue = s.values[todayISODate]?.[habit.id] || 0;
+            const isHourUnit = habit.unit?.toLowerCase().includes("hr") || 
+                              habit.unit?.toLowerCase().includes("hour");
+            const increment = isHourUnit ? dur / 60 : dur;
+            setHabitValue(todayISODate, habit.id, currentValue + increment);
+            addToast(`⏱️ Added ${dur}m to ${habit.name} (${increment} ${habit.unit || "units"})`);
           }
-          return 0;
         }
-        return prev - 1;
-      });
+      }
     }, 1000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
