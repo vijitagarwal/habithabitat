@@ -115,7 +115,7 @@ function KEY() {
   return userKey ? `${BASE_KEY}::${userKey}` : BASE_KEY;
 }
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => new Date().toLocaleDateString('en-CA');
 const daysAgoISO = (n: number) => {
   const d = new Date();
   d.setDate(d.getDate() - n);
@@ -610,29 +610,51 @@ export function habitStatus(s: HabitState, h: Habit, iso: string): HabitStatus {
   const today = todayISO();
   const hasBenchmarks = !!(h.benchmarks && h.benchmarks.length);
   const isBreak = h.direction === "break";
+  const isTimer = !!h.isTimer;
+  const t = habitTarget(h);
+  const v = s.values?.[iso]?.[h.id] ?? 0;
 
   // Check if an active timer is running for this habit today
   if (activeTimer && activeTimer.habitId === h.id && activeTimer.dateISO === iso) {
     return "in_progress";
   }
 
+  // Timer habits: any logged time = completed
+  if (isTimer) {
+    return v > 0 ? "completed" : "not_started";
+  }
+
+  // Build habits (e.g., "Drink 3L Water")
+  if (!isBreak && hasBenchmarks) {
+    if (iso > today) return "not_started"; // Future dates
+    if (iso === today) {
+      if (v >= t) return "completed";
+      if (v > 0) return "in_progress";
+      return "not_started";
+    } else {
+      // Past days
+      if (v >= t) return "completed";
+      if (v > 0) return "in_progress";
+      return "failed"; // No progress = failed
+    }
+  }
+
+  // Break/Limit habits (e.g., "Sugar < 10g")
   if (isBreak && hasBenchmarks) {
-    const t = habitTarget(h);
-    const v = s.values?.[iso]?.[h.id] ?? 0;
-    if (iso > today) return "not_started"; // Future dates are pending
-    if (v > t) return "failed"; // Exceeded limit -> Failed
-    if (iso === today) return "in_progress"; // Today: On track (in progress until day ends)
-    return "completed"; // Past day kept within limit -> Completed
+    if (iso > today) return "not_started"; // Future dates
+    if (iso === today) {
+      if (v > t) return "failed";
+      if (v > 0) return "in_progress";
+      return "not_started";
+    } else {
+      // Past days
+      if (v > t) return "failed";
+      if (v > 0) return "in_progress";
+      return "completed"; // No progress = completed (assumed within limit)
+    }
   }
 
-  if (hasBenchmarks) {
-    const t = habitTarget(h);
-    const v = s.values?.[iso]?.[h.id] ?? 0;
-    if (t > 0 && v >= t) return "completed";
-    if (v > 0) return "in_progress";
-    return "not_started";
-  }
-
+  // Boolean habits (no benchmarks)
   return s.completions[iso]?.[h.id] ? "completed" : "not_started";
 }
 
