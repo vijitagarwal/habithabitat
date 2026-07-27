@@ -1,34 +1,37 @@
-import { TrendingUp, Star, Target, Droplets } from "lucide-react";
-import { useHabits, overallProgress } from "@/lib/habits-store";
+import { TrendingUp, Flame, Trophy, AlertCircle } from "lucide-react";
+import { useHabits, overallProgress, currentStreak, bestHabitThisWeek, mostMissedHabit } from "@/lib/habits-store";
 
 export function Insights() {
   const s = useHabits();
   const overall = overallProgress(s);
+  const streak = currentStreak(s);
+  const bestHabit = bestHabitThisWeek(s);
+  const worstHabit = mostMissedHabit(s);
 
   const items = [
     {
+      icon: Flame,
+      title: "Current Streak",
+      body: streak > 0 ? `You're on a ${streak}-day streak! Keep it up.` : "Start a habit today to begin your streak!",
+      tint: "var(--amber)",
+    },
+    {
+      icon: Trophy,
+      title: "Weekly MVP",
+      body: bestHabit.pct > 0 ? `${bestHabit.name} is your best performer at ${bestHabit.pct}%.` : "Complete habits to see your weekly MVP.",
+      tint: "var(--teal)",
+    },
+    {
+      icon: AlertCircle,
+      title: "Needs Focus",
+      body: worstHabit.pct < 100 && worstHabit.name !== "None" ? `${worstHabit.name} was missed most this week (${worstHabit.pct}%).` : "You're crushing all your habits!",
+      tint: "var(--coral)",
+    },
+    {
       icon: TrendingUp,
-      title: "Great Job!",
-      body: `You're ${Math.max(1, overall - 72)}% more consistent than last month.`,
-      tint: "oklch(0.72 0.18 155)",
-    },
-    {
-      icon: Star,
-      title: "Best Day",
-      body: "Thursdays are your most productive days.",
-      tint: "oklch(0.72 0.18 275)",
-    },
-    {
-      icon: Target,
-      title: "Keep Going!",
-      body: "Evening habits need a bit more consistency.",
-      tint: "oklch(0.75 0.18 55)",
-    },
-    {
-      icon: Droplets,
-      title: "Consistency is Key",
+      title: "Consistency",
       body: `You've completed ${overall}% of your habits this month.`,
-      tint: "oklch(0.72 0.18 235)",
+      tint: "var(--lav)",
     },
   ];
 

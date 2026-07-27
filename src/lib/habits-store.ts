@@ -1279,4 +1279,72 @@ export function testReminderNotification(): void {
   }
 }
 
+// ---------- Insights Helpers ----------
+
+export function currentStreak(s: HabitState): number {
+  return currentStreakDays(s); // Reuse existing streak logic
+}
+
+export function bestHabitThisWeek(s: HabitState): { name: string; pct: number } {
+  const today = todayISO();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const sevenDaysAgoISO = sevenDaysAgo.toLocaleDateString('en-CA');
+
+  const habitStats = s.habits.map((h) => {
+    let total = 0;
+    let completed = 0;
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateISO = date.toLocaleDateString('en-CA');
+      if (dateISO < sevenDaysAgoISO) continue;
+
+      const scheduled = isScheduledOn(h, dateISO);
+      if (!scheduled) continue;
+      total++;
+
+      const status = habitStatus(s, h, dateISO);
+      if (status === "completed") completed++;
+    }
+
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { name: h.name, pct };
+  }).filter((stat) => stat.pct > 0);
+
+  return habitStats.reduce((best, current) => (current.pct > best.pct ? current : best), { name: "None", pct: 0 });
+}
+
+export function mostMissedHabit(s: HabitState): { name: string; pct: number } {
+  const today = todayISO();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const sevenDaysAgoISO = sevenDaysAgo.toLocaleDateString('en-CA');
+
+  const habitStats = s.habits.map((h) => {
+    let total = 0;
+    let completed = 0;
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateISO = date.toLocaleDateString('en-CA');
+      if (dateISO < sevenDaysAgoISO) continue;
+
+      const scheduled = isScheduledOn(h, dateISO);
+      if (!scheduled) continue;
+      total++;
+
+      const status = habitStatus(s, h, dateISO);
+      if (status === "completed") completed++;
+    }
+
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { name: h.name, pct };
+  }).filter((stat) => stat.pct < 100);
+
+  return habitStats.reduce((worst, current) => (current.pct < worst.pct ? current : worst), { name: "None", pct: 100 });
+}
+
 export { todayISO, daysAgoISO };
