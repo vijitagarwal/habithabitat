@@ -285,7 +285,7 @@ export function HabitRow({ habit: h, dateISO, status, pct, value, compact }: Pro
             );
           })}
 
-          {(isTimeHabit || hasBenchmarks) && !isMyTimer && (
+          {isTimeHabit && !isMyTimer && (
             <button
               type="button"
               onClick={(e) => {
