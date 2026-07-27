@@ -113,7 +113,7 @@ const CAT_NAV: NavGroup[] = [
     group: "TRACKING",
     items: [
       { id: "analytics", label: "Analytics", icon: BarChart2 },
-      { id: "mocks", label: "Mock Tracker", icon: BookOpen },
+      { id: "mocks", label: "Mock Tests", icon: BookOpen },
       { id: "syllabus", label: "Topic Tracker", icon: BookMarked },
       { id: "errorlog", label: "Error Log", icon: AlertCircle },
       { id: "heatmap", label: "Heatmap", icon: Flame },
