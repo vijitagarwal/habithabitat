@@ -106,6 +106,8 @@ export interface HabitState {
   monthlyGoal: number;
   level: number;
   xp: number;
+  freezeTokens: number;
+  freezes: Record<string, Record<string, boolean>>;
   reminderSettings: ReminderSettings;
 }
 
@@ -289,6 +291,8 @@ function defaultState(): HabitState {
     monthlyGoal: 90,
     level: 18,
     xp: 2450,
+    freezeTokens: 0,
+    freezes: {},
     reminderSettings: {
       enabled: false,
       time: "20:00", // Default: 8 PM
@@ -307,6 +311,8 @@ function emptyState(): HabitState {
     monthlyGoal: 80,
     level: 1,
     xp: 0,
+    freezeTokens: 0,
+    freezes: {},
     reminderSettings: {
       enabled: false,
       time: "20:00", // Default: 8 PM
@@ -343,10 +349,16 @@ function load(): HabitState {
 
   // 3. Default fallback (seed habits)
   const loadedState = defaultState();
-  // Ensure reminderSettings exists in loaded state
-  if (!state.reminderSettings) {
-    state.reminderSettings = loadedState.reminderSettings;
-  }
+    // Ensure new fields exist in loaded state
+    if (state.freezeTokens === undefined) {
+      state.freezeTokens = 0;
+    }
+    if (!state.freezes) {
+      state.freezes = {};
+    }
+    if (!state.reminderSettings) {
+      state.reminderSettings = loadedState.reminderSettings;
+    }
   return state;
 }
 
@@ -433,6 +445,11 @@ function persist() {
   }
   // Re-schedule reminder when state changes
   scheduleReminder();
+}
+
+function setState(update: (prev: HabitState) => HabitState) {
+  state = update(state);
+  persist();
 }
 
 function subscribe(l: () => void) {
@@ -614,6 +631,11 @@ export function habitStatus(s: HabitState, h: Habit, iso: string): HabitStatus {
   const t = habitTarget(h);
   const v = s.values?.[iso]?.[h.id] ?? 0;
 
+  // Check if the day is frozen for this habit
+  if (s.freezes[iso]?.[h.id]) {
+    return "completed"; // Frozen days count as completed
+  }
+
   // Check if an active timer is running for this habit today
   if (activeTimer && activeTimer.habitId === h.id && activeTimer.dateISO === iso) {
     return "in_progress";
@@ -664,6 +686,12 @@ export function habitTarget(h: Habit): number {
 
 export function habitPct(s: HabitState, h: Habit, iso: string): number {
   const today = todayISO();
+  
+  // Check if the day is frozen for this habit
+  if (s.freezes[iso]?.[h.id]) {
+    return 100; // Frozen days count as 100%
+  }
+  
   if (h.benchmarks && h.benchmarks.length) {
     const t = habitTarget(h);
     const v = s.values?.[iso]?.[h.id] ?? 0;
@@ -737,6 +765,29 @@ export function deleteHabit(id: string) {
   }
   state = { ...state, habits: state.habits.filter((h) => h.id !== id), completions, values };
   persist();
+}
+
+export function useFreezeToken(dateISO: string, habitId: string) {
+  setState((s) => {
+    if (s.freezeTokens <= 0) return s;
+    
+    const newFreezes = { ...s.freezes };
+    newFreezes[dateISO] = newFreezes[dateISO] || {};
+    newFreezes[dateISO][habitId] = true;
+    
+    return {
+      ...s,
+      freezeTokens: s.freezeTokens - 1,
+      freezes: newFreezes,
+    };
+  });
+}
+
+export function addFreezeToken() {
+  setState((s) => ({
+    ...s,
+    freezeTokens: Math.min(s.freezeTokens + 1, 3),
+  }));
 }
 
 export function setNote(dateISO: string, text: string) {
@@ -887,6 +938,14 @@ export function currentStreak(s: HabitState): number {
     const day = daysAgoISO(i);
     const scheduled = habitsFor(s, day);
     if (scheduled.length === 0) continue; // skip off-days
+    
+    // Check if the day is frozen for any habit
+    const isFrozenDay = scheduled.some(h => s.freezes[day]?.[h.id]);
+    if (isFrozenDay) {
+      streak++; // Frozen days count as streak days
+      continue;
+    }
+    
     const { pct } = completionsForDate(s, day);
     if (pct >= 60) streak++;
     else break;
@@ -903,6 +962,18 @@ export function longestStreak(s: HabitState): { days: number; from: string; to: 
     const day = daysAgoISO(i);
     const scheduled = habitsFor(s, day);
     if (scheduled.length === 0) continue;
+    
+    // Check if the day is frozen for any habit
+    const isFrozenDay = scheduled.some(h => s.freezes[day]?.[h.id]);
+    if (isFrozenDay) {
+      cur++;
+      if (cur > best) {
+        best = cur;
+        bestEnd = day;
+      }
+      continue;
+    }
+    
     const { pct } = completionsForDate(s, day);
     if (pct >= 60) {
       cur++;
@@ -1045,6 +1116,16 @@ export function perfectDays(s: HabitState): number {
   let n = 0;
   const dates = new Set<string>([...Object.keys(s.completions), ...Object.keys(s.values ?? {})]);
   for (const iso of dates) {
+    const scheduled = habitsFor(s, iso);
+    if (scheduled.length === 0) continue;
+    
+    // Check if the day is frozen for any habit
+    const isFrozenDay = scheduled.some(h => s.freezes[iso]?.[h.id]);
+    if (isFrozenDay) {
+      n++; // Frozen days count as perfect days
+      continue;
+    }
+    
     const { pct, total } = completionsForDate(s, iso);
     if (total > 0 && pct === 100) n++;
   }
@@ -1281,9 +1362,6 @@ export function testReminderNotification(): void {
 
 // ---------- Insights Helpers ----------
 
-export function currentStreak(s: HabitState): number {
-  return currentStreakDays(s); // Reuse existing streak logic
-}
 
 export function bestHabitThisWeek(s: HabitState): { name: string; pct: number } {
   const today = todayISO();
