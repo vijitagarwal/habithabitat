@@ -23,6 +23,8 @@ import {
 import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle } from "lucide-react";
 import { ScheduleEditor } from "./ScheduleEditor";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
+import { HABIT_TEMPLATES } from "./habit-templates";
+import { Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -544,6 +546,40 @@ export function HabitManager() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Templates Section */}
+      <div className="card-glass rounded-2xl p-6">
+        <h3 className="mb-1 text-lg font-semibold">Habit Templates</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Instantly install pre-built habit stacks to hit the ground running.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.entries(HABIT_TEMPLATES).map(([key, pack]) => (
+            <div key={key} className="rounded-xl border border-border bg-background/30 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold">{pack.name}</h4>
+                <button
+                  onClick={() => {
+                    pack.habits.forEach(h => addHabit(h));
+                    alert(`${pack.name} installed successfully!`);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:border-primary/40 hover:text-primary transition"
+                >
+                  <Download className="h-3.5 w-3.5" /> Install Pack
+                </button>
+              </div>
+              <ul className="space-y-2">
+                {pack.habits.map((h, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+                    {h.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 

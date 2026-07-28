@@ -46,7 +46,7 @@ export function QuickLogWidget() {
         <DialogTrigger asChild>
           <Button
             size="icon"
-            className="h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110 gradient-brand"
+            className="h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110 gradient-brand text-white"
           >
             <ListTodo className="h-6 w-6" />
           </Button>

@@ -29,6 +29,8 @@ import {
 import { CatDashboardShell } from "@/components/cat-dashboard/CatDashboardShell";
 import { GraduationCap, LayoutGrid } from "lucide-react";
 import { ScopeCtx } from "@/lib/scope";
+import { QuickLogWidget } from "@/components/dashboard/QuickLogWidget";
+import { WeeklyReviewBanner } from "@/components/dashboard/WeeklyReviewBanner";
 
 const searchSchema = z.object({
   scope: z.enum(["habit", "cat"]).optional(),
@@ -175,6 +177,7 @@ function DashboardPage() {
       <div className="dark h-screen overflow-hidden bg-background text-foreground">
         <ScopeCtx.Provider value="cat">
           <CatDashboardShell />
+          <QuickLogWidget />
         </ScopeCtx.Provider>
       </div>
     );
@@ -241,11 +244,13 @@ function DashboardPage() {
               subtitle={meta.subtitle}
             />
             <ScopeCtx.Provider value="habit">
+              <WeeklyReviewBanner onNavigate={setActive} />
               {renderView(safeActive, setActive, headerDate)}
             </ScopeCtx.Provider>
           </div>
         </main>
       </div>
+      <QuickLogWidget />
     </div>
   );
 }

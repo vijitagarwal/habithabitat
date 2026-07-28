@@ -307,3 +307,38 @@ When designing new features, ask: **"Does this help Vijit stay on track for CAT 
 
 _This prompt was written on 2026-07-24. The project has been continuously developed since 2026-07-22._
 _Always check `PROJECT_SUMMARY(habit_dashboard).md` for the most current state._
+
+---
+
+## 12. Final Mission: Complete Phase 2
+
+**Your immediate task in this chat is to build the final three core features of Phase 2.**
+
+Read the implementation details below carefully. Build them one by one, test them, and commit them.
+
+### ✅ Task 1: The Quick Log Widget (Feature 6c)
+**Goal:** Allow users to quickly check off their daily habits from *anywhere* in the app (like the CAT Dashboard or Analytics view) without having to navigate back to the main Daily Tracker.
+- Create a new component `src/components/dashboard/QuickLogWidget.tsx`.
+- Render a floating action button (FAB) fixed to the bottom-right of the screen.
+- Clicking the button opens a clean, glassmorphism modal containing a simplified checklist of **only today's incomplete Goal habits** (filter out completed habits).
+- Integrate it into the main layout or root shell so it is accessible from all routes.
+- Commit this when finished.
+
+### ✅ Task 2: The Weekly Review Prompt (Feature 6e)
+**Goal:** Enforce a weekly reflection habit by intercepting the user on Sunday evenings.
+- Create a new component `src/components/dashboard/WeeklyReviewBanner.tsx` and place it at the top of the main dashboard views.
+- **Logic:** Show the banner ONLY if `new Date().getDay() === 0` (Sunday) and the time is after 18:00 (6 PM).
+- **UI:** A prominent, beautifully styled banner: "It's Sunday evening. Time for your Weekly Review."
+- **Action:** Clicking it opens a pre-filled Journal entry in the Journal tab. The entry should auto-fill the week's stats (Habit consistency %, Mocks taken, Focus hours logged) and provide prompts: "What went well this week?", "What didn't go well?", "Focus for next week?".
+- Commit this when finished.
+
+### ✅ Task 3: Habit Templates (Feature 6f)
+**Goal:** Allow users to instantly install pre-made stacks of habits.
+- Create a new "Templates" tab or section inside `src/components/dashboard/HabitManager.tsx`.
+- Provide hardcoded JSON templates for:
+  - **The CAT Prep Pack**: (e.g. "Read 1 AEON Essay", "Solve 3 DILR sets", "Give 1 Sectional Mock").
+  - **The Deep Work Pack**: (e.g. "No Phone until Noon", "2 Hours Deep Work", "Plan tomorrow").
+- Add an "Install Pack" button next to each that loops through the array and calls `addHabit()` to auto-add these habits to the user's global state.
+- Commit this when finished.
+
+**Phase 2 is Complete! (As of 2026-07-28)**
