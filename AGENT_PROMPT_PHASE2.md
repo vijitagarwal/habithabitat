@@ -310,35 +310,35 @@ _Always check `PROJECT_SUMMARY(habit_dashboard).md` for the most current state._
 
 ---
 
-## 12. Final Mission: Complete Phase 2
+## 12. Phase 3: Bug Fixes & New Features
 
-**Your immediate task in this chat is to build the final three core features of Phase 2.**
+**Your immediate task is to address the following bugs and feature requests reported by the user.** 
+**CRITICAL INSTRUCTION: Do NOT do all of these at once. You must complete ONE task at a time, commit the changes, and wait for the user to confirm it works before moving to the next task.**
 
-Read the implementation details below carefully. Build them one by one, test them, and commit them.
+### Task 1: Fix Profile Button in CAT Dashboard
+- **Problem:** In `CatDashboardShell.tsx`, the text "Profile & Sign out" looks like a clickable row, but clicking it does nothing. Only clicking the avatar (the `ProfileModal` component itself) opens the menu.
+- **Fix:** Wrap the entire row in a button or update `ProfileModal` to expose a trigger that wraps the whole row so that clicking anywhere on the row opens the menu.
+- **Action:** Fix this, commit, and STOP. Ask the user to verify.
 
-### ✅ Task 1: The Quick Log Widget (Feature 6c)
-**Goal:** Allow users to quickly check off their daily habits from *anywhere* in the app (like the CAT Dashboard or Analytics view) without having to navigate back to the main Daily Tracker.
-- Create a new component `src/components/dashboard/QuickLogWidget.tsx`.
-- Render a floating action button (FAB) fixed to the bottom-right of the screen.
-- Clicking the button opens a clean, glassmorphism modal containing a simplified checklist of **only today's incomplete Goal habits** (filter out completed habits).
-- Integrate it into the main layout or root shell so it is accessible from all routes.
-- Commit this when finished.
+### Task 2: Fix Break/Limit Habit Auto-Completion
+- **Problem:** Habits with a "break/limit" direction (like Sugar) currently jump to 100% completion automatically at the end of the day if the limit was not exceeded (due to `if (iso < today) return 100;` in `habits-store.ts`). The user wants it to correctly display the partial percentage (based on the benchmark used) instead of jumping to 100% complete.
+- **Fix:** Modify `habitPct` and `habitStatus` in `src/lib/habits-store.ts` to retain and return the true percentage `((target - value) / target * 100)` for past days as well.
+- **Action:** Fix this, commit, and STOP. Ask the user to verify.
 
-### ✅ Task 2: The Weekly Review Prompt (Feature 6e)
-**Goal:** Enforce a weekly reflection habit by intercepting the user on Sunday evenings.
-- Create a new component `src/components/dashboard/WeeklyReviewBanner.tsx` and place it at the top of the main dashboard views.
-- **Logic:** Show the banner ONLY if `new Date().getDay() === 0` (Sunday) and the time is after 18:00 (6 PM).
-- **UI:** A prominent, beautifully styled banner: "It's Sunday evening. Time for your Weekly Review."
-- **Action:** Clicking it opens a pre-filled Journal entry in the Journal tab. The entry should auto-fill the week's stats (Habit consistency %, Mocks taken, Focus hours logged) and provide prompts: "What went well this week?", "What didn't go well?", "Focus for next week?".
-- Commit this when finished.
+### Task 3: Rebuild Heatmap Visualization
+- **Problem:** The `Heatmap.tsx` component is completely broken. It labels the rows as "Mon, Tue, Wed..." but randomly groups habits into those rows using a modulo operator (`i % 7`). It then plots them across columns 1-31 (days of the month). This makes zero sense.
+- **Fix:** Rebuild the Heatmap logic. Use **Actual Habit Names** for the Y-Axis (Rows) and **1-31 days of the month** for the X-Axis (Columns). Each cell should accurately reflect that specific habit's completion on that specific day.
+- **Action:** Fix this, commit, and STOP. Ask the user to verify.
 
-### ✅ Task 3: Habit Templates (Feature 6f)
-**Goal:** Allow users to instantly install pre-made stacks of habits.
-- Create a new "Templates" tab or section inside `src/components/dashboard/HabitManager.tsx`.
-- Provide hardcoded JSON templates for:
-  - **The CAT Prep Pack**: (e.g. "Read 1 AEON Essay", "Solve 3 DILR sets", "Give 1 Sectional Mock").
-  - **The Deep Work Pack**: (e.g. "No Phone until Noon", "2 Hours Deep Work", "Plan tomorrow").
-- Add an "Install Pack" button next to each that loops through the array and calls `addHabit()` to auto-add these habits to the user's global state.
-- Commit this when finished.
+### Task 4: Add Clocks Everywhere
+- **CAT Dashboard:** Add a detailed digital clock (showing seconds) in the top bar, alongside the existing "Days Remaining" counter.
+- **Habit Dashboard Main Screen:** Add a beautifully styled **Analogue Clock** with a ticking second hand on the main dashboard view.
+- **Habit Dashboard Other Screens:** Add a digital clock (showing seconds) in other views.
+- **Action:** Build these, commit, and STOP. Ask the user to verify.
 
-**Phase 2 is Complete! (As of 2026-07-28)**
+### Task 5: Make Settings Sections Collapsible
+- **Problem:** The "Your Habits" section in `HabitManager.tsx` takes up too much vertical space.
+- **Fix:** Make the "Your Habits" section collapsible (using an accordion or simple toggle state) so the user can hide it.
+- **Action:** Fix this, commit, and STOP. Ask the user to verify.
+
+**START WITH TASK 1 ONLY.**

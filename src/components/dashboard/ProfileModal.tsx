@@ -6,7 +6,7 @@
  * Used by both the Habit dashboard Header and the CAT sidebar footer.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import {
   User,
   Mail,
@@ -53,14 +53,32 @@ function getInitials(name: string | null, email: string): string {
   return email.slice(0, 2).toUpperCase();
 }
 
-export function ProfileModal({ onSignOut, compact }: Props) {
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
+export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
+  ({ onSignOut, compact }, ref) => {
+    const [open, setOpen] = useState(false);
+    const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [draft, setDraft] = useState<Partial<Profile>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    open: () => {
+      setOpen(true);
+      setEditing(false);
+    },
+    close: () => setOpen(false),
+    toggle: () => {
+      setOpen((v) => !v);
+      setEditing(false);
+    },
+    // @ts-ignore - To maintain compatibility with any HTMLButtonElement usages
+    click: () => {
+      setOpen((v) => !v);
+      setEditing(false);
+    }
+  }) as any);
 
   // Load session
   useEffect(() => {
@@ -154,7 +172,9 @@ export function ProfileModal({ onSignOut, compact }: Props) {
     <div ref={containerRef} className="relative">
       {/* ── Avatar trigger button ── */}
       <button
-        onClick={() => {
+        ref={ref}
+        onClick={(e) => {
+          e.stopPropagation();
           setOpen((v) => !v);
           setEditing(false);
         }}
@@ -362,5 +382,6 @@ export function ProfileModal({ onSignOut, compact }: Props) {
         </div>
       )}
     </div>
-  );
-}
+    );
+  }
+);

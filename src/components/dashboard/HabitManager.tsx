@@ -20,7 +20,7 @@ import {
   type HabitDirection,
   type Schedule,
 } from "@/lib/habits-store";
-import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { ScheduleEditor } from "./ScheduleEditor";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
 import { HABIT_TEMPLATES } from "./habit-templates";
@@ -352,6 +352,7 @@ export function HabitManager() {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [isHabitsCollapsed, setIsHabitsCollapsed] = useState(false);
   const visibleHabits = filterHabitsByScope(s.habits, scope);
   // In CAT scope, new habits default to the "CAT Prep" category.
   const initialDraft =
@@ -377,17 +378,28 @@ export function HabitManager() {
               Set benchmarks, unit, direction, and when the habit is active.
             </p>
           </div>
-          {!adding && (
+          <div className="flex items-center gap-2">
+            {!adding && !isHabitsCollapsed && (
+              <button
+                onClick={() => setAdding(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg gradient-brand px-3 py-2 text-xs font-semibold text-white shadow"
+              >
+                <Plus className="h-4 w-4" /> Add Habit
+              </button>
+            )}
             <button
-              onClick={() => setAdding(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg gradient-brand px-3 py-2 text-xs font-semibold text-white shadow"
+              onClick={() => setIsHabitsCollapsed(!isHabitsCollapsed)}
+              className="rounded-lg border border-border bg-background p-2 hover:border-primary/40"
+              title={isHabitsCollapsed ? "Expand" : "Collapse"}
             >
-              <Plus className="h-4 w-4" /> Add Habit
+              {isHabitsCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
             </button>
-          )}
+          </div>
         </div>
 
-        {adding && (
+        {!isHabitsCollapsed && (
+          <>
+            {adding && (
           <div className="mb-4">
             <DraftForm
               initial={initialDraft}
@@ -486,6 +498,8 @@ export function HabitManager() {
             </li>
           ))}
         </ul>
+          </>
+        )}
       </div>
 
       {/* Reminders Section */}

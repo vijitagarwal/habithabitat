@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useHabits, monthlyHeatmap } from "@/lib/habits-store";
 
-const rows = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const levelColors = [
   "oklch(0.28 0.02 265)", // 0 none
   "oklch(0.55 0.18 55)", // 1 few (orange)
@@ -17,12 +16,16 @@ export function Heatmap() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
 
-  const { cells, daysInMonth } = monthlyHeatmap(s, year, month);
+  const { cells, daysInMonth, habitNames } = monthlyHeatmap(s, year, month);
 
-  const grid: ((typeof cells)[number] | null)[][] = Array.from({ length: 7 }, () =>
+  const grid: ((typeof cells)[number] | null)[][] = Array.from({ length: habitNames.length }, () =>
     Array(daysInMonth).fill(null),
   );
-  for (const c of cells) grid[c.row][c.day - 1] = c;
+  for (const c of cells) {
+    if (c.row >= 0 && c.row < habitNames.length) {
+      grid[c.row][c.day - 1] = c;
+    }
+  }
 
   const colTicks = [1, 5, 10, 15, 20, 25, 30].filter((d) => d <= daysInMonth);
   if (daysInMonth === 31 && !colTicks.includes(31)) colTicks.push(31);
@@ -75,7 +78,7 @@ export function Heatmap() {
       </div>
       <div className="overflow-x-auto">
         <div className="min-w-max">
-          <div className="mb-1 flex pl-10 text-[10px] text-muted-foreground" style={{ gap: "4px" }}>
+          <div className="mb-1 flex pl-[100px] text-[10px] text-muted-foreground" style={{ gap: "4px" }}>
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const d = i + 1;
               return (
@@ -85,9 +88,9 @@ export function Heatmap() {
               );
             })}
           </div>
-          {rows.map((label, ri) => (
-            <div key={label} className="mb-1 flex items-center" style={{ gap: "4px" }}>
-              <div className="w-8 shrink-0 text-xs text-muted-foreground">{label}</div>
+          {habitNames.map((label, ri) => (
+            <div key={`${label}-${ri}`} className="mb-1 flex items-center" style={{ gap: "4px" }}>
+              <div className="w-24 shrink-0 truncate text-xs text-muted-foreground" title={label}>{label}</div>
               {grid[ri].map((cell, ci) => (
                 <div
                   key={ci}

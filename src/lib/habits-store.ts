@@ -671,8 +671,7 @@ export function habitStatus(s: HabitState, h: Habit, iso: string): HabitStatus {
     } else {
       // Past days
       if (v > t) return "failed";
-      if (v > 0) return "in_progress";
-      return "completed"; // No progress = completed (assumed within limit)
+      return "completed"; // Kept within limit
     }
   }
 
@@ -699,8 +698,7 @@ export function habitPct(s: HabitState, h: Habit, iso: string): number {
     if (h.direction === "break") {
       if (iso > today) return 0; // Future days show 0% (pending)
       if (v > t) return 0; // Exceeded limit -> 0%
-      if (iso < today) return 100; // Past day kept within limit -> 100%
-      // Today: calculate on-track capacity percentage
+      // Calculate on-track capacity percentage
       return Math.max(0, Math.min(100, Math.round(((t - v) / t) * 100)));
     }
     return Math.max(0, Math.min(100, Math.round((v / t) * 100)));
@@ -1070,32 +1068,36 @@ export function monthlyHeatmap(s: HabitState, year?: number, month?: number) {
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const isCurrentMonth = y === now.getFullYear() && m === now.getMonth();
   const todayD = now.getDate();
-  const rowHabits: Habit[][] = Array.from({ length: 7 }, () => []);
-  s.habits.forEach((h, i) => rowHabits[i % 7].push(h));
 
   const cells: { day: number; row: number; level: number; hasData: boolean }[] = [];
-  for (let r = 0; r < 7; r++) {
+  s.habits.forEach((h, r) => {
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(y, m, d);
-      const iso = date.toISOString().slice(0, 10);
+      // Ensure month and day are correctly padded, though toISOString does UTC.
+      // Better to manually format the local date.
+      const mm = String(m + 1).padStart(2, '0');
+      const dd = String(d).padStart(2, '0');
+      const iso = `${y}-${mm}-${dd}`;
+      
       const isFuture = isCurrentMonth && d > todayD;
-      const rowHs = rowHabits[r].filter((h) => isScheduledOn(h, iso));
-      if (isFuture || rowHs.length === 0) {
+      
+      if (isFuture || !isScheduledOn(h, iso)) {
         cells.push({ day: d, row: r, level: -1, hasData: false });
         continue;
       }
-      let sum = 0;
-      for (const h of rowHs) sum += habitPct(s, h, iso);
-      const pct = sum / rowHs.length;
+      
+      const pct = habitPct(s, h, iso);
       let level = 0;
       if (pct >= 100) level = 4;
       else if (pct >= 66) level = 3;
       else if (pct >= 34) level = 2;
       else if (pct > 0) level = 1;
+      
       cells.push({ day: d, row: r, level, hasData: true });
     }
-  }
-  return { cells, daysInMonth, year: y, month: m };
+  });
+  
+  return { cells, daysInMonth, year: y, month: m, habitNames: s.habits.map(h => h.name) };
 }
 
 export function totalCompleted(s: HabitState): number {

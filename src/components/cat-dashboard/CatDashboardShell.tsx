@@ -10,10 +10,11 @@
  * - Proper card/section wrapper for content area
  */
 
-import { useState, useEffect, Suspense, lazy, useCallback } from "react";
+import { useState, useEffect, Suspense, lazy, useCallback, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import "./cat-styles.css";
 import { ProfileModal } from "@/components/dashboard/ProfileModal";
+import { DigitalClock } from "@/components/dashboard/DigitalClock";
 import {
   Home,
   Zap,
@@ -190,6 +191,7 @@ function CatSidebar({
 }) {
   const { user } = useCatAuth();
   const { overall, streak, todayStats } = useScopedStats();
+  const profileRef = useRef<HTMLButtonElement>(null);
 
   const sidebarContent = (
     <div className="flex h-full flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
@@ -314,10 +316,16 @@ function CatSidebar({
           {!collapsed && <span>Habit Tracker</span>}
         </button>
         {/* Profile dropdown (includes sign-out) */}
-        <div className={`flex ${collapsed ? "justify-center" : "items-center gap-3 px-1"} py-1`}>
-          <ProfileModal onSignOut={onSignOut} compact={collapsed} />
+        <div
+          onClick={() => {
+            // @ts-ignore - we added this via useImperativeHandle
+            profileRef.current?.toggle();
+          }}
+          className={`flex cursor-pointer hover:bg-sidebar-accent/40 rounded-xl transition-colors ${collapsed ? "justify-center" : "items-center gap-3 px-1"} py-1`}
+        >
+          <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} />
           {!collapsed && (
-            <span className="text-sm font-medium text-sidebar-foreground/75">
+            <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
               Profile &amp; Sign out
             </span>
           )}
@@ -372,7 +380,9 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
         </span>
       </div>
 
-      <div className="hidden items-center sm:flex">
+      <div className="hidden items-center gap-3 sm:flex">
+        <DigitalClock className="text-sm text-foreground/80" />
+        <div className="h-4 w-px bg-border/60" />
         <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-xs text-amber-300">
           {d}d {h}:{m}:{s}
         </span>

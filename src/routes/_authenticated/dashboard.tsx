@@ -31,6 +31,7 @@ import { GraduationCap, LayoutGrid } from "lucide-react";
 import { ScopeCtx } from "@/lib/scope";
 import { QuickLogWidget } from "@/components/dashboard/QuickLogWidget";
 import { WeeklyReviewBanner } from "@/components/dashboard/WeeklyReviewBanner";
+import { AnalogueClock } from "@/components/dashboard/AnalogueClock";
 
 const searchSchema = z.object({
   scope: z.enum(["habit", "cat"]).optional(),
@@ -45,7 +46,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardHome({ onNavigate }: { onNavigate: (v: string) => void }) {
   return (
     <>
-      <StatCards />
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="flex-1 w-full">
+          <StatCards />
+        </div>
+        <div className="hidden lg:flex shrink-0">
+          <AnalogueClock />
+        </div>
+      </div>
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_320px] [&>*]:min-w-0">
         <WeeklyProgress />
         <CategoryBreakdown />

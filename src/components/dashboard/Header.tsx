@@ -2,6 +2,7 @@ import { CalendarDays, ChevronDown, Moon, Sun, Menu, RotateCw } from "lucide-rea
 import { useEffect, useState } from "react";
 import { ProfileModal } from "./ProfileModal";
 import { DatePicker } from "./DatePicker";
+import { DigitalClock } from "./DigitalClock";
 import { todayISO, syncNow } from "@/lib/habits-store";
 
 function useTheme() {
@@ -75,6 +76,9 @@ export function Header({
           align="end"
           size="md"
         />
+        <div className="hidden sm:flex items-center justify-center rounded-xl border border-border bg-card/60 px-3 py-2 text-sm text-foreground/80 h-[38px]">
+          <DigitalClock />
+        </div>
         {/* Cloud Sync Button */}
         <button
           onClick={handleSync}
