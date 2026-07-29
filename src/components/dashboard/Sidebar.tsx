@@ -113,7 +113,7 @@ function SidebarContent({
           {onClose && (
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground"
+              className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
             >
               <X className="h-4 w-4" />
             </button>
