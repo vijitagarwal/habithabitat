@@ -90,6 +90,19 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
     });
   }, []);
 
+  // Synchronize draft when profile loads or user is available
+  useEffect(() => {
+    if (profile) {
+      setDraft(profile);
+    } else if (user) {
+      // Robust fallback if no profile row exists yet
+      setDraft({
+        display_name: user.email?.split("@")[0] || "",
+        cat_year: 2026,
+      });
+    }
+  }, [profile, user]);
+
   // Load / auto-create profile when user is available
   useEffect(() => {
     if (!user) return;
@@ -128,21 +141,13 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   }, [open]);
 
   const startEdit = () => {
-    setDraft({
-      display_name: profile?.display_name ?? "",
-      bio: profile?.bio ?? "",
-      target_college: profile?.target_college ?? "",
-      target_percentile: profile?.target_percentile ?? undefined,
-      cat_year: profile?.cat_year ?? 2026,
-      phone: profile?.phone ?? "",
-      city: profile?.city ?? "",
-    });
     setEditing(true);
   };
 
   const cancelEdit = () => {
     setEditing(false);
-    setDraft({});
+    // Reset draft to current profile
+    setDraft(profile || {});
   };
 
   const saveProfile = async () => {
@@ -150,15 +155,22 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
     setSaving(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = supabase as any;
-    const { data } = await db
+    const { data, error } = await db
       .from("profiles")
       .upsert({ id: user.id, ...draft })
       .select()
       .single();
+
+    if (error) {
+      console.error("Failed to save profile:", error);
+      // Optional: add a toast here if you have a toast hook
+      setSaving(false);
+      return;
+    }
+
     if (data) setProfile(data as Profile);
     setSaving(false);
     setEditing(false);
-    setDraft({});
   };
 
   const handleSignOut = async () => {
@@ -264,7 +276,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
                   </label>
                   <input
                     type="text"
-                    value={draft.display_name ?? ""}
+                    value={draft.display_name || ""}
                     onChange={(e) => setDraft((d) => ({ ...d, display_name: e.target.value }))}
                     placeholder="Your name"
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"

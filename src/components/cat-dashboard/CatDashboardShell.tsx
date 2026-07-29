@@ -15,6 +15,7 @@ import { useNavigate } from "@tanstack/react-router";
 import "./cat-styles.css";
 import { ProfileModal } from "@/components/dashboard/ProfileModal";
 import { DigitalClock } from "@/components/dashboard/DigitalClock";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Home,
   Zap,
@@ -42,6 +43,8 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
+  Moon,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -367,6 +370,7 @@ function CatSidebar({
 function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
   const { d, h, m, s } = useCountdown();
   const { overall, streak, todayStats } = useScopedStats();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex shrink-0 h-12 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-sm">
@@ -412,6 +416,13 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
           </span>
         </span>
       </div>
+      <button
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="ml-2 flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-2.5 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors"
+      >
+        {theme === "dark" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+        <span className="capitalize">{theme}</span>
+      </button>
     </div>
   );
 }
