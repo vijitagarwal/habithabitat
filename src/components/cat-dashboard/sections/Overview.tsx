@@ -13,8 +13,8 @@ import {
   habitsFor,
   todayISO,
   completionsForDate,
-  toggleHabit,
 } from "@/lib/habits-store";
+import { HabitRowConnected } from "@/components/dashboard/HabitRow";
 import { filterHabitsByScope } from "@/lib/scope";
 
 export default function Overview() {
@@ -362,65 +362,9 @@ export default function Overview() {
               />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {catHabits.map((h) => {
-                const done = !!habitState.completions[today]?.[h.id];
-                return (
-                  <motion.button
-                    key={h.id}
-                    onClick={() => toggleHabit(today, h.id)}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "10px 14px",
-                      borderRadius: 10,
-                      width: "100%",
-                      background: done ? "rgba(34,197,94,0.08)" : "var(--bg-base)",
-                      border: `1px solid ${done ? "rgba(34,197,94,0.3)" : "var(--border)"}`,
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 5,
-                        flexShrink: 0,
-                        border: `2px solid ${done ? "#22c55e" : "var(--border-bright)"}`,
-                        background: done ? "#22c55e" : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      {done && (
-                        <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 700 }}>
-                          ✓
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: "0.88rem",
-                        color: done ? "var(--text-muted)" : "var(--text-primary)",
-                        textDecoration: done ? "line-through" : "none",
-                        flex: 1,
-                      }}
-                    >
-                      {h.name}
-                    </span>
-                    {done && (
-                      <span style={{ fontSize: "0.7rem", color: "#22c55e", fontWeight: 600 }}>
-                        Done ✓
-                      </span>
-                    )}
-                  </motion.button>
-                );
-              })}
+              {catHabits.map((h) => (
+                <HabitRowConnected key={h.id} habit={h} dateISO={today} />
+              ))}
             </div>
           </>
         )}
