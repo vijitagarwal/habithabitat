@@ -38,7 +38,7 @@ export default function Overview() {
     totalMinutes: 0,
     lastDate: "",
   });
-  const { value: checklist } = useKV<Record<string, boolean>>("checklist", {});
+  const { value: checklist } = useKV<any[]>("checklist_v2", []);
 
   // Countdown
   useEffect(() => {
@@ -59,11 +59,16 @@ export default function Overview() {
   // Error count
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("error_log")
-      .select("id", { count: "exact" })
-      .eq("user_id", user.id)
-      .then(({ count }: { count: number | null }) => setErrorCount(count || 0));
+    const fetchErrors = () => {
+      supabase
+        .from("error_log")
+        .select("id", { count: "exact" })
+        .eq("user_id", user.id)
+        .then(({ count }: { count: number | null }) => setErrorCount(count || 0));
+    };
+    fetchErrors();
+    window.addEventListener("focus", fetchErrors);
+    return () => window.removeEventListener("focus", fetchErrors);
   }, [user]);
 
   const d = Math.floor(diff / 86400000);
@@ -71,8 +76,8 @@ export default function Overview() {
   const m = pad2(Math.floor((diff % 3600000) / 60000));
   const s = pad2(Math.floor((diff % 60000) / 1000));
 
-  const checkDone = CHECKLIST.filter((c) => checklist[c.id]).length;
-  const checkTotal = CHECKLIST.length;
+  const checkDone = checklist.filter((c) => c.done).length;
+  const checkTotal = checklist.length;
 
   // Campaign segments
   const totalDays = 154;

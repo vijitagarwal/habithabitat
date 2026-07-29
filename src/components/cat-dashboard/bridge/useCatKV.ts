@@ -72,8 +72,18 @@ export function useKV<T>(
     };
 
     fetchValue();
+
+    const handleUpdate = (e: Event) => {
+      const event = e as CustomEvent<{ key: string; value: T }>;
+      if (event.detail.key === key) {
+        setValueState(event.detail.value);
+      }
+    };
+    window.addEventListener("mcp_kv_update", handleUpdate);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("mcp_kv_update", handleUpdate);
     };
   }, [user, key]);
 
@@ -81,6 +91,7 @@ export function useKV<T>(
     async (newValue: T) => {
       setValueState(newValue);
       localStorage.setItem(`mcp_kv_${key}`, JSON.stringify(newValue));
+      window.dispatchEvent(new CustomEvent("mcp_kv_update", { detail: { key, value: newValue } }));
       pendingRef.current = newValue;
       if (!user) return;
       try {
