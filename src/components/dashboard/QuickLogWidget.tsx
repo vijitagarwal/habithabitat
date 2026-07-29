@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useHabits, todayISO, habitsFor } from "@/lib/habits-store";
+import { useHabits, todayISO, habitsFor, habitStatus } from "@/lib/habits-store";
 import { HabitRowConnected } from "./HabitRow";
 import {
   Dialog,
@@ -18,10 +18,8 @@ export function QuickLogWidget() {
   const s = useHabits();
   const today = todayISO();
   const scheduled = habitsFor(s, today);
-  const completions = s.completions[today] || {};
-  
   // Filter for incomplete habits
-  const incomplete = scheduled.filter((h) => !completions[h.id]);
+  const incomplete = scheduled.filter((h) => habitStatus(s, h, today) !== "completed");
   const totalToday = scheduled.length;
   const doneToday = totalToday - incomplete.length;
   const allDone = totalToday > 0 && incomplete.length === 0;
