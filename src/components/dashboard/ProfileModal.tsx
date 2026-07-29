@@ -38,6 +38,7 @@ interface Props {
   onSignOut?: () => void;
   /** If true, renders as an icon-only trigger (for narrow sidebars) */
   compact?: boolean;
+  position?: "header" | "sidebar";
 }
 
 function getInitials(name: string | null, email: string): string {
@@ -54,7 +55,7 @@ function getInitials(name: string | null, email: string): string {
 }
 
 export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
-  ({ onSignOut, compact }, ref) => {
+  ({ onSignOut, compact, position = "header" }, ref) => {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -189,7 +190,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
 
       {/* ── Dropdown panel ── */}
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className={`absolute z-50 w-80 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 backdrop-blur-sm animate-in fade-in duration-150 ${position === "sidebar" ? "left-0 bottom-full mb-2 slide-in-from-bottom-2" : "right-0 top-full mt-2 slide-in-from-top-2"}`}>
           {/* Header strip */}
           <div className="relative bg-gradient-to-br from-primary/20 to-brand-2/20 px-5 py-4">
             <div className="flex items-center gap-3">

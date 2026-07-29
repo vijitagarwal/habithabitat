@@ -317,13 +317,9 @@ function CatSidebar({
         </button>
         {/* Profile dropdown (includes sign-out) */}
         <div
-          onClick={() => {
-            // @ts-ignore - we added this via useImperativeHandle
-            profileRef.current?.toggle();
-          }}
-          className={`flex cursor-pointer hover:bg-sidebar-accent/40 rounded-xl transition-colors ${collapsed ? "justify-center" : "items-center gap-3 px-1"} py-1`}
+          className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}
         >
-          <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} />
+          <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} position="sidebar" />
           {!collapsed && (
             <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
               Profile &amp; Sign out
