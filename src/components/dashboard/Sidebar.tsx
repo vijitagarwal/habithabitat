@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   LayoutDashboard,
   CalendarCheck2,
@@ -207,21 +208,29 @@ export function Sidebar({
   onSelect,
   mobileOpen,
   onCloseMobile,
-  collapsed,
+  collapsed = false,
   onToggleCollapsed,
 }: Props) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isExpanded = !collapsed || isHovered;
+
   return (
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex h-full shrink-0 flex-col transition-[width] duration-200 ${collapsed ? "w-[60px]" : "w-64"}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`relative hidden lg:block shrink-0 h-full z-40 transition-[width] duration-300 ${collapsed ? "w-[80px]" : "w-[250px]"}`}
       >
-        <SidebarContent
-          active={active}
-          onSelect={onSelect}
-          collapsed={collapsed}
-          onToggleCollapsed={onToggleCollapsed}
-        />
+        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-300 bg-sidebar border-r border-sidebar-border ${!isExpanded ? "w-[80px]" : "w-[250px] shadow-2xl"}`}>
+          <SidebarContent
+            active={active}
+            onSelect={onSelect}
+            collapsed={!isExpanded}
+            onToggleCollapsed={onToggleCollapsed}
+            onClose={onCloseMobile}
+          />
+        </div>
       </aside>
 
       {/* Mobile overlay drawer */}

@@ -192,142 +192,149 @@ function CatSidebar({
   const { user } = useCatAuth();
   const { overall, streak, todayStats } = useScopedStats();
   const profileRef = useRef<HTMLButtonElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const isExpanded = !collapsed || isHovered;
 
   const sidebarContent = (
-    <div className="flex h-full flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
-      {/* ── Header ── */}
-      <div
-        className={`flex shrink-0 items-center border-b border-sidebar-border px-3 py-3 ${collapsed ? "justify-center" : "justify-between gap-2"}`}
-      >
-        {!collapsed && (
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
-            </div>
-            <div className="leading-tight min-w-0">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">
-                MISSION
-              </div>
-              <div className="truncate text-sm font-bold text-sidebar-foreground">CAT 2026</div>
-            </div>
-          </div>
-        )}
-        {collapsed && (
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-500/20 border border-amber-500/30">
-            <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
-          </div>
-        )}
-        <button
-          onClick={onToggleCollapsed}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={`rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors ${collapsed ? "hidden lg:flex" : ""}`}
-        >
-          {collapsed ? (
-            <PanelLeftOpen className="h-4 w-4" />
-          ) : (
-            <PanelLeftClose className="h-4 w-4" />
-          )}
-        </button>
-        {!collapsed && (
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
+    (() => {
+      const collapsed = !isExpanded;
+      return (
+        <div className="flex h-full flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
+          {/* ── Header ── */}
+          <div
+            className={`flex shrink-0 items-center border-b border-sidebar-border px-3 py-3 ${collapsed ? "justify-center" : "justify-between gap-2"}`}
           >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
-      {/* ── Quick Stats (expanded only) ── */}
-      {!collapsed && (
-        <div className="mx-3 mt-3 shrink-0 rounded-xl border border-amber-500/20 bg-amber-500/8 p-3">
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <div className="text-sm font-bold text-amber-400">
-                {todayStats.done}/{todayStats.total}
-              </div>
-              <div className="text-[10px] text-muted-foreground">Today</div>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-orange-400">{streak}🔥</div>
-              <div className="text-[10px] text-muted-foreground">Streak</div>
-            </div>
-            <div>
-              <div
-                className={`text-sm font-bold ${overall >= 60 ? "text-green-400" : "text-amber-400"}`}
-              >
-                {overall}%
-              </div>
-              <div className="text-[10px] text-muted-foreground">30d avg</div>
-            </div>
-          </div>
-          {user && (
-            <div className="mt-2 truncate text-center text-[10px] text-muted-foreground border-t border-amber-500/15 pt-2">
-              {user.email}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Nav (independent scroll) ── */}
-      <nav className="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin">
-        {CAT_NAV.map((group) => (
-          <div key={group.group} className={collapsed ? "mt-2" : "mt-3"}>
             {!collapsed && (
-              <div className="px-3 pb-1 pt-1 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70">
-                {group.group}
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-amber-500/20 border border-amber-500/30">
+                  <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
+                </div>
+                <div className="leading-tight min-w-0">
+                  <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground">
+                    MISSION
+                  </div>
+                  <div className="truncate text-sm font-bold text-sidebar-foreground">CAT 2026</div>
+                </div>
               </div>
             )}
-            {collapsed && <div className="mx-auto my-1 h-px w-8 bg-sidebar-border" />}
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const isActive = active === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onNavigate(item.id);
-                    onClose();
-                  }}
-                  title={collapsed ? item.label : undefined}
-                  className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner"
-                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
-                  }`}
-                >
-                  <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </button>
-              );
-            })}
+            {collapsed && (
+              <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-500/20 border border-amber-500/30">
+                <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
+              </div>
+            )}
+            <button
+              onClick={onToggleCollapsed}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors ${collapsed ? "hidden lg:flex" : ""}`}
+            >
+              {collapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </button>
+            {!collapsed && (
+              <button
+                onClick={onClose}
+                className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        ))}
-      </nav>
 
-      {/* ── Footer: scope toggle + profile/sign out ── */}
-      <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
-        <button
-          onClick={onScopeSwitch}
-          title={collapsed ? "Switch to Habit Tracker" : undefined}
-          className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground transition-colors`}
-        >
-          <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-          {!collapsed && <span>Habit Tracker</span>}
-        </button>
-        {/* Profile dropdown (includes sign-out) */}
-        <div
-          className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}
-        >
-          <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} position="sidebar" />
+          {/* ── Quick Stats (expanded only) ── */}
           {!collapsed && (
-            <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
-              Profile &amp; Sign out
-            </span>
+            <div className="mx-3 mt-3 shrink-0 rounded-xl border border-amber-500/20 bg-amber-500/8 p-3">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <div className="text-sm font-bold text-amber-400">
+                    {todayStats.done}/{todayStats.total}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">Today</div>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-orange-400">{streak}🔥</div>
+                  <div className="text-[10px] text-muted-foreground">Streak</div>
+                </div>
+                <div>
+                  <div
+                    className={`text-sm font-bold ${overall >= 60 ? "text-green-400" : "text-amber-400"}`}
+                  >
+                    {overall}%
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">30d avg</div>
+                </div>
+              </div>
+              {user && (
+                <div className="mt-2 truncate text-center text-[10px] text-muted-foreground border-t border-amber-500/15 pt-2">
+                  {user.email}
+                </div>
+              )}
+            </div>
           )}
+
+          {/* ── Nav (independent scroll) ── */}
+          <nav className="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin">
+            {CAT_NAV.map((group) => (
+              <div key={group.group} className={collapsed ? "mt-2" : "mt-3"}>
+                {!collapsed && (
+                  <div className="px-3 pb-1 pt-1 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70">
+                    {group.group}
+                  </div>
+                )}
+                {collapsed && <div className="mx-auto my-1 h-px w-8 bg-sidebar-border" />}
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = active === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        onNavigate(item.id);
+                        onClose();
+                      }}
+                      title={collapsed ? item.label : undefined}
+                      className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner"
+                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
+                      }`}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+
+          {/* ── Footer: scope toggle + profile/sign out ── */}
+          <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
+            <button
+              onClick={onScopeSwitch}
+              title={collapsed ? "Switch to Habit Tracker" : undefined}
+              className={`flex w-full items-center ${collapsed ? "justify-center px-2" : "gap-3 px-3"} rounded-xl py-2 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground transition-colors`}
+            >
+              <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+              {!collapsed && <span>Habit Tracker</span>}
+            </button>
+            {/* Profile dropdown (includes sign-out) */}
+            <div
+              className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}
+            >
+              <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} position="sidebar" />
+              {!collapsed && (
+                <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
+                  Profile &amp; Sign out
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      );
+    })()
   );
 
   return (
@@ -337,9 +344,13 @@ function CatSidebar({
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex shrink-0 flex-col h-full transition-[width] duration-200 ${collapsed ? "w-[60px]" : "w-[220px]"}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`relative hidden lg:block shrink-0 h-full z-40 transition-[width] duration-200 ${collapsed ? "w-[60px]" : "w-[220px]"}`}
       >
-        {sidebarContent}
+        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-200 bg-sidebar border-r border-sidebar-border ${!isExpanded ? "w-[60px]" : "w-[220px] shadow-2xl"}`}>
+          {sidebarContent}
+        </div>
       </aside>
 
       {/* Mobile sidebar drawer */}
