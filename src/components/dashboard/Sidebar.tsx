@@ -21,6 +21,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useHabits } from "@/lib/habits-store";
+import { ProfileModal } from "./ProfileModal";
 
 export const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
@@ -47,6 +48,7 @@ interface Props {
   onCloseMobile?: () => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
+  onSignOut?: () => void;
 }
 
 function SidebarContent({
@@ -55,12 +57,14 @@ function SidebarContent({
   collapsed = false,
   onToggleCollapsed,
   onClose,
+  onSignOut,
 }: {
   active: string;
   onSelect: (k: string) => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
   onClose?: () => void;
+  onSignOut?: () => void;
 }) {
   const s = useHabits();
   const xpMax = 3000;
@@ -199,6 +203,17 @@ function SidebarContent({
           </div>
         </div>
       )}
+      {/* ── Footer: Profile / Sign out ── */}
+      <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
+        <div className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}>
+          <ProfileModal onSignOut={onSignOut} compact={collapsed} position="sidebar" />
+          {!collapsed && (
+            <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
+              Profile & Sign out
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -210,6 +225,7 @@ export function Sidebar({
   onCloseMobile,
   collapsed = false,
   onToggleCollapsed,
+  onSignOut,
 }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const isExpanded = !collapsed || isHovered;
@@ -229,6 +245,7 @@ export function Sidebar({
             collapsed={!isExpanded}
             onToggleCollapsed={onToggleCollapsed}
             onClose={onCloseMobile}
+            onSignOut={onSignOut}
           />
         </div>
       </aside>
@@ -246,6 +263,7 @@ export function Sidebar({
               }}
               collapsed={false}
               onClose={onCloseMobile}
+              onSignOut={onSignOut}
             />
           </aside>
         </div>

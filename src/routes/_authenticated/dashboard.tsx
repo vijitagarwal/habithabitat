@@ -202,6 +202,7 @@ function DashboardPage() {
           onCloseMobile={() => setMobileOpen(false)}
           collapsed={collapsed}
           onToggleCollapsed={() => setCollapsed((v) => !v)}
+          onSignOut={signOut}
         />
         <main className="flex flex-1 flex-col overflow-hidden">
           {/* ── Topbar strip: scope toggle ── */}

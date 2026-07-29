@@ -20,15 +20,15 @@
   --coral: #e2603f;
   --slate: #6b7a8d;
 
-  --bg-deep: #0b0f17;
-  --bg-base: #111827;
-  --bg-raised: #1a2235;
-  --bg-hover: #1f2c42;
-  --border: #1e2d45;
-  --border-bright: #2a3f60;
-  --text-primary: #f0ede8;
-  --text-secondary: #9ba3b5;
-  --text-muted: #5a6478;
+  --bg-deep: var(--background);
+  --bg-base: var(--card);
+  --bg-raised: var(--sidebar);
+  --bg-hover: var(--sidebar-accent);
+  --border: var(--border);
+  --border-bright: var(--ring);
+  --text-primary: var(--foreground);
+  --text-secondary: color-mix(in oklab, var(--foreground) 75%, transparent);
+  --text-muted: var(--muted-foreground);
 
   background: var(--bg-deep);
   color: var(--text-primary);

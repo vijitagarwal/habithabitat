@@ -1,6 +1,5 @@
 import { CalendarDays, ChevronDown, Moon, Sun, Menu, RotateCw } from "lucide-react";
 import { useState } from "react";
-import { ProfileModal } from "./ProfileModal";
 import { DatePicker } from "./DatePicker";
 import { DigitalClock } from "./DigitalClock";
 import { todayISO, syncNow } from "@/lib/habits-store";
@@ -83,8 +82,6 @@ export function Header({
           {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           <span className="capitalize">{theme}</span>
         </button>
-        {/* Profile dropdown */}
-        <ProfileModal onSignOut={onSignOut} />
       </div>
     </header>
   );
