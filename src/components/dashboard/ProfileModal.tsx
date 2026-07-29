@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
+import { createPortal } from "react-dom";
 import {
   User,
   Mail,
@@ -19,6 +20,7 @@ import {
   Check,
   X,
   ChevronDown,
+  ChevronUp,
   Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,18 +194,39 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
           setEditing(false);
         }}
         title="Profile & Settings"
-        className={`flex items-center gap-2 rounded-full gradient-brand font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity ${
-          compact ? "h-9 w-9 justify-center text-sm" : "h-10 w-10 justify-center text-sm"
-        }`}
+        className={
+          position === "sidebar" && !compact
+            ? "flex w-full items-center gap-3 rounded-xl hover:bg-sidebar-accent/50 p-2 text-left transition-colors"
+            : `flex items-center gap-2 rounded-full gradient-brand font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity ${
+                compact ? "h-9 w-9 justify-center text-sm" : "h-10 w-10 justify-center text-sm"
+              }`
+        }
       >
-        {initials}
-        {!compact && <ChevronDown className="sr-only" />}
+        {position === "sidebar" && !compact ? (
+          <>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full gradient-brand font-bold text-white shadow-md">
+              {initials}
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</span>
+              <span className="truncate text-[10px] text-muted-foreground">{user?.email}</span>
+            </div>
+            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+          </>
+        ) : (
+          <>
+            {initials}
+            {!compact && <ChevronDown className="sr-only" />}
+          </>
+        )}
       </button>
 
-      {/* ── Dropdown panel ── */}
-      {open && (
-        <div className={`absolute z-50 w-80 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 backdrop-blur-sm animate-in fade-in duration-150 ${position === "sidebar" ? "left-0 bottom-full mb-2 slide-in-from-bottom-2" : "right-0 top-full mt-2 slide-in-from-top-2"}`}>
-          {/* Header strip */}
+      {/* ── Fixed Centered Modal ── */}
+      {open && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setOpen(false); setEditing(false); }} />
+          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 animate-in zoom-in-95 duration-200">
+            {/* Header strip */}
           <div className="relative bg-gradient-to-br from-primary/20 to-brand-2/20 px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full gradient-brand text-xl font-bold text-white shadow-lg">
@@ -392,7 +415,8 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
     );

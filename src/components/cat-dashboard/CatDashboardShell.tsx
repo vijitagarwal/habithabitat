@@ -323,16 +323,9 @@ function CatSidebar({
               <LayoutGrid className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
               {!collapsed && <span>Habit Tracker</span>}
             </button>
-            {/* Profile dropdown (includes sign-out) */}
-            <div
-              className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}
-            >
+            {/* Profile modal */}
+            <div className={`flex items-center justify-center w-full`}>
               <ProfileModal ref={profileRef} onSignOut={onSignOut} compact={collapsed} position="sidebar" />
-              {!collapsed && (
-                <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
-                  Profile &amp; Sign out
-                </span>
-              )}
             </div>
           </div>
         </div>

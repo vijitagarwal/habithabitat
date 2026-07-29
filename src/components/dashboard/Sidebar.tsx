@@ -205,13 +205,8 @@ function SidebarContent({
       )}
       {/* ── Footer: Profile / Sign out ── */}
       <div className={`shrink-0 border-t border-sidebar-border p-2 space-y-1`}>
-        <div className={`flex items-center gap-3 px-1 py-1 ${collapsed ? "justify-center" : ""}`}>
+        <div className={`flex items-center justify-center w-full`}>
           <ProfileModal onSignOut={onSignOut} compact={collapsed} position="sidebar" />
-          {!collapsed && (
-            <span className="text-sm font-medium text-sidebar-foreground/75 select-none">
-              Profile & Sign out
-            </span>
-          )}
         </div>
       </div>
     </div>
