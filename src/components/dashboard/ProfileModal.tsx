@@ -65,6 +65,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   const [profile, setProfile] = useState<Profile | null>(null);
   const [draft, setDraft] = useState<Partial<Profile>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -129,11 +130,16 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
       });
   }, [user]);
 
-  // Close on outside click
+  // Close on outside click — also accounts for the portal panel in document.body
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const panel = document.getElementById("profile-modal-panel");
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node) &&
+        (!panel || !panel.contains(e.target as Node))
+      ) {
         setOpen(false);
         setEditing(false);
       }
@@ -141,6 +147,13 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
+
+  // Cleanup hover timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
 
   const startEdit = () => {
     setEditing(true);
@@ -150,6 +163,21 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
     setEditing(false);
     // Reset draft to current profile
     setDraft(profile || {});
+  };
+
+  const handleTriggerMouseEnter = () => {
+    if (open) return; // already open, nothing to do
+    hoverTimerRef.current = setTimeout(() => {
+      setOpen(true);
+      setEditing(false);
+    }, 300);
+  };
+
+  const handleTriggerMouseLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
   };
 
   const saveProfile = async () => {
@@ -184,7 +212,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "User";
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative overflow-visible">
       {/* ── Avatar trigger button ── */}
       <button
         ref={ref}
@@ -193,6 +221,8 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
           setOpen((v) => !v);
           setEditing(false);
         }}
+        onMouseEnter={handleTriggerMouseEnter}
+        onMouseLeave={handleTriggerMouseLeave}
         title="Profile & Settings"
         className={
           position === "sidebar" && !compact
@@ -223,9 +253,9 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
 
       {/* ── Fixed Centered Modal ── */}
       {open && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setOpen(false); setEditing(false); }} />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 animate-in zoom-in-95 duration-200">
+          <div id="profile-modal-panel" className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 animate-in zoom-in-95 duration-200">
             {/* Header strip */}
           <div className="relative bg-gradient-to-br from-primary/20 to-brand-2/20 px-5 py-4">
             <div className="flex items-center gap-3">
