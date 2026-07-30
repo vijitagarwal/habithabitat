@@ -148,7 +148,6 @@ function DashboardPage() {
   const nav = useNavigate();
   const [active, setActive] = useState<string>("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const [headerDate, setHeaderDate] = useState<string | undefined>(undefined);
   const meta = TITLES[active] ?? TITLES.dashboard;
   const validKeys = NAV.map((n) => n.key);
@@ -200,8 +199,6 @@ function DashboardPage() {
           onSelect={setActive}
           mobileOpen={mobileOpen}
           onCloseMobile={() => setMobileOpen(false)}
-          collapsed={collapsed}
-          onToggleCollapsed={() => setCollapsed((v) => !v)}
           onSignOut={signOut}
         />
         <main className="flex flex-1 flex-col overflow-hidden">

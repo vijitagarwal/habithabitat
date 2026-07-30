@@ -1,25 +1,23 @@
 import { useState } from "react";
-import {
-  LayoutDashboard,
-  CalendarCheck2,
-  CalendarDays,
-  BarChart3,
-  Grid3x3,
-  Target,
-  Trophy,
-  NotebookPen,
-  Smile,
-  Moon,
-  Droplets,
-  Scale,
-  Settings,
-  CheckCircle2,
-  Quote,
-  X,
-  PanelLeftClose,
-  PanelLeftOpen,
-  LogOut,
-} from "lucide-react";
+  import {
+    LayoutDashboard,
+    CalendarCheck2,
+    CalendarDays,
+    BarChart3,
+    Grid3x3,
+    Target,
+    Trophy,
+    NotebookPen,
+    Smile,
+    Moon,
+    Droplets,
+    Scale,
+    Settings,
+    CheckCircle2,
+    Quote,
+    X,
+    LogOut,
+  } from "lucide-react";
 import { useHabits } from "@/lib/habits-store";
 import { ProfileModal } from "./ProfileModal";
 
@@ -46,8 +44,6 @@ interface Props {
   onSelect: (k: string) => void;
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
-  collapsed?: boolean;
-  onToggleCollapsed?: () => void;
   onSignOut?: () => void;
 }
 
@@ -55,14 +51,12 @@ function SidebarContent({
   active,
   onSelect,
   collapsed = false,
-  onToggleCollapsed,
   onClose,
   onSignOut,
 }: {
   active: string;
   onSelect: (k: string) => void;
   collapsed?: boolean;
-  onToggleCollapsed?: () => void;
   onClose?: () => void;
   onSignOut?: () => void;
 }) {
@@ -97,19 +91,6 @@ function SidebarContent({
           </div>
         )}
         <div className="flex items-center gap-1">
-          {onToggleCollapsed && (
-            <button
-              onClick={onToggleCollapsed}
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors"
-            >
-              {collapsed ? (
-                <PanelLeftOpen className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
-            </button>
-          )}
           {onClose && (
             <button
               onClick={onClose}
@@ -218,27 +199,24 @@ export function Sidebar({
   onSelect,
   mobileOpen,
   onCloseMobile,
-  collapsed = false,
-  onToggleCollapsed,
   onSignOut,
 }: Props) {
   const [isHovered, setIsHovered] = useState(false);
-  const isExpanded = !collapsed || isHovered;
+  const isExpanded = isHovered;
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — fixed 60px gutter, inner panel floats on hover */}
       <aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`relative hidden lg:block shrink-0 h-full z-40 transition-[width] duration-300 ${collapsed ? "w-[80px]" : "w-[250px]"}`}
+        className="relative hidden lg:block shrink-0 h-full z-40 w-[60px]"
       >
-        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-300 bg-sidebar border-r border-sidebar-border ${!isExpanded ? "w-[80px]" : "w-[250px] shadow-2xl"}`}>
+        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-300 bg-sidebar border-r border-sidebar-border z-40 ${!isExpanded ? "w-[60px]" : "w-[250px] shadow-2xl shadow-black/30"}`}>
           <SidebarContent
             active={active}
             onSelect={onSelect}
             collapsed={!isExpanded}
-            onToggleCollapsed={onToggleCollapsed}
             onClose={onCloseMobile}
             onSignOut={onSignOut}
           />
