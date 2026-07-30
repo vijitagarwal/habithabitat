@@ -41,8 +41,6 @@ import {
   LogOut,
   Menu,
   X,
-  PanelLeftClose,
-  PanelLeftOpen,
   Moon,
   Sun,
   type LucideIcon,
@@ -175,20 +173,16 @@ function useCountdown() {
 // ── Sidebar ────────────────────────────────────────────────────────────
 function CatSidebar({
   open,
-  collapsed,
   active,
   onNavigate,
   onClose,
-  onToggleCollapsed,
   onScopeSwitch,
   onSignOut,
 }: {
   open: boolean;
-  collapsed: boolean;
   active: string;
   onNavigate: (id: string) => void;
   onClose: () => void;
-  onToggleCollapsed: () => void;
   onScopeSwitch: () => void;
   onSignOut: () => void;
 }) {
@@ -196,7 +190,7 @@ function CatSidebar({
   const { overall, streak, todayStats } = useScopedStats();
   const profileRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const isExpanded = !collapsed || isHovered;
+  const isExpanded = isHovered;
 
   const sidebarContent = (
     (() => {
@@ -225,17 +219,6 @@ function CatSidebar({
                 <GraduationCap className="h-4.5 w-4.5 text-amber-400" strokeWidth={2} size={18} />
               </div>
             )}
-            <button
-              onClick={onToggleCollapsed}
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className={`rounded-lg border border-sidebar-border bg-card/40 p-1.5 text-sidebar-foreground/70 hover:border-primary/40 hover:text-sidebar-foreground transition-colors ${collapsed ? "hidden lg:flex" : ""}`}
-            >
-              {collapsed ? (
-                <PanelLeftOpen className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
-            </button>
             {!collapsed && (
               <button
                 onClick={onClose}
@@ -338,13 +321,13 @@ function CatSidebar({
       {/* Mobile overlay */}
       {open && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={onClose} />}
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — fixed 60px gutter, inner panel floats on hover */}
       <aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`relative hidden lg:block shrink-0 h-full z-40 transition-[width] duration-200 ${collapsed ? "w-[60px]" : "w-[220px]"}`}
+        className="relative hidden lg:block shrink-0 h-full z-40 w-[60px]"
       >
-        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-200 bg-sidebar border-r border-sidebar-border ${!isExpanded ? "w-[60px]" : "w-[220px] shadow-2xl"}`}>
+        <div className={`absolute top-0 left-0 h-full flex flex-col overflow-hidden transition-all duration-200 bg-sidebar border-r border-sidebar-border z-40 ${!isExpanded ? "w-[60px]" : "w-[220px] shadow-2xl shadow-black/30"}`}>
           {sidebarContent}
         </div>
       </aside>
@@ -451,7 +434,6 @@ function CatSection({ active }: { active: string }) {
 function CatShellInner() {
   const nav = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const [active, setActive] = useState("overview");
   const bump = useCallback(() => {}, []);
 
@@ -471,11 +453,9 @@ function CatShellInner() {
     <div className="flex h-full overflow-hidden">
       <CatSidebar
         open={sidebarOpen}
-        collapsed={collapsed}
         active={active}
         onNavigate={setActive}
         onClose={() => setSidebarOpen(false)}
-        onToggleCollapsed={() => setCollapsed((v) => !v)}
         onScopeSwitch={switchToHabits}
         onSignOut={signOut}
       />
