@@ -445,6 +445,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
               </button>
             </div>
           </div>
+        </div>
         </div>,
         document.body
       )}
