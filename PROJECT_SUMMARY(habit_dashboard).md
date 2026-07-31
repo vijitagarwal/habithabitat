@@ -1,4 +1,4 @@
-# HabitHabitat — Complete Project Summary (Updated 2026-07-23)
+# HabitHabitat — Complete Project Summary (Updated 2026-07-31)
 
 > **Purpose**: Exhaustive technical reference for continuing this codebase. Written for an AI assistant with zero prior context. Read this entire file before making any changes.
 
@@ -574,16 +574,21 @@ const { data } = await (supabase as any).from("profiles").select("*").eq("id", u
 ## 16. Git History (latest commits)
 
 ```
-c21b51f  [Lovable] Applied UI polish and fixed build (StatCards accent borders, WeeklyProgress today-glow, CalendarView pills+glow, DailyTracker bar polish, Heatmap hover, auth aurora, styles utilities)
-ada05e5  fix: restore correct Supabase project, remove .env from git tracking
-b45fb29  [Lovable] Refined shell polish (Sidebar groups, dashboard topbar, ambient background, card-glass)
-cd18901  chore: add .lovable to gitignore
-24a2fff  chore: remove Lovable artifacts, clean up project structure
-655ebba  docs: add AGENT_PROMPT_PHASE2.md
-f346205  docs: update PROJECT_SUMMARY with branding + calendar/overflow bug fix notes
-7119097  fix: calendar date off-by-one, HabitRow overflow, header date picker
-49e12e5  brand: replace Lovable favicon with HabitHabitat icon
-ea1660d  feat: CAT overview habits widget, checklist categories+edit, tech ladder CRUD
+08a04de feat(FocusTimer): add pause and resume functionality
+563c0e2 fix: missing closing div in ProfileModal portal and Sidebar import indent
+e8aea0f feat(Sidebar): hover-only float expand, remove lock toggle button
+1063634 fix(ProfileModal): fix z-index clipping, portal outside-click, add hover-open (300ms)
+7648129 feat(CatSidebar): hover-only float expand, remove lock toggle button
+5460fee feat(ProfileModal): convert to fixed modal overlay and improve trigger layout
+5bcc271 fix(Sidebar): hide close button on desktop
+b59925f feat: layout uniformity and cat dashboard theme mapping
+5cb8874 feat: sync theme hook and profile persistence
+6b4ea3f style: custom scrollbars and hidden overflow-x
+e9b6b90 feat(Overview): use HabitRowConnected for CAT Prep widget
+e1056dc feat: update CAT Prep widget with HabitRowConnected
+a07361d feat(QuickLogWidget): use habitStatus for accuracy
+1927688 feat(cat-dashboard): implement reactive dashboard cards with live sync
+b05f4dd fix(cat-dashboard): resolve ProfileModal layout clipping and click conflict in sidebar
 ```
 
 ### Phase 2 Completion (2026-07-28)
@@ -600,6 +605,14 @@ ea1660d  feat: CAT overview habits widget, checklist categories+edit, tech ladde
   - Completely rebuilt the `Heatmap` row-mapping logic to map 1:1 to user habits instead of arbitrarily grouping by 7 days.
   - Fixed the `ProfileModal` open/close state toggling to prevent bubbling issues on the CAT Dashboard.
   - Fixed the end-of-day completion logic for "Break/Limit" habits (e.g. Limit Sugar) to accurately reflect their benchmark state based on past days instead of defaulting to 100%.
+
+### Phase 4 Completion (2026-07-31)
+
+- **Sidebar Architecture Overhaul**: Replaced the static/locked sidebar functionality with a modern, hover-only float expanding layout for both `Sidebar` and `CatSidebar`. This eliminates main content layout shifts entirely while providing a clean 60px gutter for navigation.
+- **Profile Modal Enhancements**: Extracted the modal into a fixed portal overlay (`createPortal` with `z-[200]`) to solve global layout clipping across both dashboards. Added 300ms hover-to-open interaction (with click fallback) and intelligent outside-click detection.
+- **CAT Dashboard Polish**: The CAT Prep widget was fully wired to use the interactive `HabitRowConnected` component for live toggle capabilities. Dashboard cards were made reactive with live synchronization.
+- **Focus Timer Overhaul**: Implemented robust Pause/Resume functionality for the built-in timer, preserving absolute time deltas via the Web Worker without losing current session state.
+- **QuickLog Accuracy**: `QuickLogWidget` now uses the strict `habitStatus` engine to accurately reflect the progress of Break/Limit and Stopwatch habits.
 
 Push command: `git push origin main` from `e:\Desktop\operating system\all-in-one\bright-habit-view`
 

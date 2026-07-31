@@ -13,11 +13,14 @@ HabitHabitat contains two distinct workspaces, toggleable from the main sidebar:
 - **Habit Tracker**: A generalized, highly customizable tracker for life, health, and productivity.
 - **CAT Prep Dashboard**: A targeted "mission control" cockpit dedicated specifically to preparing for the CAT 2026 examination, featuring a countdown timer, study checklists, topic trackers, and mock test analytics.
 
+*Both workspaces feature a modern, hover-only expanding sidebar architecture that prevents main content layout shifts, creating a seamless app-like experience.*
+
 ### 2. Powerful Habit Engine
 - **Flexible Habit Types**: Support for Boolean (Yes/No), Numeric (e.g., Pages Read), and Stopwatch (Duration) habits.
 - **Smart Tracking**: Create "Build" (positive) or "Break/Limit" (negative) habits. Break habits automatically compute success based on whether you stayed under your specified limits.
-- **Live Stopwatch**: Built-in timers for duration habits. Running a timer pulses visually and automatically logs time to your daily progress when saved.
+- **Live Stopwatch**: Built-in timers for duration habits with **pause/resume functionality**. Running a timer pulses visually and automatically logs time to your daily progress when saved.
 - **Granular Scheduling**: Schedule habits daily, on specific weekdays, or at custom intervals.
+- **Quick Logging**: Floating QuickLog widget to rapidly check off today's pending habits without navigating away.
 
 ### 3. Comprehensive Analytics & Visualization
 - **Daily & Calendar Views**: Jump to any specific date in the past or future to log activity using the intuitive calendar interface.
