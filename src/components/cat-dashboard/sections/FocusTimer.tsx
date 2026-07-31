@@ -28,6 +28,7 @@ export default function FocusTimer() {
   const [subject, setSubject] = useState(GENERAL_SUBJECTS[0]);
   const [custom, setCustom] = useState(30);
   const [running, setRunning] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [secsLeft, setSecsLeft] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [done, setDone] = useState(false);
@@ -43,8 +44,18 @@ export default function FocusTimer() {
   const stop = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setRunning(false);
+    setPaused(false);
     setFullscreen(false);
   }, []);
+
+  const pause = useCallback(() => {
+    setPaused(true);
+  }, []);
+
+  const resume = useCallback(() => {
+    endTimeRef.current = Date.now() + secsLeft * 1000;
+    setPaused(false);
+  }, [secsLeft]);
 
   const start = useCallback(() => {
     resumeCtx();
@@ -52,10 +63,11 @@ export default function FocusTimer() {
     endTimeRef.current = Date.now() + getDurationMins() * 60000;
     setSecsLeft(getDurationMins() * 60);
     setRunning(true);
+    setPaused(false);
   }, [getDurationMins]);
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || paused) return;
 
     // Create an inline Web Worker to bypass background tab throttling
     const workerCode = `
@@ -118,7 +130,7 @@ export default function FocusTimer() {
       worker.postMessage('stop');
       worker.terminate();
     };
-  }, [running, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast]);
+  }, [running, paused, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast]);
 
   const minsLeft = Math.floor(secsLeft / 60);
   const secsDisp = String(secsLeft % 60).padStart(2, "0");
@@ -162,7 +174,7 @@ export default function FocusTimer() {
                 textTransform: "uppercase",
               }}
             >
-              {subject}
+              {subject} {paused && <span style={{ color: "var(--amber)", marginLeft: 8 }}>(PAUSED)</span>}
             </div>
             <div
               style={{
@@ -193,13 +205,28 @@ export default function FocusTimer() {
                 }}
               />
             </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setFullscreen(false)}
-              style={{ color: "var(--text-muted)" }}
-            >
-              Exit focus mode
-            </button>
+            <div style={{ display: "flex", gap: 12 }}>
+              {paused ? (
+                <button className="btn btn-amber btn-sm" onClick={resume}>
+                  ▶ Resume
+                </button>
+              ) : (
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={pause}
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  ⏸ Pause
+                </button>
+              )}
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setFullscreen(false)}
+                style={{ color: "var(--text-muted)" }}
+              >
+                Exit focus mode
+              </button>
+            </div>
           </div>
         </motion.div>
       )}
@@ -364,6 +391,15 @@ export default function FocusTimer() {
             </button>
           ) : (
             <>
+              {paused ? (
+                <button className="btn btn-amber" onClick={resume} style={{ minWidth: 100 }}>
+                  ▶ Resume
+                </button>
+              ) : (
+                <button className="btn btn-ghost" onClick={pause} style={{ minWidth: 100 }}>
+                  ⏸ Pause
+                </button>
+              )}
               <button className="btn btn-ghost" onClick={stop}>
                 Stop
               </button>
