@@ -172,6 +172,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      profiles: {
+        Row: {
+          avatar_url: string | null;
+          bio: string | null;
+          cat_year: number | null;
+          city: string | null;
+          display_name: string | null;
+          id: string;
+          phone: string | null;
+          target_college: string | null;
+          target_percentile: number | null;
+        };
+        Insert: {
+          avatar_url?: string | null;
+          bio?: string | null;
+          cat_year?: number | null;
+          city?: string | null;
+          display_name?: string | null;
+          id: string;
+          phone?: string | null;
+          target_college?: string | null;
+          target_percentile?: number | null;
+        };
+        Update: {
+          avatar_url?: string | null;
+          bio?: string | null;
+          cat_year?: number | null;
+          city?: string | null;
+          display_name?: string | null;
+          id?: string;
+          phone?: string | null;
+          target_college?: string | null;
+          target_percentile?: number | null;
+        };
+        Relationships: [];
+      };
       user_settings: {
         Row: {
           created_at: string;

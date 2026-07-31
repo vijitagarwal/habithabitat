@@ -91,6 +91,27 @@ function AuthPage() {
     }
   }
 
+  async function forgotPassword() {
+    if (!email) {
+      setErr("Please enter your email first.");
+      return;
+    }
+    setErr(null);
+    setInfo(null);
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/reset-password",
+      });
+      if (error) throw error;
+      setInfo("✅ Reset link sent! Check your email to reset your password.");
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to send reset link");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const modeLabel =
     mode === "signup" ? "Create account" : mode === "magic" ? "Magic link" : "Sign in";
 
@@ -170,18 +191,29 @@ function AuthPage() {
               </div>
 
               {mode !== "magic" && (
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password (min 6 chars)"
-                    className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none focus:border-primary/60"
-                  />
-                </div>
+                <>
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password (min 6 chars)"
+                      className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none focus:border-primary/60"
+                    />
+                  </div>
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={forgotPassword}
+                      className="text-xs text-muted-foreground hover:text-primary transition"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </>
               )}
 
               {err && (

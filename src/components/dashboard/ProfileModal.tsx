@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
-import { createPortal } from "react-dom";
 import {
   User,
   Mail,
@@ -24,6 +23,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Profile {
   id: string;
@@ -31,9 +31,10 @@ interface Profile {
   bio: string | null;
   target_college: string | null;
   target_percentile: number | null;
-  cat_year: number;
+  cat_year: number | null;
   phone: string | null;
   city: string | null;
+  avatar_url: string | null;
 }
 
 interface Props {
@@ -64,7 +65,6 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [draft, setDraft] = useState<Partial<Profile>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -109,44 +109,25 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   // Load / auto-create profile when user is available
   useEffect(() => {
     if (!user) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = supabase as any;
-    db.from("profiles")
+    supabase
+      .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single()
-      .then(async ({ data, error }: { data: Profile | null; error: unknown }) => {
+      .then(async ({ data, error }) => {
         if (error || !data) {
           const name = user.email.split("@")[0];
-          const { data: created } = await db
+          const { data: created } = await supabase
             .from("profiles")
             .insert({ id: user.id, display_name: name, cat_year: 2026 })
             .select()
             .single();
-          if (created) setProfile(created as Profile);
+          if (created) setProfile(created);
         } else {
           setProfile(data);
         }
       });
   }, [user]);
-
-  // Close on outside click — also accounts for the portal panel in document.body
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      const panel = document.getElementById("profile-modal-panel");
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node) &&
-        (!panel || !panel.contains(e.target as Node))
-      ) {
-        setOpen(false);
-        setEditing(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
 
   // Cleanup hover timer on unmount
   useEffect(() => {
@@ -183,9 +164,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   const saveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = supabase as any;
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from("profiles")
       .upsert({ id: user.id, ...draft })
       .select()
@@ -198,7 +177,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
       return;
     }
 
-    if (data) setProfile(data as Profile);
+    if (data) setProfile(data);
     setSaving(false);
     setEditing(false);
   };
@@ -212,50 +191,68 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "User";
 
   return (
-    <div ref={containerRef} className="relative overflow-visible">
-      {/* ── Avatar trigger button ── */}
-      <button
-        ref={ref}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-          setEditing(false);
-        }}
-        onMouseEnter={handleTriggerMouseEnter}
-        onMouseLeave={handleTriggerMouseLeave}
-        title="Profile & Settings"
-        className={
-          position === "sidebar" && !compact
-            ? "flex w-full items-center gap-3 rounded-xl hover:bg-sidebar-accent/50 p-2 text-left transition-colors"
-            : `flex items-center gap-2 rounded-full gradient-brand font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity ${
-                compact ? "h-9 w-9 justify-center text-sm" : "h-10 w-10 justify-center text-sm"
-              }`
-        }
-      >
-        {position === "sidebar" && !compact ? (
-          <>
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full gradient-brand font-bold text-white shadow-md">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        {/* ── Avatar trigger button ── */}
+        <button
+          ref={ref}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+            setEditing(false);
+          }}
+          onMouseEnter={handleTriggerMouseEnter}
+          onMouseLeave={handleTriggerMouseLeave}
+          title="Profile & Settings"
+          className={
+            position === "sidebar" && !compact
+              ? "flex w-full items-center gap-3 rounded-xl hover:bg-sidebar-accent/50 p-2 text-left transition-colors"
+              : `flex items-center gap-2 rounded-full gradient-brand font-bold text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity ${
+                  compact ? "h-9 w-9 justify-center text-sm" : "h-10 w-10 justify-center text-sm"
+                }`
+          }
+        >
+          {position === "sidebar" && !compact ? (
+            <>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full gradient-brand font-bold text-white shadow-md">
+                {initials}
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</span>
+                <span className="truncate text-[10px] text-muted-foreground">{user?.email}</span>
+              </div>
+              <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+            </>
+          ) : (
+            <>
               {initials}
-            </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</span>
-              <span className="truncate text-[10px] text-muted-foreground">{user?.email}</span>
-            </div>
-            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-          </>
-        ) : (
-          <>
-            {initials}
-            {!compact && <ChevronDown className="sr-only" />}
-          </>
-        )}
-      </button>
+              {!compact && <ChevronDown className="sr-only" />}
+            </>
+          )}
+        </button>
+      </PopoverTrigger>
 
-      {/* ── Fixed Centered Modal ── */}
-      {open && createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setOpen(false); setEditing(false); }} />
-          <div id="profile-modal-panel" className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 animate-in zoom-in-95 duration-200">
+      <PopoverContent
+        side={position === "sidebar" ? "right" : "bottom"}
+        align={position === "sidebar" ? "start" : "end"}
+        onMouseEnter={() => {
+          if (hoverTimerRef.current) {
+            clearTimeout(hoverTimerRef.current);
+            hoverTimerRef.current = null;
+          }
+        }}
+        onMouseLeave={() => {
+          if (editing) return;
+          hoverTimerRef.current = setTimeout(() => {
+            setOpen(false);
+          }, 300);
+        }}
+        className="w-full max-w-md p-0 overflow-hidden"
+      >
+        <div id="profile-modal-panel" className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40">
+          <button onClick={() => { setOpen(false); setEditing(false); }} className="absolute right-3 top-3 p-1 rounded-full hover:bg-muted/50 z-20">
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
             {/* Header strip */}
           <div className="relative bg-gradient-to-br from-primary/20 to-brand-2/20 px-5 py-4">
             <div className="flex items-center gap-3">
@@ -276,7 +273,7 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
             {!editing && (
               <button
                 onClick={startEdit}
-                className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                className="absolute right-10 top-3 flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
               >
                 <Edit3 className="h-3 w-3" /> Edit
               </button>
@@ -446,10 +443,8 @@ export const ProfileModal = forwardRef<HTMLButtonElement, Props>(
             </div>
           </div>
         </div>
-        </div>,
-        document.body
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
     );
   }
 );
