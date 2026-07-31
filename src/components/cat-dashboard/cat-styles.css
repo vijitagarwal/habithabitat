@@ -547,3 +547,9 @@
     height: 10px !important;
   }
 }
+
+html:not(.dark) .cat-shell {
+  --amber: #d97706;
+  --amber-dim: rgba(217, 119, 6, 0.15);
+  --amber-glow: rgba(217, 119, 6, 0.35);
+}

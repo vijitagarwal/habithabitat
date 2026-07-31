@@ -159,7 +159,11 @@ The app has **two separate dashboard shells** toggled by `?scope=`:
 | ------------------------------------ | -------------------------------------------------------------------------- |
 | `Sidebar.tsx`                        | Collapsible left nav (icon-only when collapsed), Level/XP widget at bottom |
 | `Header.tsx`                         | Page title + dark/light toggle + **ProfileModal** trigger                  |
-| `ProfileModal.tsx`                   | Avatar dropdown + view/edit user profile + sign-out button                 |
+| `ProfileModal.tsx`                   | Advanced popover + view/edit user profile + sign-out button                |
+| `QuickLogWidget.tsx`                 | Floating action widget to rapidly log today's remaining habits             |
+| `AnalogueClock.tsx`                  | Visual clock component used in dashboard home                              |
+| `DigitalClock.tsx`                   | Minimal digital clock used in header bars                                  |
+| `WeeklyReviewBanner.tsx`             | Prompt banner showing on Sunday evenings to conduct weekly review          |
 | `HabitRow.tsx` + `HabitRowConnected` | Single habit row; boolean toggle OR numeric benchmark input                |
 | `HabitManager.tsx`                   | CRUD for habits; DraftForm with all fields                                 |
 | `ScheduleEditor.tsx`                 | Schedule type picker + conditional day/date selectors                      |
@@ -185,6 +189,16 @@ The app has **two separate dashboard shells** toggled by `?scope=`:
 | Section         | File                 | Data source                     | Notes                                                                                                                |
 | --------------- | -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Overview        | `Overview.tsx`       | useKV + Supabase + habits-store | Campaign countdown, metrics, **CAT Prep habits strip** (shows today's CAT Prep habits from habits-store, toggleable) |
+| Analytics       | `Analytics.tsx`      | Supabase                        | Full-page Analytics panel for mock tests and habit stats. |
+| Campaign Map    | `CampaignMap.tsx`    | static                          | Visual representation of syllabus progression and milestones. |
+| Cat Core        | `CatCore.tsx`        | container                       | Container/entry point for the core CAT functionality. |
+| Contingency     | `Contingency.tsx`    | useKV `contingency`             | Tracker for backup plans and alternative exams. |
+| Data Export     | `DataExport.tsx`     | local                           | Utility panel to export CAT and habit data. |
+| Focus Timer     | `FocusTimer.tsx`     | local state + Web Worker        | Stopwatch/timer using Web Workers for pausing/resuming focused study sessions. |
+| Health          | `Health.tsx`         | useKV `health_log`              | Widget integrating health habits with study performance. |
+| Heatmap         | `Heatmap.tsx`        | habits-store                    | Visual grid of historical study activity levels over the past months. |
+| Mock Tracker    | `MockTracker.tsx`    | Supabase `mock_tests`           | Component for logging, tracking, and analyzing mock test scores. |
+| Right Now       | `RightNow.tsx`       | derived                         | "What to do next" recommendation engine based on scheduled habits and topics. |
 | Topic Tracker   | `TopicTracker.tsx`   | Supabase `topic_tracker` table  | Auto-seeds DEFAULT_TOPICS on first load                                                                              |
 | Weekly Board    | `WeeklyBoard.tsx`    | useKV `weekly_board`            | Kanban board                                                                                                         |
 | Error Log       | `ErrorLog.tsx`       | Supabase `error_log` table      | Mistake logger                                                                                                       |
@@ -519,8 +533,9 @@ All pure visual changes — TypeScript clean (0 errors):
 | Issue                                          | Priority | Notes                                                                    |
 | ---------------------------------------------- | -------- | ------------------------------------------------------------------------ |
 | Supabase types.ts missing `profiles` table     | Low      | Use `(supabase as any)` workaround                                       |
-| Achievements are static                        | Low      | 4 hardcoded badges, not computed from real data                          |
-| Seed habits have old `createdAt` (60 days ago) | Info     | Demo users see full 60-day history. Real users start from today          |
+| Missing Type Definitions                       | Low      | `types.ts` is manually generated and doesn't reflect recent migrations.  |
+| Onboarding                                     | Low      | No intro flow for new users; drops directly into empty dashboard.         |
+| Performance                                    | Low      | Habit lists >100 may cause rendering lag on mobile devices.              |
 
 ---
 
