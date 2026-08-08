@@ -31,7 +31,7 @@ export function WeeklyReviewBanner({ onNavigate }: { onNavigate: (v: string) => 
         </div>
       </div>
       <Button 
-        onClick={() => onNavigate("journal")}
+        onClick={() => onNavigate("journal-weekly")}
         className="bg-amber-500 hover:bg-amber-600 text-black font-semibold"
       >
         Start Review <ArrowRight className="ml-2 h-4 w-4" />

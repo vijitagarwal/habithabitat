@@ -99,6 +99,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   goals: { title: "Goals", subtitle: "Set targets and track how you're pacing." },
   achievements: { title: "Achievements", subtitle: "Milestones unlocked so far." },
   journal: { title: "Journal", subtitle: "Reflect on your day." },
+  "journal-weekly": { title: "Weekly Review", subtitle: "Reflect on your week's performance." },
   mood: { title: "Mood Tracker", subtitle: "Log how you feel over time." },
   sleep: { title: "Sleep Tracker", subtitle: "Log nightly sleep." },
   water: { title: "Water Tracker", subtitle: "Stay hydrated." },
@@ -129,6 +130,8 @@ function renderView(active: string, onNavigate: (v: string) => void, initialDate
       );
     case "journal":
       return <JournalView />;
+    case "journal-weekly":
+      return <JournalView initialMode="weekly" />;
     case "mood":
       return <MetricTracker cfg={MOOD_CFG} />;
     case "sleep":
@@ -151,7 +154,7 @@ function DashboardPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [headerDate, setHeaderDate] = useState<string | undefined>(undefined);
   const meta = TITLES[active] ?? TITLES.dashboard;
-  const validKeys = NAV.map((n) => n.key);
+  const validKeys = [...NAV.map((n) => n.key), "journal-weekly"];
   const safeActive = validKeys.includes(active as (typeof validKeys)[number])
     ? active
     : "dashboard";
