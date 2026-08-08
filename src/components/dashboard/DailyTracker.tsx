@@ -88,7 +88,13 @@ export function DailyTracker({ initialDate }: Props) {
         </span>
       </div>
 
-      {scheduled.length === 0 ? (
+      {scheduled.length === 0 && s.habits.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-10 text-center">
+          <div className="text-4xl">🌱</div>
+          <p className="text-sm font-medium">No habits yet</p>
+          <p className="text-xs text-muted-foreground">Add your first habits to start tracking your progress.</p>
+        </div>
+      ) : scheduled.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           No habits scheduled for this date.
         </div>

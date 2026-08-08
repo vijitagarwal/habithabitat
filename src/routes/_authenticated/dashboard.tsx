@@ -32,7 +32,9 @@ import { ScopeCtx } from "@/lib/scope";
 import { QuickLogWidget } from "@/components/dashboard/QuickLogWidget";
 import { WeeklyReviewBanner } from "@/components/dashboard/WeeklyReviewBanner";
 import { AnalogueClock } from "@/components/dashboard/AnalogueClock";
+import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 import { toast } from "sonner";
+import { useHabits } from "@/lib/habits-store";
 
 const searchSchema = z.object({
   scope: z.enum(["habit", "cat"]).optional(),
@@ -153,6 +155,8 @@ function DashboardPage() {
   const [active, setActive] = useState<string>("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [headerDate, setHeaderDate] = useState<string | undefined>(undefined);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const habitState = useHabits();
   const meta = TITLES[active] ?? TITLES.dashboard;
   const validKeys = [...NAV.map((n) => n.key), "journal-weekly"];
   const safeActive = validKeys.includes(active as (typeof validKeys)[number])
@@ -175,6 +179,14 @@ function DashboardPage() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const alreadyOnboarded = localStorage.getItem("habithabitat-onboarded");
+    if (!alreadyOnboarded && habitState.habits.length === 0 && scope === "habit") {
+      const timer = setTimeout(() => setShowOnboarding(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [habitState.habits.length, scope]);
 
   // Listen for streak freeze earn event
   useEffect(() => {
@@ -273,6 +285,12 @@ function DashboardPage() {
         </main>
       </div>
       <QuickLogWidget />
+      {showOnboarding && (
+        <OnboardingModal onComplete={() => {
+          localStorage.setItem("habithabitat-onboarded", "true");
+          setShowOnboarding(false);
+        }} />
+      )}
     </div>
   );
 }
