@@ -29,6 +29,11 @@ import {
   isScheduledOn,
   daysAgoISO,
   todayISO,
+  bestHabitThisWeek,
+  mostMissedHabit,
+  weekOverWeekProgress,
+  longestActiveStreak,
+  bestDayToCheckIn,
 } from "@/lib/habits-store";
 
 // ── Helper: create a scoped HabitState ────────────────────────────────
@@ -114,6 +119,13 @@ export function useScopedStats() {
       monthlyGoal: s.monthlyGoal,
       level: s.level,
       xp: s.xp,
+      insights: {
+        bestHabit: bestHabitThisWeek(ss),
+        worstHabit: mostMissedHabit(ss),
+        wowProgress: weekOverWeekProgress(ss),
+        longestStreakHabit: longestActiveStreak(ss),
+        bestDay: bestDayToCheckIn(ss),
+      }
     };
   }, [s, scope, today]);
 }

@@ -1479,4 +1479,83 @@ export function mostMissedHabit(s: HabitState): { name: string; pct: number } {
   return habitStats.reduce((worst, current) => (current.pct < worst.pct ? current : worst), { name: "None", pct: 100 });
 }
 
+export function weekOverWeekProgress(s: HabitState): number {
+  const currentWeek = weeklyProgress(s);
+  
+  const lastWeekDate = new Date();
+  lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+  const lastWeekIso = lastWeekDate.toLocaleDateString('en-CA');
+  
+  let lastWeekCompleted = 0;
+  let lastWeekTotal = 0;
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(lastWeekDate);
+    date.setDate(date.getDate() - i);
+    const dateISO = date.toLocaleDateString('en-CA');
+    const { done, total } = completionsForDate(s, dateISO);
+    lastWeekCompleted += done;
+    lastWeekTotal += total;
+  }
+  
+  const currentPct = currentWeek.reduce((sum, d) => sum + d.pct, 0) / (currentWeek.length || 1);
+  const lastWeekPct = lastWeekTotal > 0 ? (lastWeekCompleted / lastWeekTotal) * 100 : 0;
+  
+  return Math.round(currentPct - lastWeekPct);
+}
+
+export function longestActiveStreak(s: HabitState): { name: string; streak: number } {
+  const today = todayISO();
+  let best = { name: "None", streak: 0 };
+  
+  for (const h of s.habits) {
+    let current = 0;
+    for (let i = 0; i < 365; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateISO = date.toLocaleDateString('en-CA');
+      
+      const scheduled = isScheduledOn(h, dateISO);
+      if (!scheduled) continue;
+      
+      const status = habitStatus(s, h, dateISO);
+      if (status === "completed" || status === "frozen") {
+        current++;
+      } else if (status === "missed") {
+        break;
+      }
+    }
+    if (current > best.streak) {
+      best = { name: h.name, streak: current };
+    }
+  }
+  
+  return best;
+}
+
+export function bestDayToCheckIn(s: HabitState): { day: string; pct: number } {
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayStats = Array(7).fill(0).map(() => ({ done: 0, total: 0 }));
+  
+  for (let i = 0; i < 28; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateISO = date.toLocaleDateString('en-CA');
+    const dayOfWeek = date.getDay();
+    const { done, total } = completionsForDate(s, dateISO);
+    dayStats[dayOfWeek].done += done;
+    dayStats[dayOfWeek].total += total;
+  }
+  
+  let best = { day: "None", pct: 0 };
+  for (let i = 0; i < 7; i++) {
+    const pct = dayStats[i].total > 0 ? Math.round((dayStats[i].done / dayStats[i].total) * 100) : 0;
+    if (pct > best.pct) {
+      best = { day: days[i], pct };
+    }
+  }
+  
+  return best;
+}
+
 export { todayISO, daysAgoISO };

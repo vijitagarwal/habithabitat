@@ -1,37 +1,41 @@
-import { TrendingUp, Flame, Trophy, AlertCircle } from "lucide-react";
-import { useHabits, overallProgress, currentStreak, bestHabitThisWeek, mostMissedHabit } from "@/lib/habits-store";
+import { TrendingUp, Flame, Trophy, AlertCircle, CalendarClock } from "lucide-react";
+import { useScopedStats } from "@/lib/scope-aware-stats";
 
 export function Insights() {
-  const s = useHabits();
-  const overall = overallProgress(s);
-  const streak = currentStreak(s);
-  const bestHabit = bestHabitThisWeek(s);
-  const worstHabit = mostMissedHabit(s);
+  const stats = useScopedStats();
+  
+  const { bestHabit, worstHabit, wowProgress, longestStreakHabit, bestDay } = stats.insights;
 
   const items = [
     {
-      icon: Flame,
-      title: "Current Streak",
-      body: streak > 0 ? `You're on a ${streak}-day streak! Keep it up.` : "Start a habit today to begin your streak!",
-      tint: "var(--amber)",
-    },
-    {
       icon: Trophy,
       title: "Weekly MVP",
-      body: bestHabit.pct > 0 ? `${bestHabit.name} is your best performer at ${bestHabit.pct}%.` : "Complete habits to see your weekly MVP.",
+      body: bestHabit.pct > 0 ? `🔥 ${bestHabit.name} is your best performer at ${bestHabit.pct}%.` : "Complete habits to see your weekly MVP.",
       tint: "var(--teal)",
     },
     {
       icon: AlertCircle,
       title: "Needs Focus",
-      body: worstHabit.pct < 100 && worstHabit.name !== "None" ? `${worstHabit.name} was missed most this week (${worstHabit.pct}%).` : "You're crushing all your habits!",
+      body: worstHabit.pct < 100 && worstHabit.name !== "None" ? `⚠️ ${worstHabit.name} was missed most this week (${worstHabit.pct}%).` : "You're crushing all your habits!",
       tint: "var(--coral)",
     },
     {
       icon: TrendingUp,
-      title: "Consistency",
-      body: `You've completed ${overall}% of your habits this month.`,
+      title: "Week over Week",
+      body: wowProgress > 0 ? `📈 +${wowProgress}% vs last week. You're improving!` : wowProgress < 0 ? `📉 ${wowProgress}% vs last week. Let's bounce back.` : "Holding steady compared to last week.",
       tint: "var(--lav)",
+    },
+    {
+      icon: Flame,
+      title: "Longest Active Streak",
+      body: longestStreakHabit.streak > 0 ? `🏆 ${longestStreakHabit.name} (${longestStreakHabit.streak} days)` : "Start a habit today to build your streak!",
+      tint: "var(--amber)",
+    },
+    {
+      icon: CalendarClock,
+      title: "Best Day to Check In",
+      body: bestDay.pct > 0 ? `💡 You complete ${bestDay.pct}% of habits on ${bestDay.day}s.` : "Keep tracking to find your best day.",
+      tint: "var(--info)",
     },
   ];
 
