@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../bridge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { Button } from "../../ui/button";
 import { useToast } from "../bridge/useCatToast";
 import { format } from "date-fns";
+import { useKV } from "../bridge";
+import { DATE_CFG } from "../data/dates";
+import { getStatus } from "../engine/schedule";
 
 interface MockTest {
   id: string;
@@ -39,6 +42,10 @@ function MockTracker() {
     qa_correct: 0,
     notes: "",
   });
+  const { value: targetScore, setValue: setTargetScore } = useKV<number>("mock_target_score", 100);
+
+  const [isEditingTarget, setIsEditingTarget] = useState(false);
+  const [tempTarget, setTempTarget] = useState(targetScore.toString());
 
   const fetchMockTests = async () => {
   const { addToast } = useToast();
@@ -106,13 +113,57 @@ function MockTracker() {
     }
   };
 
+  const latestScore = mockTests.length > 0 ? mockTests[mockTests.length - 1].total_score : null;
+  const trajectory = latestScore === null ? "No data" : latestScore >= targetScore ? "On track 🚀" : "Behind target 📉";
+  
+  const today = new Date();
+  const phase = getStatus(today, DATE_CFG).phase;
+  let suggestedTarget = 80;
+  if (phase === "Phase 2") suggestedTarget = 120;
+  if (phase === "Phase 3") suggestedTarget = 160;
+
   return (
     <div className="space-y-6">
       <Card className="card-glass">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle>Mock Test Score Progression</CardTitle>
+          <div className="text-sm font-medium px-3 py-1 rounded-full bg-background/50 border border-border">
+            Status: <span className={latestScore && latestScore >= targetScore ? "text-success" : "text-amber-500"}>{trajectory}</span>
+          </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 flex items-center justify-between rounded-xl bg-black/20 p-4 border border-border/50">
+            <div>
+              <div className="text-sm text-muted-foreground">Current Target Score</div>
+              {isEditingTarget ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <Input 
+                    type="number" 
+                    value={tempTarget} 
+                    onChange={(e) => setTempTarget(e.target.value)} 
+                    className="w-24 h-8"
+                  />
+                  <Button size="sm" onClick={() => {
+                    setTargetScore(Number(tempTarget));
+                    setIsEditingTarget(false);
+                  }}>Save</Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="text-2xl font-bold text-teal-400">{targetScore}</div>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setTempTarget(targetScore.toString());
+                    setIsEditingTarget(true);
+                  }}>Edit</Button>
+                </div>
+              )}
+            </div>
+            <div className="text-right text-sm">
+              <div className="text-muted-foreground">Suggested for {phase}</div>
+              <div className="font-semibold text-amber-400">{suggestedTarget}</div>
+            </div>
+          </div>
+
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={mockTests}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -125,6 +176,7 @@ function MockTracker() {
                 labelFormatter={(date) => format(new Date(date), "MMM dd, yyyy")}
                 formatter={(value: number) => [`${value}`, "Score"]}
               />
+              <ReferenceLine y={targetScore} stroke="var(--teal)" strokeDasharray="3 3" label={{ position: 'top', value: 'Target', fill: 'var(--teal)' }} />
               <Line
                 type="monotone"
                 dataKey="total_score"

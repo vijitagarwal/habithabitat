@@ -26,6 +26,7 @@ export default function Overview() {
   const [dayNum, setDayNum] = useState(0);
   const [phase, setPhase] = useState("");
   const [errorCount, setErrorCount] = useState(0);
+  const [lastMockScore, setLastMockScore] = useState<number | null>(null);
 
   const { value: breathLog } = useKV<BreathLog>("breath_log", {
     streak: 0,
@@ -72,6 +73,23 @@ export default function Overview() {
     return () => window.removeEventListener("focus", fetchErrors);
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const fetchLastMock = () => {
+      supabase
+        .from("mock_tests")
+        .select("total_score")
+        .order("date", { ascending: false })
+        .limit(1)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            setLastMockScore(data[0].total_score);
+          }
+        });
+    };
+    fetchLastMock();
+  }, [user]);
+
   const d = Math.floor(diff / 86400000);
   const h = pad2(Math.floor((diff % 86400000) / 3600000));
   const m = pad2(Math.floor((diff % 3600000) / 60000));
@@ -100,9 +118,9 @@ export default function Overview() {
   const catPct = catTotal > 0 ? Math.round((catDone / catTotal) * 100) : 0;
 
   const metrics = [
+    { label: "Last Mock", value: lastMockScore !== null ? String(lastMockScore) : "--", icon: "📊", color: "var(--amber)" },
     { label: "Breath Streak", value: `${breathLog.streak}d`, icon: "🌬️", color: "var(--lav)" },
     { label: "Med Minutes", value: `${medLog.totalMinutes}m`, icon: "🧘", color: "var(--teal)" },
-    { label: "Checklist", value: `${checkDone}/${checkTotal}`, icon: "✅", color: "var(--amber)" },
     { label: "Errors Logged", value: String(errorCount), icon: "🔍", color: "var(--coral)" },
   ];
 
