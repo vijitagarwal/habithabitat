@@ -34,6 +34,7 @@ import {
 } from "@/lib/habits-store";
 
 import { Snowflake } from "lucide-react";
+import { toast } from "sonner";
 
 function IconOf(name: string) {
   return (
@@ -378,10 +379,13 @@ export function HabitRowConnected({
   const handleFreeze = () => {
     if (s.freezeTokens > 0) {
       useFreezeToken(dateISO, habit.id);
-      alert(`Streak frozen! ❄️
-Your streak for ${habit.name} on ${new Date(dateISO).toLocaleDateString()} is now protected.`);
+      toast.success("Streak Frozen! ❄️", {
+        description: `Your streak for ${habit.name} on ${new Date(dateISO).toLocaleDateString()} is now protected.`,
+      });
     } else {
-      alert("No freeze tokens left!\nMaintain a 7-day streak to earn one.");
+      toast.error("No freeze tokens left!", {
+        description: "Maintain a 7-day streak to earn one.",
+      });
     }
   };
   

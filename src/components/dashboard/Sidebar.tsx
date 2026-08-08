@@ -17,6 +17,7 @@ import {
   Quote,
   X,
   LogOut,
+  Snowflake,
 } from "lucide-react";
 import { useHabits } from "@/lib/habits-store";
 import { ProfileModal } from "./ProfileModal";
@@ -159,9 +160,17 @@ function SidebarContent({
                 </span>
                 <span className="font-semibold text-sidebar-foreground">Level {s.level}</span>
               </div>
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                Explorer
-              </span>
+              <div className="flex items-center gap-1.5">
+                {s.freezeTokens > 0 && (
+                  <span className="flex items-center gap-0.5 rounded-full bg-cyan-500/10 px-1.5 py-0.5 text-[10px] font-bold text-cyan-500 border border-cyan-500/20" title={`${s.freezeTokens} Streak Freezes Available`}>
+                    <Snowflake className="h-2.5 w-2.5" />
+                    {s.freezeTokens}
+                  </span>
+                )}
+                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  Explorer
+                </span>
+              </div>
             </div>
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div

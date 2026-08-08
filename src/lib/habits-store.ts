@@ -711,22 +711,45 @@ export function habitValue(s: HabitState, h: Habit, iso: string): number {
 }
 
 export function setHabitValue(iso: string, habitId: string, value: number) {
+  const prevStreak = currentStreak(state);
+
   const day = { ...(state.values[iso] ?? {}) };
   if (Number.isFinite(value) && value > 0) day[habitId] = Math.round(value * 100) / 100;
   else delete day[habitId];
   const values = { ...state.values, [iso]: day };
   if (Object.keys(day).length === 0) delete values[iso];
   state = { ...state, values };
+
+  const newStreak = currentStreak(state);
+  if (newStreak > prevStreak && newStreak > 0 && newStreak % 7 === 0) {
+    state = { ...state, freezeTokens: Math.min(state.freezeTokens + 1, 3) };
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("streak-freeze-earned", { detail: newStreak }));
+    }
+  }
+
   persist();
 }
 
 export function toggleHabit(dateISO: string, habitId: string) {
   const h = state.habits.find((x) => x.id === habitId);
   if (h && h.benchmarks && h.benchmarks.length) return; // benchmarked; use setHabitValue
+  
+  const prevStreak = currentStreak(state);
+
   const day = state.completions[dateISO] ?? {};
   const next = { ...day, [habitId]: !day[habitId] };
   state = { ...state, completions: { ...state.completions, [dateISO]: next } };
   if (next[habitId]) state = { ...state, xp: state.xp + 10 };
+
+  const newStreak = currentStreak(state);
+  if (newStreak > prevStreak && newStreak > 0 && newStreak % 7 === 0) {
+    state = { ...state, freezeTokens: Math.min(state.freezeTokens + 1, 3) };
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("streak-freeze-earned", { detail: newStreak }));
+    }
+  }
+
   persist();
 }
 

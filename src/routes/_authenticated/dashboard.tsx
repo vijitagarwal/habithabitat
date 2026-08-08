@@ -32,6 +32,7 @@ import { ScopeCtx } from "@/lib/scope";
 import { QuickLogWidget } from "@/components/dashboard/QuickLogWidget";
 import { WeeklyReviewBanner } from "@/components/dashboard/WeeklyReviewBanner";
 import { AnalogueClock } from "@/components/dashboard/AnalogueClock";
+import { toast } from "sonner";
 
 const searchSchema = z.object({
   scope: z.enum(["habit", "cat"]).optional(),
@@ -170,6 +171,18 @@ function DashboardPage() {
       cancelled = true;
       sub.subscription.unsubscribe();
     };
+  }, []);
+
+  // Listen for streak freeze earn event
+  useEffect(() => {
+    const handleEarn = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      toast.success("🎉 Streak Freeze Earned!", {
+        description: `You reached a ${detail}-day streak. Keep it up!`,
+      });
+    };
+    window.addEventListener("streak-freeze-earned", handleEarn);
+    return () => window.removeEventListener("streak-freeze-earned", handleEarn);
   }, []);
 
   async function signOut() {
