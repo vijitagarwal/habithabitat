@@ -20,7 +20,7 @@ import {
   type HabitDirection,
   type Schedule,
 } from "@/lib/habits-store";
-import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, TrendingUp, TrendingDown, Bell, AlertTriangle, ChevronDown, ChevronUp, DownloadCloud } from "lucide-react";
 import { ScheduleEditor } from "./ScheduleEditor";
 import { useScope, filterHabitsByScope } from "@/lib/scope";
 import { HABIT_TEMPLATES } from "./habit-templates";
@@ -28,6 +28,7 @@ import { Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 type Draft = {
   name: string;
@@ -364,6 +365,48 @@ export function HabitManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [isHabitsCollapsed, setIsHabitsCollapsed] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      const auth = await supabase.auth.getUser();
+      const userId = auth.data.user?.id;
+      let remoteData = {};
+      
+      if (userId) {
+        const { data: topics } = await supabase.from("topic_progress").select("*").eq("user_id", userId);
+        const { data: mocks } = await supabase.from("mock_tests").select("*").eq("user_id", userId);
+        const { data: errors } = await supabase.from("error_log").select("*").eq("user_id", userId);
+        remoteData = { topics, mocks, errors };
+      }
+      
+      const localData: Record<string, any> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k) localData[k] = localStorage.getItem(k);
+      }
+      
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        remote: remoteData,
+        local: localData
+      };
+      
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `habit-tracker-backup-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to export data");
+    }
+  };
+
+  const handleTestNotification = () => {
+    testReminderNotification();
+  };
   const visibleHabits = filterHabitsByScope(s.habits, scope);
   // In CAT scope, new habits default to the "CAT Prep" category.
   const initialDraft =
@@ -606,6 +649,19 @@ export function HabitManager() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="card-glass rounded-2xl p-6">
+        <h3 className="mb-1 text-lg font-semibold">Data & Backup</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Export your entire history, habits, CAT prep data, and logs as a single JSON file.
+        </p>
+        <button
+          onClick={handleExport}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold hover:border-primary/40 transition"
+        >
+          <DownloadCloud className="h-4 w-4" /> Export Complete Backup
+        </button>
       </div>
 
       <div className="card-glass rounded-2xl p-6">
