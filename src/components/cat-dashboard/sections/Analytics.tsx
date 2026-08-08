@@ -17,7 +17,8 @@ import {
 } from "recharts";
 import { supabase } from "../bridge";
 import { useAuth } from "../bridge";
-import type { ErrorEntry, MockResult, TopicProgress, DailyActivity } from "../types";
+import { useKV } from "../bridge";
+import type { ErrorEntry, MockResult, TopicProgress, DailyActivity, FocusLog } from "../types";
 
 export default function Analytics() {
   const { user } = useAuth();
@@ -26,6 +27,8 @@ export default function Analytics() {
   const [topics, setTopics] = useState<TopicProgress[]>([]);
   const [activity, setActivity] = useState<DailyActivity[]>([]);
   const [tab, setTab] = useState<"overview" | "errors" | "mocks">("overview");
+
+  const { value: focusLog } = useKV<FocusLog>("focus_log", { sessions: [] });
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -74,6 +77,15 @@ export default function Analytics() {
 
   // 30-day activity
   const actData = activity.map((a) => ({ date: a.date.slice(5), score: a.score }));
+
+  // Weekly study hours
+  const weekSessions = (focusLog.sessions || []).filter((s) => {
+    const d = new Date(s.date);
+    const now = new Date();
+    const diff = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+    return diff < 7;
+  });
+  const weekHours = weekSessions.reduce((sum, s) => sum + s.durationMins, 0) / 60;
 
   const CHART_COLORS = {
     "Concept Gap": "var(--coral)",
@@ -144,6 +156,16 @@ export default function Analytics() {
                 <Bar dataKey="score" fill="var(--amber)" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          
+          {/* Weekly Study Hours Stat */}
+          <div className="card" style={{ padding: 20, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gridColumn: "1 / -1" }}>
+            <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: 8 }}>
+              Total Study Hours This Week
+            </div>
+            <div style={{ fontSize: "2.5rem", fontWeight: 700, color: "var(--amber)", fontFamily: "JetBrains Mono" }}>
+              {weekHours.toFixed(1)}<span style={{ fontSize: "1.5rem", color: "var(--text-muted)" }}>h</span>
+            </div>
           </div>
 
           {/* Topic radar */}

@@ -269,8 +269,13 @@ export default function TopicTracker() {
                     }}
                     title="Click to advance status"
                   >
-                    <span style={{ fontSize: "0.875rem", color: "var(--text-primary)" }}>
+                    <span style={{ fontSize: "0.875rem", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 6 }}>
                       {t.topic_name}
+                      {t.time_spent_minutes && t.time_spent_minutes > 0 ? (
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                          ⏱ {t.time_spent_minutes < 60 ? `${t.time_spent_minutes}m` : `${Math.floor(t.time_spent_minutes / 60)}h ${t.time_spent_minutes % 60 > 0 ? `${t.time_spent_minutes % 60}m` : ''}`}
+                        </span>
+                      ) : null}
                     </span>
                     <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", marginTop: 1 }}>
                       {t.status}

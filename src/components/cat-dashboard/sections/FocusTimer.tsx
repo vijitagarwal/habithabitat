@@ -4,6 +4,8 @@ import { bell, resumeCtx } from "../audio/audio";
 import { useKV } from "../bridge";
 import { useActivity } from "../bridge";
 import { useToast } from "../bridge";
+import { supabase } from "../bridge";
+import { useAuth } from "../bridge";
 import { todayKey } from "../engine/schedule";
 import type { FocusLog } from "../types";
 import confetti from "canvas-confetti";
@@ -33,6 +35,25 @@ export default function FocusTimer() {
   const [fullscreen, setFullscreen] = useState(false);
   const [done, setDone] = useState(false);
   const endTimeRef = useRef<number>(0);
+
+  const { user } = useAuth();
+  const [topics, setTopics] = useState<{ id: string; name: string }[]>([]);
+  const [linkedTopic, setLinkedTopic] = useState<string | null>(null);
+  const [linkedTopicName, setLinkedTopicName] = useState<string>("");
+
+  useEffect(() => {
+    if (!user) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+    db.from("topic_progress")
+      .select("id, name:topic_name")
+      .eq("user_id", user.id)
+      .order("topic_name")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then(({ data }: { data: any }) => {
+        if (data) setTopics(data);
+      });
+  }, [user]);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -121,6 +142,28 @@ export default function FocusTimer() {
             addToast(`⏱️ Added ${dur}m to ${habit.name} (${increment} ${habit.unit || "units"})`);
           }
         }
+
+        if (linkedTopic && user) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const db = supabase as any;
+          db.from("topic_progress")
+            .select("time_spent_minutes")
+            .eq("id", linkedTopic)
+            .single()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .then(({ data: topicData }: { data: any }) => {
+              const currentMins = topicData?.time_spent_minutes || 0;
+              db.from("topic_progress")
+                .update({ time_spent_minutes: currentMins + dur })
+                .eq("id", linkedTopic)
+                .then(() => {
+                  addToast(`📚 ${dur}m logged to ${linkedTopicName}`);
+                });
+            });
+        }
+        
+        setLinkedTopic(null);
+        setLinkedTopicName("");
       }
     };
 
@@ -130,7 +173,7 @@ export default function FocusTimer() {
       worker.postMessage('stop');
       worker.terminate();
     };
-  }, [running, paused, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast]);
+  }, [running, paused, stop, getDurationMins, focusLog, subject, setFocusLog, markActivity, addToast, linkedTopic, linkedTopicName, user, timerHabits, s.values]);
 
   const minsLeft = Math.floor(secsLeft / 60);
   const secsDisp = String(secsLeft % 60).padStart(2, "0");
@@ -332,6 +375,37 @@ export default function FocusTimer() {
             </div>
           )}
         </div>
+
+        {/* Link to Topic dropdown */}
+        {!running && topics.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center", width: "100%" }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+              Link to Topic (optional — logs study time)
+            </span>
+            <select
+              className="input"
+              style={{ maxWidth: 280, textAlign: "center", padding: "6px 12px", background: "var(--bg-raised)", color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: "8px" }}
+              value={linkedTopic || ""}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                setLinkedTopic(selectedId || null);
+                const t = topics.find((t) => t.id === selectedId);
+                setLinkedTopicName(t?.name || "");
+              }}
+              disabled={running}
+            >
+              <option value="">— No topic link —</option>
+              {topics.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+            {linkedTopic && (
+              <span style={{ fontSize: "0.72rem", color: "var(--teal)" }}>
+                ✓ Will log time to: {linkedTopicName}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Timer display */}
         <div style={{ textAlign: "center" }}>

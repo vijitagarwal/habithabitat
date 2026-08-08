@@ -119,6 +119,7 @@ export interface TopicProgress {
   topic_name: string;
   status: "Not Started" | "In Progress" | "Concept Done" | "Practice Done" | "Mastered";
   confidence?: number;
+  time_spent_minutes?: number;
   updated_at?: string;
   history?: TopicHistory[]; // 7-day confidence history
 }
