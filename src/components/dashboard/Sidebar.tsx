@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   LayoutDashboard,
   CalendarCheck2,
@@ -212,6 +212,9 @@ export function Sidebar({
 }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const isExpanded = isHovered;
+  
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   return (
     <>
@@ -234,7 +237,23 @@ export function Sidebar({
 
       {/* Mobile overlay drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div 
+          className="fixed inset-0 z-50 lg:hidden"
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0].clientX;
+            touchStartY.current = e.touches[0].clientY;
+          }}
+          onTouchEnd={(e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX.current - touchEndX;
+            const diffY = touchStartY.current - touchEndY;
+            // Increased threshold and check horizontal vs vertical movement
+            if (diffX > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+              onCloseMobile?.();
+            }
+          }}
+        >
           <div className="absolute inset-0 bg-black/60" onClick={onCloseMobile} />
           <aside className="relative flex h-full w-64 flex-col shadow-2xl">
             <SidebarContent

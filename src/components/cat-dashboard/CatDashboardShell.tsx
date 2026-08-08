@@ -191,6 +191,8 @@ function CatSidebar({
   const { user } = useCatAuth();
   const { overall, streak, todayStats } = useScopedStats();
   const profileRef = useRef<HTMLButtonElement>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const [isHovered, setIsHovered] = useState(false);
   const isExpanded = isHovered;
 
@@ -336,7 +338,23 @@ function CatSidebar({
 
       {/* Mobile sidebar drawer */}
       {open && (
-        <aside className="fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col lg:hidden">
+        <aside 
+          className="fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col lg:hidden"
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0].clientX;
+            touchStartY.current = e.touches[0].clientY;
+          }}
+          onTouchEnd={(e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX.current - touchEndX;
+            const diffY = touchStartY.current - touchEndY;
+            // Increased threshold and check horizontal vs vertical movement
+            if (diffX > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+              onClose();
+            }
+          }}
+        >
           {sidebarContent}
         </aside>
       )}
