@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { format } from "date-fns";
 import { supabase } from "../bridge";
 import { useAuth } from "../bridge";
 import { useRealtime } from "../bridge";
@@ -112,6 +113,40 @@ export default function TopicTracker() {
     {} as Record<string, TopicProgress[]>,
   );
 
+  // Aggregated Confidence Over Time
+  const confidenceByDate: Record<string, { sum: number; count: number }> = {};
+  topics.forEach((t) => {
+    let hist: TopicHistory[] = [];
+    if (typeof t.history === "string") {
+      try {
+        hist = JSON.parse(t.history);
+      } catch (e) {}
+    } else if (Array.isArray(t.history)) {
+      hist = t.history;
+    }
+    
+    // Also include the current confidence for today if not present in history
+    if (t.confidence && t.confidence > 0) {
+      const todayStr = todayISO();
+      if (!hist.some(h => h.date === todayStr)) {
+        hist.push({ date: todayStr, confidence: t.confidence });
+      }
+    }
+
+    hist.forEach((entry) => {
+      if (!confidenceByDate[entry.date]) confidenceByDate[entry.date] = { sum: 0, count: 0 };
+      confidenceByDate[entry.date].sum += entry.confidence;
+      confidenceByDate[entry.date].count += 1;
+    });
+  });
+
+  const chartData = Object.keys(confidenceByDate)
+    .sort()
+    .map((date) => ({
+      date,
+      avgConfidence: Math.round(confidenceByDate[date].sum / confidenceByDate[date].count),
+    }));
+
   return (
     <section id="syllabus" className="section">
       <div style={{ marginBottom: 20 }}>
@@ -169,6 +204,47 @@ export default function TopicTracker() {
           </div>
         ))}
       </div>
+      
+      {/* Analytics Chart */}
+      {chartData.length > 0 && (
+        <div className="card" style={{ padding: "16px", marginBottom: 20 }}>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)" }}>Average Confidence Trend</div>
+            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Across all topics</div>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={(val) => format(new Date(val), "MMM d")} 
+                stroke="var(--text-muted)" 
+                fontSize={10} 
+                tickMargin={10}
+              />
+              <YAxis 
+                domain={[0, 100]} 
+                stroke="var(--text-muted)" 
+                fontSize={10} 
+                tickFormatter={(val) => `${val}%`}
+              />
+              <Tooltip
+                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 8, fontSize: "0.8rem" }}
+                labelFormatter={(date) => format(new Date(date), "MMM dd, yyyy")}
+                formatter={(val: number) => [`${val}%`, "Avg Confidence"]}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="avgConfidence" 
+                stroke="var(--amber)" 
+                strokeWidth={2} 
+                dot={{ r: 3, fill: "var(--amber)" }} 
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Status legend */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
