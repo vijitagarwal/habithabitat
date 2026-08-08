@@ -43,6 +43,7 @@ import {
   X,
   Moon,
   Sun,
+  RotateCw,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +51,7 @@ import { useScopedStats } from "@/lib/scope-aware-stats";
 import { CatAuthProvider, useCatAuth } from "./bridge/useCatAuth";
 import { ToastProvider } from "./bridge/useCatToast";
 import { useRealtime } from "./bridge/useCatRealtime";
+import { useSyncStatus, syncNow } from "@/lib/habits-store";
 
 // ── Lazy-loaded sections ───────────────────────────────────────────────
 const Overview = lazy(() => import("./sections/Overview"));
@@ -347,6 +349,26 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
   const { d, h, m, s } = useCountdown();
   const { overall, streak, todayStats } = useScopedStats();
   const { theme, setTheme } = useTheme();
+  const syncStatus = useSyncStatus();
+  const [syncing, setSyncing] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    await syncNow();
+    setTimeout(() => setSyncing(false), 500);
+  };
 
   return (
     <div className="flex shrink-0 h-12 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-sm">
@@ -392,13 +414,50 @@ function CatTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
           </span>
         </span>
       </div>
-      <button
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="ml-2 flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-2.5 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors"
-      >
-        {theme === "dark" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-        <span className="capitalize">{theme}</span>
-      </button>
+
+      <div className="ml-auto flex items-center gap-2">
+        {/* Sync Indicator */}
+        {syncStatus === "error" ? (
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            title="Sync failed. Click to retry."
+            className="flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/10 px-2.5 py-1.5 text-xs font-medium hover:border-destructive transition-colors disabled:opacity-50"
+          >
+            <div className="h-2 w-2 rounded-full bg-destructive" />
+            <span className="hidden sm:inline text-destructive">Error</span>
+          </button>
+        ) : syncStatus === "syncing" || syncing ? (
+          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1.5 text-xs font-medium">
+            <RotateCw className="h-3.5 w-3.5 text-amber-500 animate-spin" />
+            <span className="hidden sm:inline text-amber-500">Saving</span>
+          </div>
+        ) : (
+          <button
+            onClick={handleSync}
+            disabled={syncing || isOffline}
+            title={isOffline ? "Offline" : "All changes synced"}
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-2.5 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors disabled:opacity-50"
+          >
+            <div className={`h-2 w-2 rounded-full ${isOffline ? 'bg-amber-500' : 'bg-success'}`} />
+            <span className="hidden sm:inline text-muted-foreground">{isOffline ? 'Offline' : 'Synced'}</span>
+          </button>
+        )}
+
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-2.5 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors"
+        >
+          {theme === "dark" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          <span className="capitalize hidden sm:inline">{theme}</span>
+        </button>
+      </div>
+      
+      {isOffline && (
+        <div className="absolute top-full left-0 right-0 z-50 bg-amber-500 text-black text-xs font-bold text-center py-1">
+          Offline — changes saved locally, will sync when reconnected
+        </div>
+      )}
     </div>
   );
 }

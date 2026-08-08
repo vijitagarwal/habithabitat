@@ -366,9 +366,29 @@ let state: HabitState = defaultState();
 let hydrated = false;
 const listeners = new Set<() => void>();
 
+export type SyncStatus = "idle" | "syncing" | "synced" | "error";
+let currentSyncStatus: SyncStatus = "idle";
+const syncListeners = new Set<() => void>();
+
+export function useSyncStatus() {
+  return useSyncExternalStore(
+    (l) => {
+      syncListeners.add(l);
+      return () => syncListeners.delete(l);
+    },
+    () => currentSyncStatus
+  );
+}
+
+function setSyncStatus(s: SyncStatus) {
+  currentSyncStatus = s;
+  syncListeners.forEach((l) => l());
+}
+
 let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function syncToSupabase(uid: string, currentState: HabitState) {
+  setSyncStatus("syncing");
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(async () => {
     try {
@@ -385,8 +405,12 @@ function syncToSupabase(uid: string, currentState: HabitState) {
           },
           { onConflict: "user_id,key" },
         );
+      
+      if (err) throw err;
+      setSyncStatus("synced");
     } catch (err) {
       console.warn("[habits-store] Supabase cloud sync failed:", err);
+      setSyncStatus("error");
     }
   }, 300);
 }
@@ -484,6 +508,7 @@ export function setStoreUser(uid: string | null) {
     const currentUid = userKey;
     // Fetch remote state from Supabase kv_store
     const fetchRemoteState = async () => {
+      setSyncStatus("syncing");
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = supabase as any;
@@ -508,14 +533,18 @@ export function setStoreUser(uid: string | null) {
             localStorage.setItem(KEY(), JSON.stringify(state));
           }
           listeners.forEach((l) => l());
+          setSyncStatus("synced");
         } else {
           // If remote is empty, push our local state (containing user's desktop habits) to Supabase cloud!
           if (state.habits && state.habits.length > 0) {
             syncToSupabase(currentUid, state);
+          } else {
+            setSyncStatus("synced");
           }
         }
       } catch (err) {
-        console.warn("[habits-store] Failed to fetch remote state, using local cache:", err);
+        console.error("Failed to fetch remote state", err);
+        setSyncStatus("error");
       }
     };
 
