@@ -40,6 +40,7 @@ type Draft = {
   benchmarks: number[];
   schedule: Schedule;
   isTimer: boolean;
+  monthlyTarget?: number;
 };
 
 const emptyDraft: Draft = {
@@ -373,9 +374,9 @@ export function HabitManager() {
       let remoteData = {};
       
       if (userId) {
-        const { data: topics } = await supabase.from("topic_progress").select("*").eq("user_id", userId);
-        const { data: mocks } = await supabase.from("mock_tests").select("*").eq("user_id", userId);
-        const { data: errors } = await supabase.from("error_log").select("*").eq("user_id", userId);
+        const { data: topics } = await (supabase as any).from("topic_progress").select("*").eq("user_id", userId);
+        const { data: mocks } = await (supabase as any).from("mock_tests").select("*").eq("user_id", userId);
+        const { data: errors } = await (supabase as any).from("error_log").select("*").eq("user_id", userId);
         remoteData = { topics, mocks, errors };
       }
       
@@ -404,9 +405,6 @@ export function HabitManager() {
     }
   };
 
-  const handleTestNotification = () => {
-    testReminderNotification();
-  };
   const visibleHabits = filterHabitsByScope(s.habits, scope);
   // In CAT scope, new habits default to the "CAT Prep" category.
   const initialDraft =

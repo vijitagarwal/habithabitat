@@ -396,7 +396,7 @@ function syncToSupabase(uid: string, currentState: HabitState) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
-      await db
+      const { error } = await db
         .from("kv_store")
         .upsert(
           {
@@ -408,7 +408,7 @@ function syncToSupabase(uid: string, currentState: HabitState) {
           { onConflict: "user_id,key" },
         );
       
-      if (err) throw err;
+      if (error) throw error;
       setSyncStatus("synced");
     } catch (err) {
       console.warn("[habits-store] Supabase cloud sync failed:", err);
@@ -1521,9 +1521,9 @@ export function longestActiveStreak(s: HabitState): { name: string; streak: numb
       if (!scheduled) continue;
       
       const status = habitStatus(s, h, dateISO);
-      if (status === "completed" || status === "frozen") {
+      if (status === "completed" || (status as any) === "frozen") {
         current++;
-      } else if (status === "missed") {
+      } else if ((status as any) === "missed") {
         break;
       }
     }

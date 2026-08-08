@@ -77,12 +77,12 @@ export default function Overview() {
   useEffect(() => {
     if (!user) return;
     const fetchLastMock = () => {
-      supabase
+      (supabase as any)
         .from("mock_tests")
         .select("total_score")
         .order("date", { ascending: false })
         .limit(1)
-        .then(({ data }) => {
+        .then(({ data }: { data: any[] | null }) => {
           if (data && data.length > 0) {
             setLastMockScore(data[0].total_score);
           }
