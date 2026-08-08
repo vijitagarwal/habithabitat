@@ -73,6 +73,8 @@ export interface Habit {
   schedule?: Schedule;
   /** True for duration/stopwatch habits (e.g. study hours, coding time). */
   isTimer?: boolean;
+  /** Optional monthly target amount (e.g. 30 sessions, 60 hours). */
+  monthlyTarget?: number;
 }
 
 export interface ActiveTimer {

@@ -54,26 +54,49 @@ export function GoalsView() {
         {s.habits.length === 0 ? (
           <p className="text-sm text-muted-foreground">No habits yet.</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-6">
             {s.habits.map((h) => {
               let sum = 0;
+              let valSum = 0;
               for (let i = 0; i < 30; i++) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
                 const iso = d.toISOString().slice(0, 10);
                 if (s.completions[iso]?.[h.id]) sum++;
+                if (s.values[iso]?.[h.id]) valSum += s.values[iso][h.id];
               }
               const pct = Math.round((sum / 30) * 100);
+              
+              const isNumeric = h.unit || h.benchmarks?.length;
+              const actual = isNumeric ? valSum : sum;
+              const hasTarget = !!h.monthlyTarget;
+              const targetPct = hasTarget ? Math.min(100, Math.round((actual / h.monthlyTarget!) * 100)) : pct;
+              const targetPace = hasTarget ? (actual >= (h.monthlyTarget! / 30) * 30 ? "Yes" : "No") : null;
+
               return (
                 <li key={h.id}>
-                  <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="font-medium">{h.name}</span>
-                    <span className="text-muted-foreground">{pct}%</span>
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="font-medium flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: `var(--color-${h.color})` }} />
+                      {h.name}
+                    </span>
+                    <span className="text-muted-foreground font-semibold">
+                      {hasTarget ? `${targetPct}% of Target` : `${pct}%`}
+                    </span>
                   </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  
+                  {hasTarget && (
+                    <div className="mb-2 flex items-center gap-4 text-[11px] text-muted-foreground">
+                      <div>Target: <span className="font-medium text-foreground">{h.monthlyTarget} {isNumeric ? h.unit : "sessions"}</span></div>
+                      <div>Completed: <span className="font-medium text-foreground">{actual}</span></div>
+                      <div>On pace: <span className={`font-medium ${targetPace === "Yes" ? "text-success" : "text-amber-500"}`}>{targetPace}</span></div>
+                    </div>
+                  )}
+
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full"
-                      style={{ width: `${pct}%`, backgroundColor: `var(--color-${h.color})` }}
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${hasTarget ? targetPct : pct}%`, backgroundColor: `var(--color-${h.color})` }}
                     />
                   </div>
                 </li>

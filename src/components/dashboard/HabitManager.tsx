@@ -237,6 +237,17 @@ function DraftForm({
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
           />
         </label>
+        <label className="text-xs">
+          <div className="mb-1 text-muted-foreground">Monthly Target (optional)</div>
+          <input
+            type="number"
+            min={1}
+            value={d.monthlyTarget || ""}
+            onChange={(e) => setD({ ...d, monthlyTarget: e.target.value ? Number(e.target.value) : undefined })}
+            placeholder="e.g. 30"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </label>
         <div className="text-xs sm:col-span-2">
           <div className="mb-1 text-muted-foreground">
             Benchmarks (leave empty for simple check-off habit)
