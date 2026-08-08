@@ -1,9 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CONTINGENCIES } from "../data/static";
+import { useKV, useToast } from "../bridge";
 
 export default function Contingency() {
   const [open, setOpen] = useState<number | null>(0);
+  const { value: activeProtocol, setValue: setActiveProtocol } = useKV<string | null>("active_contingency", null);
+  const { addToast } = useToast();
+
+  const handleActivate = (title: string) => {
+    if (activeProtocol === title) {
+      setActiveProtocol(null);
+      addToast("Contingency mode deactivated.");
+    } else {
+      setActiveProtocol(title);
+      addToast(`Contingency activated: ${title}`);
+    }
+  };
 
   return (
     <section id="contingency" className="section">
@@ -71,7 +84,17 @@ export default function Contingency() {
                       lineHeight: 1.7,
                     }}
                   >
-                    {c.body}
+                    <p style={{ marginBottom: 12 }}>{c.body}</p>
+                    <button
+                      className={`btn btn-sm ${activeProtocol === c.title ? "btn-danger" : "btn-ghost"}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleActivate(c.title);
+                      }}
+                      style={{ fontSize: "0.75rem" }}
+                    >
+                      {activeProtocol === c.title ? "Deactivate Protocol" : "Activate Protocol"}
+                    </button>
                   </div>
                 </motion.div>
               )}

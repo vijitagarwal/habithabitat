@@ -40,7 +40,8 @@ export default function Overview() {
     lastDate: "",
   });
   const { value: checklist } = useKV<any[]>("checklist_v2", []);
-    const { value: regStatus, setValue: setRegStatus } = useKV<{ registered: boolean }>("cat_registration", { registered: false });
+  const { value: regStatus, setValue: setRegStatus } = useKV<{ registered: boolean }>("cat_registration", { registered: false });
+  const { value: activeContingency } = useKV<string | null>("active_contingency", null);
 
   // Countdown
   useEffect(() => {
@@ -132,8 +133,26 @@ export default function Overview() {
 
   return (
     <section id="overview" className="section">
-      <div style={{ marginBottom: 8 }}>
-        <p className="section-eyebrow">Mission Control</p>
+      {activeContingency && (
+        <div style={{
+          padding: "12px 16px",
+          background: "rgba(255, 69, 58, 0.1)",
+          border: "1px solid var(--coral)",
+          borderRadius: 8,
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}>
+          <span style={{ fontSize: "1.2rem" }}>🚨</span>
+          <div>
+            <div style={{ color: "var(--coral)", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contingency Protocol Active</div>
+            <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem", marginTop: 2 }}>{activeContingency} — Requirements scaled down.</div>
+          </div>
+        </div>
+      )}
+      <div style={{ marginBottom: 20 }}>
+        <p className="section-eyebrow">Command Center</p>
         <h2 className="section-title">Overview</h2>
       </div>
 
