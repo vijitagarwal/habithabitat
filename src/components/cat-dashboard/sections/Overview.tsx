@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { DATE_CFG } from "../data/dates";
+import { DATE_CFG, REG_START, REG_END, REG_URGENT } from "../data/dates";
 import { getStatus, getCampaignProgress, pad2 } from "../engine/schedule";
 import { useKV } from "../bridge";
 import { useAuth } from "../bridge";
@@ -39,6 +39,7 @@ export default function Overview() {
     lastDate: "",
   });
   const { value: checklist } = useKV<any[]>("checklist_v2", []);
+    const { value: regStatus, setValue: setRegStatus } = useKV<{ registered: boolean }>("cat_registration", { registered: false });
 
   // Countdown
   useEffect(() => {
@@ -117,6 +118,75 @@ export default function Overview() {
         <p className="section-eyebrow">Mission Control</p>
         <h2 className="section-title">Overview</h2>
       </div>
+
+      {/* ── CAT Registration Banner ── */}
+      {(() => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const isInRegWindow = today >= REG_START && today <= REG_END;
+        const isUrgent = today >= REG_URGENT;
+        const daysLeft = Math.ceil((REG_END.getTime() - today.getTime()) / 86400000);
+        const showRegBanner = isInRegWindow && !regStatus.registered;
+        if (!showRegBanner) return null;
+        return (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "14px 18px",
+              borderRadius: 12,
+              border: `1.5px solid ${isUrgent ? "var(--coral)" : "var(--amber)"}`,
+              background: isUrgent ? "rgba(255,100,80,0.08)" : "rgba(232,162,61,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {isUrgent && (
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: "var(--coral)",
+                    flexShrink: 0,
+                    animation: "pulse 1.5s infinite",
+                  }}
+                />
+              )}
+              <div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "0.9rem",
+                    color: isUrgent ? "var(--coral)" : "var(--amber)",
+                  }}
+                >
+                  {isUrgent ? "⚠️ CAT Registration Closes Soon!" : "📋 CAT 2026 Registration is Open"}
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 2 }}>
+                  {isUrgent
+                    ? `Only ${daysLeft} day${daysLeft !== 1 ? "s" : ""} left — register at iimcat.ac.in before Sep 20`
+                    : `Window open now. Closes in ${daysLeft} days (Sep 20, 2026)`}
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn btn-ghost btn-sm"
+              style={{
+                color: isUrgent ? "var(--coral)" : "var(--amber)",
+                border: `1px solid ${isUrgent ? "var(--coral)" : "var(--amber)"}`,
+                flexShrink: 0,
+              }}
+              onClick={() => setRegStatus({ registered: true })}
+            >
+              Mark as Registered ✓
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Countdown + progress row */}
       <div
