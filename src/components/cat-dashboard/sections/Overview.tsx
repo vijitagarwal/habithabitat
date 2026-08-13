@@ -205,8 +205,8 @@ export default function Overview() {
                 </div>
                 <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 2 }}>
                   {isUrgent
-                    ? `Only ${daysLeft} day${daysLeft !== 1 ? "s" : ""} left — register at iimcat.ac.in before Sep 20`
-                    : `Window open now. Closes in ${daysLeft} days (Sep 20, 2026)`}
+                    ? `Only ${daysLeft} day${daysLeft !== 1 ? "s" : ""} left — register at iimcat.ac.in before Sep 15 (5:00 PM IST)`
+                    : `Window open now. Closes in ${daysLeft} days (Sep 15, 2026, 5:00 PM IST)`}
                 </div>
               </div>
             </div>

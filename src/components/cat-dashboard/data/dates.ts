@@ -19,5 +19,5 @@ export const EXAM_DISPLAY = "Nov 29, 2026";
 
 // Registration banner window
 export const REG_START: Date = D(2026, 7, 1); // Aug 1
-export const REG_END: Date = D(2026, 8, 20); // Sep 20
-export const REG_URGENT: Date = D(2026, 8, 13); // Sep 13 (7 days before)
+export const REG_END: Date = D(2026, 8, 15); // Sep 15 (5:00 PM IST)
+export const REG_URGENT: Date = D(2026, 8, 8); // Sep 8 (7 days before)
