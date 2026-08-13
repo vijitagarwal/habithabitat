@@ -1,6 +1,19 @@
-# HabitHabitat — Complete Project Summary (Updated 2026-08-02)
+# HabitHabitat — Complete Project Summary (Updated 2026-08-13)
 
 > **Purpose**: Exhaustive technical reference for an AI assistant with zero prior context. Read this entire file before making any changes to the codebase. This is the ground truth for project state.
+
+---
+
+## 🔒 PROJECT FREEZE NOTICE (2026-08-13)
+
+> **This project is now FROZEN for personal use.** `bright-habit-view/` is the live, deployed personal CAT 2026 prep dashboard for the owner. **Do NOT make any functional code changes to this project.** It must remain stable and fully operational through CAT 2026 exam date (Nov 29, 2026).
+>
+> A NEW separate multi-exam platform project (working title: **ExamHabitat**) will be built from scratch using this project as a reference. All multi-exam feature development must happen there, not here.
+>
+> Only the following are permitted in this repo going forward:
+> - Updating `README.md` and `PROJECT_SUMMARY` docs
+> - Urgent bug fixes that break the owner's personal CAT prep (with explicit approval)
+> - Updating dates/deadlines in `data/dates.ts` as official notifications are received
 
 ---
 
@@ -16,13 +29,15 @@
 | **Deployment** | Vercel (Hobby), env var `NITRO_PRESET=vercel` is critical |
 | **Auth** | Supabase magic link (email OTP) — email+password sign-up is disabled |
 | **Dev server** | `npm run dev` → `http://localhost:8081` |
+| **Last updated** | 2026-08-13 |
+| **Current status** | 🔒 FROZEN — personal use only, no new feature development |
 
 ### ⚠️ Folder Explanation
 
 - **`bright-habit-view/`** ← **THE ACTIVE PROJECT** (deployed to habithabitat.vercel.app)
 - **`mission-cat-pro/`** ← **ARCHIVED** — old standalone CAT dashboard (separate Vercel deployment). NOT used. All CAT features merged into `bright-habit-view`.
 
-**Only `bright-habit-view/` should be edited going forward.**
+**No functional code changes permitted. See FREEZE NOTICE above.**
 
 ---
 
@@ -639,15 +654,18 @@ return createPortal(<div className="fixed inset-0 z-[200]">...</div>, document.b
 
 ## 17. Known Issues & Future Work
 
-| Issue | Priority | Notes |
-| --- | --- | --- |
-| Supabase `types.ts` missing `profiles`, `kv_store` | Low | Use `(supabase as any)` workaround |
-| Missing Type Definitions | Low | `types.ts` manually generated, doesn't reflect recent migrations |
-| Onboarding | Medium | No intro flow for new users; drops into empty dashboard |
-| Performance | Low | Habit lists >100 may cause rendering lag on mobile |
-| Email+Password signup | Low | Disabled — Supabase config only |
-| Direct DB sync for items/completions | Low | Currently uses kv_store blob; individual tables present but unused |
-| Push Notifications | Medium | Browser notifications configured but service worker not set up |
+> **Note**: This project is frozen for personal use. Issues below are tracked for awareness only — only critical bugs affecting personal CAT prep will be fixed.
+
+| Issue | Priority | Status | Notes |
+| --- | --- | --- | --- |
+| Supabase `types.ts` missing `profiles`, `kv_store` | Low | Open | Use `(supabase as any)` workaround |
+| Missing Type Definitions | Low | Open | `types.ts` manually generated, doesn't reflect recent migrations |
+| Onboarding | Medium | Won't Fix (frozen) | No intro flow for new users; drops into empty dashboard |
+| Performance | Low | Open | Habit lists >100 may cause rendering lag on mobile |
+| Email+Password signup | Low | Won't Fix (frozen) | Disabled — Supabase config only |
+| Direct DB sync for items/completions | Low | Won't Fix (frozen) | Currently uses kv_store blob; individual tables present but unused |
+| Push Notifications | Medium | Won't Fix (frozen) | Browser notifications configured but service worker not set up |
+| Multi-exam support | — | Out of Scope | Being built as a separate new project (ExamHabitat) |
 
 ---
 
@@ -668,6 +686,9 @@ return createPortal(<div className="fixed inset-0 z-[200]">...</div>, document.b
 | 2026-07-28 | Collapsible HabitManager list; AnalogueClock; DigitalClock; Heatmap 1:1 fix; ProfileModal fix |
 | 2026-07-31 | Sidebar hover-only float expand (both dashboards); ProfileModal portal (createPortal z-[200]) |
 | 2026-07-31 | CAT HabitRowConnected; reactive dashboard cards; FocusTimer pause/resume; QuickLog accuracy |
+| 2026-08-02 | Topic time tracking migration (`20260802_topic_time_spent.sql`); topic_time_spent added |
+| 2026-08-13 | Registration deadline update: `REG_END` confirmed Sep 15, 2026. `REG_URGENT` set to Sep 8. |
+| 2026-08-13 | **PROJECT FROZEN** — Personal CAT prep dashboard locked. Multi-exam platform to be built separately as ExamHabitat. |
 
 ---
 
@@ -685,3 +706,45 @@ git push origin main
 | Vercel team | `vijitagarwal123-4578's... (Hobby)` |
 | GitHub | `vijitagarwal/habithabitat` |
 | Live URL | `https://habithabitat.vercel.app` |
+
+---
+
+## 20. Companion Project: ExamHabitat (Planned — 2026-08-13)
+
+A new multi-exam competitive preparation platform will be built from scratch, using this project as reference. This is **not** a fork — it is a ground-up rebuild with a multi-exam-first architecture.
+
+### Rationale
+- This project is CAT-specific at every layer (schema, types, components, data). Retrofitting multi-exam support would require risky, deep changes to a live app.
+- Building fresh allows a correct architecture from Day 1: an Exam Registry pattern, `exam_id` scoping in the DB, and a generic `ExamDashboardShell`.
+- This project remains fully intact for personal CAT 2026 prep.
+
+### What Will Be Reused (Copied Verbatim)
+- Entire `src/lib/habits-store.ts` — habits engine is exam-agnostic
+- All 26 `src/components/dashboard/` habit tracker components
+- Auth system (Supabase magic link, route guards)
+- Bridge pattern (`useKV`, `useAuth`, `useRealtime`)
+- CSS system (`styles.css`, OKLCH tokens, glassmorphism utilities)
+- All `src/components/ui/` shadcn/ui primitives
+- Tech stack: TanStack Start + Supabase + TailwindCSS v4 + shadcn/ui
+
+### What Will Be Generalized / Rebuilt
+- `CatDashboardShell.tsx` → `ExamDashboardShell.tsx` (dynamic exam config, countdown, branding)
+- `data/dates.ts` → `src/lib/exams/registry.ts` (per-exam dates, phases, registration windows)
+- `data/topics.ts` → per-exam topic seed files (NEET, JEE, UPSC, CAT, GATE, CLAT)
+- `MockTracker.tsx` → dynamic sections + exam-specific scoring (+4/-1 for NEET/JEE, +3/-1 for CAT)
+- `TopicTracker.tsx` → `exam_id`-scoped, dynamic section tabs from exam config
+- `ErrorLog.tsx` → dynamic section filter from exam config
+- `CatCore.tsx` → `ExamCore.tsx` (rendered from exam registry strategy content)
+- Supabase schema → new DB with `exam_id` columns from the start
+- Onboarding flow → Exam Selection modal on first login
+
+### Target Exams (Initial)
+| Exam | Sections | Scoring | Typical Date |
+| --- | --- | --- | --- |
+| CAT | VARC, DILR, QA | +3 / -1 | Nov |
+| NEET UG | Physics, Chemistry, Botany, Zoology | +4 / -1 | May |
+| JEE Main | Physics, Chemistry, Math | +4 / -1 | Jan & Apr |
+| JEE Advanced | Physics, Chemistry, Math | Variable | May |
+| UPSC CSE | GS-1, CSAT, Optional, Answer Writing | — | May |
+| GATE | Core, Engg Math, Aptitude | +1/+2 / -0.33/−0.66 | Feb |
+| CLAT | Legal, Logical, RC, Quant, GK | +1 / -0.25 | Dec |

@@ -5,6 +5,13 @@
 [![Live App](https://img.shields.io/badge/Live%20App-habithabitat.vercel.app-brightgreen?style=flat-square)](https://habithabitat.vercel.app)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
+[![Status](https://img.shields.io/badge/Status-Personal%20Use%20%2F%20Frozen-orange?style=flat-square)]()
+
+---
+
+> 🔒 **Status: Personal Tool — FROZEN (2026-08-13)**
+>
+> This repository is a **personal CAT 2026 exam preparation dashboard** in active use by its owner. The codebase is now locked to prevent disruption to ongoing exam prep. No new features will be added here. See [Companion Project](#-companion-project-examhabitat) for the multi-exam platform being built separately.
 
 ---
 
@@ -233,7 +240,7 @@ bright-habit-view/
 
 ---
 
-## 🌐 Deployment
+## 🌎 Deployment
 
 The app is deployed on **Vercel** at [habithabitat.vercel.app](https://habithabitat.vercel.app).
 
@@ -242,6 +249,33 @@ The app is deployed on **Vercel** at [habithabitat.vercel.app](https://habithabi
 Supabase Auth URL configuration:
 - Site URL: `https://habithabitat.vercel.app`
 - Redirect URLs: `https://habithabitat.vercel.app/**`
+
+---
+
+## 📘 Companion Project: ExamHabitat
+
+A **new multi-exam competitive preparation platform** is planned to be built from scratch using this project as a reference. It will support NEET, JEE Main/Advanced, UPSC CSE, CAT, GATE, CLAT and more, with:
+
+- **Exam Registry**: Per-exam syllabus, sections, scoring rules, and phase timelines
+- **Onboarding flow**: Exam selection on first login
+- **Dynamic Dashboard**: All sections (Topic Tracker, Mock Tracker, Error Log, Exam Core) adapt to the chosen exam
+- **Multi-exam data isolation**: `exam_id` scoping in Supabase schema from Day 1
+- **Fresh Supabase project**: New DB designed for multi-exam from the start
+
+This project (`HabitHabitat`) will serve as the reference codebase for the habit tracker engine, auth system, bridge pattern, and UI components.
+
+---
+
+## 📅 Changelog (recent)
+
+| Date | Change |
+|---|---|
+| 2026-08-13 | Project frozen for personal CAT 2026 prep. README updated. ExamHabitat companion project planned. |
+| 2026-08-13 | CAT registration deadline confirmed: **Sep 15, 2026** (urgent: Sep 8). |
+| 2026-08-02 | Topic time tracking migration added (`topic_time_spent`). |
+| 2026-07-31 | Hover-only sidebar float expand (both dashboards); ProfileModal createPortal fix. |
+| 2026-07-28 | QuickLogWidget; WeeklyReviewBanner; Habit Templates added. |
+| 2026-07-25 | HabitStatus engine; Break/Limit habits; Stopwatch/Duration habits; cross-device sync. |
 
 ---
 
